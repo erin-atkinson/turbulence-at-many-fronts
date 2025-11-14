@@ -5,7 +5,6 @@ using Printf
 using Oceananigans.Fields: compute_at!, instantiated_location
 include("update_clock.jl")
 include("update_fields.jl")
-include("write_outputs.jl")
 
 t0 = time()
 
@@ -74,29 +73,16 @@ cleanup() = nothing
 @info "Including $scriptname.jl"
 include("../$scriptname.jl")
 
-# Can be cleaned up in 0.100.8
-output_fts = NamedTuple(
-    k => FieldTimeSeries(
-        instantiated_location(v), 
-        grid, 
-        times; 
-        path = BUFFER, 
-        name = k,
-        backend = OnDisk()
-    )
-    for (k, v) in pairs(output_fields)
+output_fds = FieldDataset(times, output_fields; 
+    backend = OnDisk(), 
+    path = BUFFER,
+    metadata = fds.metadata
 )
 
-temp_fts = NamedTuple(
-    k => FieldTimeSeries(
-        instantiated_location(v), 
-        grid, 
-        times; 
-        path = TEMP, 
-        name = k,
-        backend = OnDisk()
-    )
-    for (k, v) in pairs(temp_fields)
+temp_fds = FieldDataset(times, temp_fields; 
+    backend = OnDisk(), 
+    path = TEMP,
+    metadata = fds.metadata
 )
 
 # Helpful for debugging to print times for all
@@ -130,8 +116,8 @@ for (i, frame) in enumerate(frames)
 
     compute_at!(dependency_fields, frame)
 
-    write_outputs(output_fts, output_fields, iteration, t)
-    write_outputs(temp_fts, temp_fields, iteration, t)
+    set!(output_fds, iteration, t; output_fields...)
+    set!(temp_fds, iteration, t; temp_fields...)
 
     # Little bit of timekeeping for convenience
     tstr = if i < 11
