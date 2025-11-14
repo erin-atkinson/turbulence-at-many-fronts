@@ -16,20 +16,31 @@ export JULIA_DEPOT_PATH=$RAM/.julia-trig
 export JULIA_SCRATCH_TRACK_ACCESS=0
 cd ~/turbulence-at-fronts
 
-output_path=$SCRATCH/turbulence-at-fronts/Strain
+output_folder=$SCRATCH/turbulence-at-fronts/Strain
+
 run_time="8e5"
-f="1e-4"
-H="100"
-Nx=1024
-Ny=128
-Nz=256
-Ro="0.4"
-Ri="2.0"
-alpha="1e-5"
-Q="100"
-c="0.5"
 start_time="-4e5"
 save_time="1e3"
-s="1.05"
 
-julia -t 24 -- src-simulation/simulation.jl $output_path $run_time $f $H $Nx $Ny $Nz $Ro $Ri $alpha $Q $c $start_time $save_time $s "Trillium GPU"
+f="1e-4"
+
+Lx=4
+Lh=0.5
+H=100
+
+Nx=1024
+Nh=768
+Ny=128
+Nz=256
+
+Ro=0.1
+Ri=2.0
+db=0.029
+
+alpha="1e-5"
+Q=100
+N0sq=0.003
+
+comment="Checking Ro dependence"
+
+julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $Lx $Lh $H $Nx $Nh $Ny $Nz $Ro $Ri $db $alpha $Q $N0sq $comment
