@@ -1,0 +1,12 @@
+.ipynb_checkpoints
+
+compute_at_test.jl
+slices/b.jld2
+slices/DFM.jld2
+slices/parameters.jld2
+slices/u.jld2
+b_timeseries.png
+*.mp4
+*.svg
+*.obj
+3DFigures.ipynb
