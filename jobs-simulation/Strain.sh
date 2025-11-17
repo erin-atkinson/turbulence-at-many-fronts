@@ -8,17 +8,19 @@
 module load julia/1.10.10
 
 # Copy installation to RAM disk
-export RAM=/dev/shm/turbulence-at-fronts
-cp -r $HOME/.julia-trig $RAM
+export RAM=/dev/shm/turbulence-at-many-fronts
+mkdir $RAM
+
+cp -r $HOME/turbulence-at-many-fronts/.julia-trig $RAM
 
 # Launch from RAM disk
 export JULIA_DEPOT_PATH=$RAM/.julia-trig
 export JULIA_SCRATCH_TRACK_ACCESS=0
-cd ~/turbulence-at-fronts
+cd ~/turbulence-at-many-fronts
 
-output_folder=$SCRATCH/turbulence-at-fronts/Strain
+output_folder=$SCRATCH/turbulence-at-many-fronts/Strain
 
-run_time="8e5"
+run_time="4e5"
 start_time="-4e5"
 save_time="1e3"
 
@@ -31,7 +33,7 @@ H=100
 Nx=1024
 Nh=768
 Ny=128
-Nz=256
+Nz=128
 
 Ro=0.1
 Ri=2.0
