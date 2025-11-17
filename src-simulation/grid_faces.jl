@@ -8,10 +8,10 @@
 end
 
 @inline function linear_to_cubic_x_faces(k, Lx, Lh, Nx, Nh)
-    a = (Lx/2 - Lh/2) / (Nx÷2 - Nh÷2)^3
+    a = (Lx/2 - Nx/Nh * Lh/2) / (Nx÷2 - Nh÷2)^3
     abs(k) <= Nh÷2 && return k * Lh / Nh
-    k > Nh÷2 && return Lh/2 + a * (k - Nh÷2)^3
-    k < -Nh÷2 && return -Lh/2 + a * (k + Nh÷2)^3
+    k > Nh÷2 && return Lh/Nh * k + a * (k - Nh÷2)^3
+    k < -Nh÷2 && return Lh/Nh * k + a * (k + Nh÷2)^3
 end
 
 @inline function x_width(Nx, Nh, Lh, s)
