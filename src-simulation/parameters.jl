@@ -1,12 +1,12 @@
 # parameters.jl
 
 default_inputs = (;
-    run_time = 1e6, start_time = -5e6, save_time = 1e3,
-    f = 1e-4,
-    Lx = 2, Lh = 0.5, H = 100,
-    Nx = 1024, Nh = 800, Ny = 128, Nz = 128,
-    Ro = 0.1, Ri = 2, Δb = 5.5e-4, 
-    α = 1e-5, Q = 100, N₀² = 1e-4,
+    run_time = 8e5, start_time = -4e5, save_time = 1e3,
+    f = 1e-4, Δb = 0.029,
+    Lx = 4, Lh = 0.5, H = 100,
+    Nx = 1024, Nh = 768, Ny = 128, Nz = 256,
+    Ro = 0.1, Ri = 2, 
+    α = 1e-5, Q = 100, N₀² = 3e-3,
     comment = ""
 )
 
@@ -18,7 +18,7 @@ default_inputs = (;
     # Domain size
     Lh = sp.Lh * sp.ℓ # About 2 for Ro = 0.4 works
     Lx = sp.Lx * sp.ℓ
-    Ly = sp.Lh * sp.Ny / sp.Nh
+    Ly = Lh * sp.Ny / sp.Nh
     Lz = 1.5sp.H
 
     # Physical constants needed to construct surface BC
