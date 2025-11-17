@@ -16,15 +16,6 @@ function init_jld2!(file, comment, parameters)
     return nothing
 end
 
-# Save the parameters to a file
-if !isdir("$output_folder")
-    mkdir(output_folder)
-end
-jldopen("$output_folder/parameters.jld2", "w") do file
-    file["simulation"] = sp
-    write_comment!(file, comment)
-end
-
 # Get the grid
 grid_faces = get_grid_faces(sp)
 @info "Created grid faces"
