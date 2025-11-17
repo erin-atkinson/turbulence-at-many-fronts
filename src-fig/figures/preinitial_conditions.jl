@@ -1,6 +1,6 @@
 using Oceananigans
-include("../src-simulation/grid_faces.jl")
-include("../src-simulation/base_state.jl")
+include("../../src-simulation/grid_faces.jl")
+include("../../src-simulation/base_state.jl")
 
 @inline function σ(z, sp)
     s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
@@ -15,9 +15,8 @@ function preinitial_conditions(sp)
     vs = [approximate_front_velocity(x, z, sp) for x in xs, z in zs]
     bs = [front_buoyancy(x, z, sp) for x in xs, z in zs]
     σs = [σ(z, sp) for x in xs, z in zs] .* 3600
-    hs = [-sp.H for x in xs]
 
-    levels = minimum(bs):(sp.Δb / 5):maximum(bs)
+    b_levels = minimum(bs):(sp.Δb / 2):maximum(bs)
     
     fig = Figure(; size=(600, 160))
 
@@ -33,8 +32,7 @@ function preinitial_conditions(sp)
     σ_colormap = [RGBA(σ_color.r, σ_color.g, σ_color.b, 0), σ_color]
 
     ct = contourf!(ax, xs ./ 1000, zs, vs; levels=range(0, maximum(abs, vs), 5), colormap=to_colormap(:amp)[1:200])
-    contour!(ax, xs ./ 1000, zs, bs; levels, color=(:black, 0.5))
-    #lines!(ax, xs ./ 1000, hs; color=(:blue, 0.5), linestyle=:dash)
+    contour!(ax, xs ./ 1000, zs, bs; levels=b_levels, color=(:black, 0.5))
     lines!(ax, [-sp.Lh/2000, -sp.Lh/2000, sp.Lh/2000, sp.Lh/2000, -sp.Lh/2000], [0, -sp.H, -sp.H, 0, 0]; color=:magenta, linestyle=:dashdot)
     ht = heatmap!(ax, xs ./ 1000, zs, σs; colormap=σ_colormap)
     
