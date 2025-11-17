@@ -3,11 +3,9 @@
 
 using Oceananigans: fill_halo_regions!
 
-
-
-@inline f(s) = 1 + tanh(s)
-@inline f′(s) = sech(s)^2
-const f′′_max = maximum(s->-2tanh(s) * sech(s)^2, range(-10, 10, 1000))
+@inline f(s) = (1 + tanh(s)) / 2 # 0 to 1
+@inline f′(s) = sech(s)^2 / 2
+const f′′_max = maximum(s->-tanh(s) * sech(s)^2, range(-10, 10, 1000))
 
 @inline G(s) = log(1 + exp(s))
 @inline g(s) = 1 / (1 + exp(-s))
@@ -21,7 +19,7 @@ const f′′_max = maximum(s->-2tanh(s) * sech(s)^2, range(-10, 10, 1000))
     x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.Δb / 2) * f(x₁) * g(z₁) + b∞(z, sp)
+    return sp.Δb * f(x₁) * g(z₁) + b∞(z, sp)
 end
 
 # Stratification
@@ -30,8 +28,8 @@ end
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
     return (
-          (sp.a * sp.Δb / 2sp.H) * f′(x₁) * g(z₁)
-        + (sp.Δb / (2sp.λ * sp.H)) * f(x₁) * g′(z₁)
+          (sp.a * sp.Δb / sp.H) * f′(x₁) * g(z₁)
+        + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′(z₁)
         + sp.N₀² * g(-z₁)
     )
 end
@@ -41,7 +39,7 @@ end
     x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.Δb / 2sp.ℓ) * f′(x₁) * g(z₁)
+    return (sp.Δb / sp.ℓ) * f′(x₁) * g(z₁)
 end
 
 # Thermal wind shear
@@ -52,17 +50,17 @@ end
     x₂ = x / sp.ℓ + sp.a * (-sp.H + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.a * sp.H * sp.Δb / (2sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g(z₁)
+    return (sp.a * sp.H * sp.Δb / (sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g(z₁)
 end
 
 @inline front_Ri(x, z, sp) = front_N²(x, z, sp) / front_shear(x, z, sp)^2
 
 @inline function minimum_Ri(sp)
-    return 2sp.a * sp.ℓ^2 * sp.f^2 / sp.H / sp.Δb
+    return sp.a * sp.ℓ^2 * sp.f^2 / sp.H / sp.Δb
 end
 
 @inline function maximum_front_velocity(sp)
-    return 2sp.a^2 * sp.H * sp.Δb / sp.ℓ / sp.f 
+    return sp.a^2 * sp.H * sp.Δb / sp.ℓ / sp.f 
 end
 
 @inline function maximum_Ro(sp)
@@ -72,8 +70,8 @@ end
 
 @inline function create_front_parameters(ip)
     λ = 0.1
-    a = (ip.Ro * ip.Ri / A_Ro)^(1/3)'
-    ℓ = sqrt(f′′_max * a^2 * ip.H * ip.Δb / 2ip.f^2 / ip.Ro)
+    a = (ip.Ro * ip.Ri / f′′_max)^(1/3)'
+    ℓ = sqrt(f′′_max * a^2 * ip.H * ip.Δb / ip.f^2 / ip.Ro)
     return merge(ip, (; λ, a, ℓ))
 end
 
