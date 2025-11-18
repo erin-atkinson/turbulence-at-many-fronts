@@ -16,6 +16,8 @@ function init_jld2!(file, model)
     return nothing
 end
 
+!isdir(output_folder) && mkdir(output_folder)
+
 # Get the grid
 grid_faces = get_grid_faces(sp)
 @info "Created grid faces"

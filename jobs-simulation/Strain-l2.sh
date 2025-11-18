@@ -11,7 +11,7 @@ module load julia/1.10.10
 export RAM=/dev/shm/Strain-l2
 mkdir $RAM
 
-cp -r $HOME/turbulence-at-many-fronts/.julia-trig $RAM
+cp -rn $HOME/turbulence-at-many-fronts/.julia-trig $RAM
 
 # Launch from RAM disk
 export JULIA_DEPOT_PATH=$RAM/.julia-trig
