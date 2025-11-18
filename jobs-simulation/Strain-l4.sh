@@ -2,13 +2,13 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --time=6:00:00
-#SBATCH --job-name=Strain
+#SBATCH --job-name=Strain-l4
 #SBATCH --output=../scratch/logs/Strain-%j.txt
 
 module load julia/1.10.10
 
 # Copy installation to RAM disk
-export RAM=/dev/shm/turbulence-at-many-fronts
+export RAM=/dev/shm/Strain-l4
 mkdir $RAM
 
 cp -r $HOME/turbulence-at-many-fronts/.julia-trig $RAM
@@ -18,7 +18,7 @@ export JULIA_DEPOT_PATH=$RAM/.julia-trig
 export JULIA_SCRATCH_TRACK_ACCESS=0
 cd ~/turbulence-at-many-fronts
 
-output_folder=$SCRATCH/turbulence-at-many-fronts/Strain
+output_folder=$SCRATCH/turbulence-at-many-fronts/Strain-l4
 
 run_time="16e5"
 start_time="-4e5"
@@ -36,7 +36,7 @@ Ny=128
 Nz=64
 
 betab=1
-betal=8
+betal=4
 betaH=0.1
 
 alpha="1e-5"
