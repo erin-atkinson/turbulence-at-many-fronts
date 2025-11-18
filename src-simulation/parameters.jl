@@ -2,24 +2,24 @@
 
 default_inputs = (;
     run_time = 8e5, start_time = -4e5, save_time = 1e3,
-    f = 1e-4, Δb = 0.029,
-    Lx = 4, Lh = 0.5, H = 100,
+    f = 1e-4, L = 1e3,
+    βx = 4, βh = 1,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 256,
-    Ro = 0.1, Ri = 2, 
-    α = 1e-5, Q = 100, N₀² = 3e-3,
+    βb = 1, βℓ = 1, βH = 0.1,
+    α = 1e-5, Q = 100, β₀ = 8,
     comment = ""
 )
 
 @inline function create_simulation_parameters(input_parameters=(; ))
-    ip = (; default_inputs..., input_parameters...)
+    ip = merge(default_inputs, input_parameters)
 
-    sp = create_front_parameters(ip)
+    fp = create_front_parameters(ip)
 
     # Domain size
-    Lh = sp.Lh * sp.ℓ # About 2 for Ro = 0.4 works
-    Lx = sp.Lx * sp.ℓ
-    Ly = Lh * sp.Ny / sp.Nh
-    Lz = 1.5sp.H
+    Lx = ip.βx * ip.L
+    Lh = ip.βh * ip.L
+    Ly = Lh * ip.Ny / ip.Nh
+    Lz = 1.5fp.H
 
     # Physical constants needed to construct surface BC
     αV = 2.0678e-4 # K⁻¹
@@ -28,12 +28,12 @@ default_inputs = (;
     g = 9.81 # m s⁻²
 
     # Surface buoyancy flux
-    B = αV * g * sp.Q / (cₚ * ρ)
+    B = αV * g * ip.Q / (cₚ * ρ)
 
     # Sponge layer damping rate
-    σ = 0.5 * sqrt(sp.N₀²) / (2π)
+    σ = 0.5 * sqrt(fp.N₀²) / (2π)
     
-    return merge(sp, (; Lh, Lx, Ly, Lz, B, σ))
+    return merge(ip, fp, (; Lh, Lx, Ly, Lz, B, σ))
 end
 
 @inline function create_simulation_parameters(; input_parameters...)

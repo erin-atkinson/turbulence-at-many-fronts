@@ -4,76 +4,99 @@
 using Oceananigans: fill_halo_regions!
 
 @inline f(s) = (1 + tanh(s)) / 2 # 0 to 1
-@inline f′(s) = sech(s)^2 / 2
+@inline f′(s) = (sech(s)^2) / 2
 const f′′_max = maximum(s->-tanh(s) * sech(s)^2, range(-10, 10, 1000))
 
-@inline G(s) = log(1 + exp(s))
-@inline g(s) = 1 / (1 + exp(-s))
-@inline g′(s) = exp(-s) / (1 + exp(-s))^2
+@inline g(s) = log(1 + exp(s))
+@inline g′(s) = 1 / (1 + exp(-s))
+@inline g′′(s) = exp(-s) / (1 + exp(-s))^2
 
 # Background stratification
-@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * G(-(z + sp.H) / (sp.λ * sp.H))
+@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * g(-(z + sp.H) / (sp.λ * sp.H))
 
 # Buoyancy
 @inline function front_buoyancy(x, z, sp)
-    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return sp.Δb * f(x₁) * g(z₁) + b∞(z, sp)
+    return sp.Δb * f(x₁) * g′(z₁) + b∞(z, sp)
 end
 
 # Stratification
 @inline function front_N²(x, z, sp)
-    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
     return (
-          (sp.a * sp.Δb / sp.H) * f′(x₁) * g(z₁)
-        + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′(z₁)
-        + sp.N₀² * g(-z₁)
+          (sp.Δb / sp.H) * f′(x₁) * g′(z₁)
+        + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′′(z₁)
+        + sp.N₀² * g′(-z₁)
     )
 end
 
 # Horizontal buoyancy gradient
 @inline function front_M²(x, z, sp)
-    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.Δb / sp.ℓ) * f′(x₁) * g(z₁)
+    return (sp.Δb / sp.ℓ) * f′(x₁) * g′(z₁)
 end
 
 # Thermal wind shear
 @inline front_S(x, z, sp) = front_M²(x, z, sp) / sp.f
 
 @inline function approximate_front_velocity(x, z, sp)
-    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
-    x₂ = x / sp.ℓ + sp.a * (-sp.H + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
+    x₂ = x / sp.ℓ - 1 / 2
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.a * sp.H * sp.Δb / (sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g(z₁)
+    return (sp.H * sp.Δb / (sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g′(z₁)
+end
+
+@inline function approximate_surface_velocity(x, sp)
+    x₁ = x / sp.ℓ
+    
+    return (sp.H * sp.Δb / (sp.ℓ * sp.f)) * f′(x₁)
 end
 
 @inline front_Ri(x, z, sp) = front_N²(x, z, sp) / front_shear(x, z, sp)^2
 
-@inline function minimum_Ri(sp)
-    return sp.a * sp.ℓ^2 * sp.f^2 / sp.H / sp.Δb
+@inline function minimum_Ri(ip)
+    return ip.βℓ^2 / ip.βb 
 end
 
-@inline function maximum_front_velocity(sp)
-    return sp.a^2 * sp.H * sp.Δb / sp.ℓ / sp.f 
+@inline function maximum_front_velocity(ip)
+    return ip.L * ip.f * ip.βb / ip.βℓ
 end
 
-@inline function maximum_Ro(sp)
+@inline function maximum_Ro(ip)
     # Maximum Rossby number occurs at the surface
-    f′′_max * maximum_front_velocity(sp) / sp.ℓ / sp.f 
+    return 2f′′_max * maximum_front_velocity(ip) / ip.βℓ
 end
 
 @inline function create_front_parameters(ip)
-    λ = 0.1
-    a = (ip.Ro * ip.Ri / f′′_max)^(1/3)'
-    ℓ = sqrt(f′′_max * a^2 * ip.H * ip.Δb / ip.f^2 / ip.Ro)
-    return merge(ip, (; λ, a, ℓ))
+    λ = 0.03
+
+    # Buoyancy change of Ri = 1 front
+    Δb₀ = 2ip.L * ip.f^2 / ip.βH
+    Δb = ip.βb * Δb₀
+
+    # Size relative to deformation radius
+    ℓ = ip.βℓ * ip.L
+
+    # MLD
+    H = ip.βH * ip.L
+
+    # Deep water buoyancy frequency from deformation radius
+    N₀² = (ip.f * ip.β₀ * ip.L / H)^2
+
+    Ro = maximum_Ro(ip)
+    Ri = minimum_Ri(ip)
+    V = maximum_front_velocity(ip)
+
+    return (; λ, Δb₀, Δb, ℓ, H, N₀², Ro, Ri, V)
 end
+create_front_parameters(; ip...) = create_front_parameters(ip)
 
 @inline function front_initial_conditions(grid::RectilinearGrid, sp)
     # Use Oceananigans fields to setup the initial thermal wind properly

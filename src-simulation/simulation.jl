@@ -47,10 +47,12 @@ simulation_parameters = let
     # Coriolis frequency
     f = parse(Float64, ARGS[5])
 
+    # Deformation radius
+    L = parse(Float64, ARGS[6])
+
     # Grid extent
-    Lx = parse(Float64, ARGS[6])
-    Lh = parse(Float64, ARGS[7])
-    H = parse(Float64, ARGS[8])
+    βx = parse(Float64, ARGS[7])
+    βh = parse(Float64, ARGS[8])
 
     # Grid sizes
     Nx = parse(Int64, ARGS[9])
@@ -59,24 +61,24 @@ simulation_parameters = let
     Nz = parse(Int64, ARGS[12])
 
     # Front
-    Ro = parse(Float64, ARGS[13])
-    Ri = parse(Float64, ARGS[14])
-    Δb = parse(Float64, ARGS[15])
+    βb = parse(Float64, ARGS[13])
+    βℓ = parse(Float64, ARGS[14])
+    βH = parse(Float64, ARGS[15])
 
     # Background
     α = parse(Float64, ARGS[16])
     Q = parse(Float64, ARGS[17])
-    N₀² = parse(Float64, ARGS[18])
+    β₀ = parse(Float64, ARGS[18])
 
     comment = ARGS[19]
 
     (;
         run_time, start_time, save_time,
-        f,
-        Lx, Lh, H,
+        f, L,
+        βx, βh,
         Nx, Nh, Ny, Nz,
-        Ro, Ri, Δb,
-        α, Q, N₀²,
+        βb, βℓ, βH,
+        α, Q, β₀,
         comment
     )
 end

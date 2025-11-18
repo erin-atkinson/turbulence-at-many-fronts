@@ -25,24 +25,24 @@ start_time="-4e5"
 save_time="1e3"
 
 f="1e-4"
+L="1e3"
 
-Lx=4
-Lh=0.5
-H=100
+betax=32
+betah=4
 
 Nx=1024
 Nh=768
 Ny=128
-Nz=128
+Nz=64
 
-Ro=0.1
-Ri=2.0
-db=0.029
+betab=1
+betal=8
+betaH=0.1
 
 alpha="1e-5"
 Q=100
-N0sq=0.003
+beta0=8
 
 comment="Checking Ro dependence"
 
-julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $Lx $Lh $H $Nx $Nh $Ny $Nz $Ro $Ri $db $alpha $Q $N0sq $comment
+julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $alpha $Q $beta0 $comment
