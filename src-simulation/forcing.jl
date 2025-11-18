@@ -12,10 +12,10 @@ end
 # Damp b at the bottom towards a linear profile
 @inline function b_forcing_func(i, j, k, grid, clock, model_fields)
     (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
-    (z_bottom, ) = node(i, j, k, grid, Nothing(), Nothing(), Center())
+    (z_bottom, ) = node(i, j, 1, grid, Nothing(), Nothing(), Center())
 
     b = @inbounds model_fields.b[i, j, k]
-    tb = @inbounds model_fields.b[i, j, grid.Hz] + sp.N₀² * (z - z_bottom)
+    tb = @inbounds model_fields.b[i, j, 1] + sp.N₀² * (z - z_bottom)
     
     return sp.σ * (tb - b) * sponge_layer(x, y, z)
 end
