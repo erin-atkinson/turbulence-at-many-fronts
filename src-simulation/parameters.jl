@@ -31,7 +31,7 @@ default_inputs = (;
     B = αV * g * ip.Q / (cₚ * ρ)
 
     # Sponge layer damping rate
-    σ = 0.5 * sqrt(fp.N₀²) / (2π)
+    σ = 0.1 * sqrt(fp.N₀²) / (2π)
     
     return merge(ip, fp, (; Lh, Lx, Ly, Lz, B, σ))
 end
