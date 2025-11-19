@@ -9,15 +9,15 @@ using CUDA: @allowscalar
     return (1 - abs(s))^2
 end
 
-# Damp b at the bottom towards a linear profile
+# Damp b towards the bottom value
 @inline function b_forcing_func(i, j, k, grid, clock, model_fields)
     (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
-    (z_bottom, ) = node(i, j, 1, grid, Nothing(), Nothing(), Center())
+    (z_bottom, ) = node(i, j, 0, grid, Nothing(), Nothing(), Center())
 
     b = @inbounds model_fields.b[i, j, k]
-    tb = @inbounds model_fields.b[i, j, 1] + sp.N₀² * (z - z_bottom)
+    tb = @inbounds model_fields.b[i, j, 0] + sp.N₀² * (z - z_bottom)
     
-    return sp.σ * (tb - b) * sponge_layer(x, y, z)
+    return sp.σ * min(tb - b, 0) * sponge_layer(x, y, z)
 end
 # ---------------------------------------
 
