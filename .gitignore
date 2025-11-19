@@ -11,4 +11,5 @@ b_timeseries.png
 *.obj
 3DFigures.ipynb
 .julia-trig
+.julia-tri
 Test.ipynb
