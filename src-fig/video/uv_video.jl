@@ -13,12 +13,15 @@ function uv_video(
         σh=0,
         background=false
     )
-    iterations, times = iterations_times(foldername)
-    sp = simulation_parameters(foldername)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(foldername)
-    inds = centre_indices(foldername)
+    OUTPUT = jldopen(joinpath(foldername, "output.jld2"))
+    DFM = jldopen(joinpath(foldername, "DFM.jld2"))
+
+    iterations, times = iterations_times(DFM)
+    sp = simulation_parameters(DFM)
+    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(DFM)
+    inds = center_indices(DFM)
     colormap = to_colormap(:balance)
-    z_indᶜ = zᶜbounds(foldername, z)
+    z_indᶜ = zᶜbounds(DFM, z)
 
     iterations = iterations[frames]
     times = times[frames]
@@ -26,11 +29,15 @@ function uv_video(
     n = Observable(1)
     iteration = @lift iterations[$n]
     t = @lift times[$n]
-    u_title = @lift let time_string = prettytime($t / 3600; digits=1)
-        L"u, t=%$time_string ~\text{hr}"
+    u_title = @lift let
+        t_val = @sprintf "%03.1f" sp.f * $t / 2π
+        hr_val = @sprintf "%03.0f" $t / 3600
+        L"u, ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
     end
-    v_title = @lift let time_string = prettytime($t / 3600; digits=1)
-        L"v, t=%$time_string ~\text{hr}"
+    v_title = @lift let
+        t_val = @sprintf "%03.1f" sp.f * $t / 2π
+        hr_val = @sprintf "%03.0f" $t / 3600
+        L"v, ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
     end
     
     U = [-variable_strain_rate(t, sp) * x for t in times, x in xsᶠ, y in 1:1, z in 1:1] .* background
@@ -41,11 +48,8 @@ function uv_video(
         fig_kw...
     )
     
-    DFM = jldopen(joinpath(foldername, "DFM.jld2"))
-    OUTPUT = jldopen(joinpath(foldername, "output.jld2"))
-    
-    colorrange_u = (-0.06, 0.06)
-    colorrange_v = (-0.2, 0.2)
+    colorrange_u = (-0.04, 0.04)
+    colorrange_v = (-0.1, 0.1)
 
     u = @lift get_field(DFM, "u_dfm", $iteration) .+ U[$n, :, 1, :]
     v = @lift get_field(DFM, "v_dfm", $iteration)
