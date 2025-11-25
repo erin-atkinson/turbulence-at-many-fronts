@@ -66,8 +66,8 @@ simulation_parameters = let
     βH = parse(Float64, ARGS[15])
 
     # Background
-    α = parse(Float64, ARGS[16])
-    Q = parse(Float64, ARGS[17])
+    Roα = parse(Float64, ARGS[16])
+    Ek = parse(Float64, ARGS[17])
     β₀ = parse(Float64, ARGS[18])
 
     comment = ARGS[19]
@@ -78,7 +78,7 @@ simulation_parameters = let
         βx, βh,
         Nx, Nh, Ny, Nz,
         βb, βℓ, βH,
-        α, Q, β₀,
+        Roα, Ek, β₀,
         comment
     )
 end

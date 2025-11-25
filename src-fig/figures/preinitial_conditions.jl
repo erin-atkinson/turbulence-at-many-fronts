@@ -16,7 +16,7 @@ function preinitial_conditions(sp)
     bs = [front_buoyancy(x, z, sp) for x in xs, z in zs]
     σs = [σ(z, sp) for x in xs, z in zs] .* 3600
 
-    b_levels = minimum(bs):(sp.Δb / 4):maximum(bs)
+    b_levels = minimum(bs):(sp.Δb / 6):maximum(bs)
     
     fig = Figure(; size=(600, 160))
 
