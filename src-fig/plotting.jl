@@ -33,6 +33,11 @@ simulation_parameters(filename::String) = jldopen(simulation_parameters, filenam
     turnon = max(1-exp(-sp.f * t / 15), 0)
     return sp.α * turnon
 end
+
+@inline function surface_b_flux(t, sp) 
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    return sp.B * turnon
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
