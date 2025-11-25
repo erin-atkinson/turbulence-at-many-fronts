@@ -24,7 +24,7 @@ center_indices(filename::String) = jldopen(center_indices, filename)
 nov = no_offset_view
 @inline halos(file) = file["grid/Hx"], file["grid/Hz"], file["grid/Hz"]
 
-function grid_nodes(file; with_halos=false, reshape=false)
+function grid_nodes(file; with_halos=false)
     xsᶜ = nov(file["grid/xᶜᵃᵃ"])
     xsᶠ = nov(file["grid/xᶠᵃᵃ"])
 
@@ -43,6 +43,8 @@ function grid_nodes(file; with_halos=false, reshape=false)
         ysᶠ = ysᶠ[(Hy+1):(end-Hy)]
         zsᶜ = zsᶜ[(Hz+1):(end-Hz)]
         zsᶠ = zsᶠ[(Hz+1):(end-Hz)]
+
+        return xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ
     end
 
     xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ
