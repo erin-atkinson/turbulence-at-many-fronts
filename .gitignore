@@ -10,6 +10,6 @@ b_timeseries.png
 *.svg
 *.obj
 3DFigures.ipynb
-.julia-trig
-.julia-tri
+julia-trig
+julia-tri
 Test.ipynb

@@ -7,15 +7,8 @@
 
 module load julia/1.10.10
 
-# Copy installation to RAM disk
-export RAM=/dev/shm/Strain-l2
-mkdir $RAM
-
-cp -rn $HOME/turbulence-at-many-fronts/.julia-trig $RAM
-
-# Launch from RAM disk
-export JULIA_DEPOT_PATH=$RAM/.julia-trig
-export JULIA_SCRATCH_TRACK_ACCESS=0
+# Launch from scratch
+export JULIA_DEPOT_PATH=$SCRATCH/julia-trig
 cd ~/turbulence-at-many-fronts
 
 output_folder=$SCRATCH/turbulence-at-many-fronts/Strain-l2
@@ -39,10 +32,10 @@ betab=1
 betal=2
 betaH=0.1
 
-alpha="1e-5"
-Q=100
+Roalpha=0.1
+Ek=1.7
 beta0=8
 
 comment="Checking Ro dependence"
 
-julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $alpha $Q $beta0 $comment
+julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $Ek $beta0 $comment

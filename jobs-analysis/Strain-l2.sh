@@ -7,17 +7,8 @@
 
 module load julia/1.10.10
 
-# Copy installation to RAM disk
-echo "Copying installation to RAM disk"
-export RAM=/dev/shm/Strain-l2
-mkdir $RAM
-
-cp -r $HOME/turbulence-at-many-fronts/.julia-tri $RAM
-
-# Launch from RAM disk
-echo "Running..."
-export JULIA_DEPOT_PATH=$RAM/.julia-tri
-export JULIA_SCRATCH_TRACK_ACCESS=0
+# Launch from scratch
+export JULIA_DEPOT_PATH=$SCRATCH/julia-tri
 cd ~/turbulence-at-many-fronts
 
 # Location of output.jld2
