@@ -18,13 +18,18 @@ function full_video(
         σh=0,
         background=false
     )
-    full_iterations, full_times = iterations_times(foldername)
-    sp = simulation_parameters(foldername)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(foldername)
-    inds = centre_indices(foldername)
+    DFM = jldopen(joinpath(foldername, "DFM.jld2"))
+    PV = jldopen(joinpath(foldername, "PV.jld2"))
+    OUTPUT = jldopen(joinpath(foldername, "output.jld2"))
+    TKE = jldopen(joinpath(foldername, "TKE.jld2"))
+    
+    full_iterations, full_times = iterations_times(DFM)
+    sp = simulation_parameters(DFM)
+    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(DFM)
+    inds = center_indices(DFM)
     colormap_u = to_colormap(:balance)
     colormap_Vq = to_colormap(:diff)
-    z_indᶜ = zᶜbounds(foldername, z)
+    z_indᶜ = zᶜbounds(DFM, z)
 
     iterations = full_iterations[frames]
     times = full_times[frames]
@@ -35,8 +40,10 @@ function full_video(
     iteration = @lift iterations[$n]
     t = @lift times[$n]
     
-    u_title = @lift let time_string = prettytime($t / 3600; digits=1)
-        L"t=%$time_string ~\text{hr}"
+    u_title = @lift let 
+        t_val = @sprintf "%03.1f" sp.f * $t / 2π
+        hr_val = @sprintf "%03.0f" $t / 3600
+        L"ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
     end
     
     U = [-variable_strain_rate(t, sp) * x for t in times, x in xsᶠ, y in 1:1, z in 1:1] .* background
@@ -46,11 +53,6 @@ function full_video(
         size=(960, 540),
         fig_kw...
     )
-    
-    DFM = jldopen(joinpath(foldername, "DFM.jld2"))
-    PV = jldopen(joinpath(foldername, "PV.jld2"))
-    OUTPUT = jldopen(joinpath(foldername, "output.jld2"))
-    TKE = jldopen(joinpath(foldername, "TKE.jld2"))
     
     colorrange_u = (-6, 6)
     colorrange_Vq = (0, 1)
@@ -175,7 +177,7 @@ function full_video(
     # PV heatmap
     ht_Vq = heatmap!(ax_Vq, xsᶜ ./ 1000, zsᶜ, Vq; ht_Vq_kw...)
 
-    Colorbar(fig[3, 1], ht_u; vertical=false, flipaxis=false, label=L"u / \text{cm}\,{s}^{-1}")
+    Colorbar(fig[3, 1], ht_u; vertical=false, flipaxis=false, label=L"u / \text{cm}\,\text{s}^{-1}")
     Colorbar(fig[3, 2], ht_Vq; vertical=false, flipaxis=false, label=L"\overline{\chi}_{q < 0}")
 
     hidespines!(ax_TKE_series)
