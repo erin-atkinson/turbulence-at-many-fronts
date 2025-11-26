@@ -59,7 +59,7 @@ model = NonhydrostaticModel(; grid,
 set!(model; init_state...)
 
 # Some initial timestep...
-Δt = 1e-3 * sp.save_time
+Δt = 1e-3 * sp.f
 
 checkpoint_files = filter(readdir(output_folder)) do x
     occursin(r"^checkpoint", x)
@@ -98,8 +98,8 @@ simulation.output_writers[:checkpointer] = Checkpointer(model;
 )
 
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=1e-3/sp.f)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=5e-2/sp.f)
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 # Compute the advection
 simulation.callbacks[:advection] = Callback(calculate_U_callback, IterationInterval(1); parameters=sp)
