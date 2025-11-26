@@ -7,6 +7,9 @@
 
 module load julia/1.10.10
 
+export RAM=/dev/shm/DFM
+mkdir $RAM
+
 # Launch from scratch
 export JULIA_DEPOT_PATH=$SCRATCH/julia-tri
 cd ~/turbulence-at-many-fronts
