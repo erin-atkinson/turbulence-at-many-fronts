@@ -39,3 +39,13 @@ beta0=8
 comment="Initialized front with Ek = 1.4"
 
 julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $Ek $beta0 $comment
+
+# Copy to each t > 0 run
+mkdir $output_folder/../StrainL-Ek14
+cp $output_folder/checkpoint_* $output_folder/../StrainL-Ek14
+
+mkdir $output_folder/../StrainM-Ek14
+cp $output_folder/checkpoint_* $output_folder/../StrainM-Ek14
+
+mkdir $output_folder/../StrainH-Ek14
+cp $output_folder/checkpoint_* $output_folder/../StrainH-Ek14
