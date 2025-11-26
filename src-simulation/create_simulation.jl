@@ -59,7 +59,7 @@ model = NonhydrostaticModel(; grid,
 set!(model; init_state...)
 
 # Some initial timestep...
-Δt = 1e-3 * sp.f
+Δt = 1e-3 / sp.f
 
 checkpoint_files = filter(readdir(output_folder)) do x
     occursin(r"^checkpoint", x)
