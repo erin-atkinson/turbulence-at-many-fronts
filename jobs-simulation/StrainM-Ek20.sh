@@ -9,6 +9,7 @@ module load julia/1.10.10
 
 # Launch from scratch
 export JULIA_DEPOT_PATH=$SCRATCH/julia-trig
+export JULIA_SCRATCH_TRACK_ACCESS=0
 cd ~/turbulence-at-many-fronts
 
 output_folder=$SCRATCH/turbulence-at-many-fronts/StrainM-Ek20
