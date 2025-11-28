@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --time=24:00:00
+#SBATCH --time=4:00:00
 #SBATCH --job-name=StrainM-C00
 #SBATCH --output=../scratch/logs/Strain-%j.txt
 
@@ -15,7 +15,7 @@ cd ~/turbulence-at-many-fronts
 output_folder=$SCRATCH/turbulence-at-many-fronts/StrainM-C00
 
 run_time="10e5"
-start_time="-12e5"
+start_time="0e5"
 save_time="1e3"
 
 f="1e-4"
