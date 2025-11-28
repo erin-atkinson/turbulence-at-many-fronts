@@ -6,7 +6,7 @@ default_inputs = (;
     βx = 4, βh = 1,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 256,
     βb = 1, βℓ = 1, βH = 0.1,
-    Roα = 0.1, Ek = 1.7, β₀ = 8,
+    Roα = 0.1, C = 1.7, β₀ = 8,
     comment = ""
 )
 
@@ -25,7 +25,7 @@ default_inputs = (;
     α = ip.Roα * ip.f
 
     # Cooling from mixing rate
-    τ = 1 / (ip.f * ip.Ek)
+    τ = 1 / (ip.f * ip.C)
     B = fp.H^2 / τ^3
     
     # Physical constants needed to construct surface BC

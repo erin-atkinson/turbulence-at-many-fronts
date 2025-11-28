@@ -33,9 +33,9 @@ betal=2
 betaH=0.1
 
 Roalpha=0.1
-Ek=1.7
+C=1.7
 beta0=8
 
 comment="Checking Ro dependence"
 
-julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $Ek $beta0 $comment
+julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $C $beta0 $comment
