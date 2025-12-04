@@ -1,4 +1,5 @@
 using Oceananigans.Operators
+using Oceananigans.Grids: node
 
 @inline down_front_mean(a) = Field(Average(a; dims=2))
 @inline dfm(a) = down_front_mean(a)
@@ -37,3 +38,67 @@ end
 @inline f′(i, j, k, grid, f, f_dfm) = @inbounds f[i, j, k] - f_dfm[i, j, k]
 @inline f′g′(i, j, k, grid, f, f_dfm, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * f′(i, j, k, grid, g, g_dfm)
 @inline f′Gg′(i, j, k, grid, f, f_dfm, G, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * G(i, j, k, grid, f′, g, g_dfm)
+
+# Faster to assume that the kernel is separable and normalized
+@inline function coarse_grain_x(i, j, k, grid, weights, f::F, args...) where {F <: Function}
+    res = 0
+    for d in axes(weights, 1)
+        w = @inbounds weights[d]
+        ind =  min(max(i+d .- size(weights, 1) ÷ 2, 1), grid.Nx)
+        res += f(ind, j, k, grid, args...) * w
+    end
+
+    return res
+end
+
+@inline function coarse_grain_y(i, j, k, grid, weights, f::F, args...) where {F <: Function}
+    res = 0
+    for d in axes(weights, 1)
+        w = @inbounds weights[d]
+        ind =  min(max(j+d .- size(weights, 1) ÷ 2, 1), grid.Ny)
+        res += f(i, ind, k, grid, args...) * w
+    end
+
+    return res
+end
+
+@inline function coarse_grain_z(i, j, k, grid, weights, f::F, args...) where {F <: Function}
+    res = 0
+    for d in axes(weights, 1)
+        w = @inbounds weights[d]
+        ind =  min(max(k+d .- size(weights, 1) ÷ 2, 1), grid.Nz)
+        res += f(i, j, ind, grid, args...) * w
+    end
+
+    return res
+end
+
+@inline identityc(i, j, k, grid, field) = @inbounds field[i, j, k]
+@inline coarse_grain_x(i, j, k, grid, weights, field) = coarse_grain_x(i, j, k, grid, weights, identityc, field)
+@inline coarse_grain_y(i, j, k, grid, weights, field) = coarse_grain_y(i, j, k, grid, weights, identityc, field)
+@inline coarse_grain_z(i, j, k, grid, weights, field) = coarse_grain_z(i, j, k, grid, weights, identityc, field)
+
+@inline function coarse_grain_variable_x(i, j, k, grid, Lx, kernel_size, σ, args...)
+    weights = gaussian_weights_x(i, j, k, grid, Lx, kernel_size, σ)
+    return coarse_grain_x(i, j, k, grid, weights, args...)
+end
+
+# 1D array of normalized weights
+@inline function gaussian_weights(Δx, σ)
+    weights = map(Δx) do x
+        exp(-x^2 / 2σ^2)
+    end
+    return weights ./ sum(weights)
+end
+
+# 1D array of normalized weights
+@inline function gaussian_weights_x(i, j, k, grid, Lx, kernel_size, σ)
+    x, = node(i, j, k, grid, Lx, Nothing(), Nothing())
+
+    Δx = map(-kernel_size:kernel_size) do di
+        x1, = node(i+di, j, k, grid, Lx, Nothing(), Nothing())
+        x1 - x
+    end
+
+    return gaussian_weights(Δx, σ)
+end
