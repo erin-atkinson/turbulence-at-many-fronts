@@ -44,7 +44,7 @@ end
     res = 0
     for d in axes(weights, 1)
         w = @inbounds weights[d]
-        ind =  min(max(i+d .- size(weights, 1) ÷ 2, 1), grid.Nx)
+        ind =  min(max(i+d - size(weights, 1) ÷ 2, 1), grid.Nx)
         res += f(ind, j, k, grid, args...) * w
     end
 
@@ -55,7 +55,7 @@ end
     res = 0
     for d in axes(weights, 1)
         w = @inbounds weights[d]
-        ind =  min(max(j+d .- size(weights, 1) ÷ 2, 1), grid.Ny)
+        ind =  min(max(j+d - size(weights, 1) ÷ 2, 1), grid.Ny)
         res += f(i, ind, k, grid, args...) * w
     end
 
@@ -66,7 +66,7 @@ end
     res = 0
     for d in axes(weights, 1)
         w = @inbounds weights[d]
-        ind =  min(max(k+d .- size(weights, 1) ÷ 2, 1), grid.Nz)
+        ind =  min(max(k+d - size(weights, 1) ÷ 2, 1), grid.Nz)
         res += f(i, j, ind, grid, args...) * w
     end
 
@@ -96,7 +96,8 @@ end
     x, = node(i, j, k, grid, Lx, Nothing(), Nothing())
 
     Δx = map(-kernel_size:kernel_size) do di
-        x1, = node(i+di, j, k, grid, Lx, Nothing(), Nothing())
+        i2 = min(max(i+di, 1), grid.Nx)
+        x1, = node(i2, j, k, grid, Lx, Nothing(), Nothing())
         x1 - x
     end
 
