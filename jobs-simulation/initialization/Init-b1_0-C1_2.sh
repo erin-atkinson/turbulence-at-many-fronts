@@ -2,8 +2,8 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --time=4:00:00
-#SBATCH --job-name=Init-C10
-#SBATCH --output=../scratch/logs/Strain-%j.txt
+#SBATCH --job-name=Init-b1_0-C1_2
+#SBATCH --output=../scratch/logs/Init-b1_0-C1_2.txt
 
 module load julia/1.10.10
 
@@ -11,7 +11,7 @@ module load julia/1.10.10
 export JULIA_DEPOT_PATH=$SCRATCH/julia-trig
 cd ~/turbulence-at-many-fronts
 
-output_folder=$SCRATCH/turbulence-at-many-fronts/Init-C10
+output_folder=$SCRATCH/turbulence-at-many-fronts/Init-b1_0-C1_2
 
 run_time="8e5"
 start_time="-8e5"
@@ -26,26 +26,20 @@ betah=3
 Nx=1024
 Nh=768
 Ny=128
-Nz=128
+Nz=64
 
 betab=1
 betal=6
 betaH=0.1
 
 Roalpha=0
-C=1.0
+C=1.2
 beta0=8
 
-comment="Initialized front with C = 1.0"
+comment="Initialized front with C = $C, beta b = $betab"
 
 julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $C $beta0 $comment
 
-# Copy to each t > 0 run
-mkdir $output_folder/../StrainL-C10
-cp $output_folder/checkpoint_* $output_folder/../StrainL-C10
-
-mkdir $output_folder/../StrainM-C10
-cp $output_folder/checkpoint_* $output_folder/../StrainM-C10
-
-mkdir $output_folder/../StrainH-C10
-cp $output_folder/checkpoint_* $output_folder/../StrainH-C10
+# Copy to a t > 0 run
+mkdir $output_folder/../a0_10-b1_0-C1_2
+cp $output_folder/checkpoint_* $output_folder/../a0_10-b1_0-C1_2

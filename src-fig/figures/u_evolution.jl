@@ -77,7 +77,6 @@ function u_evolution(
     
     hidexdecorations!.(axs[1:end-1]; ticks=false)
     hidexdecorations!.(axsh[1:end-1]; ticks=false)
-    hideydecorations!.(axsh; ticks=false)
 
     ht_kw = (;
         colormap,

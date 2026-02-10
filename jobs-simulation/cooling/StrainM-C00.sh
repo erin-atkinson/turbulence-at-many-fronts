@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --time=4:00:00
+#SBATCH --time=5:00:00
 #SBATCH --job-name=StrainM-C00
 #SBATCH --output=../scratch/logs/Strain-%j.txt
 

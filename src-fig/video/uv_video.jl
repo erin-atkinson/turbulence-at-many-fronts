@@ -32,12 +32,12 @@ function uv_video(
     u_title = @lift let
         t_val = @sprintf "%03.1f" sp.f * $t / 2π
         hr_val = @sprintf "%03.0f" $t / 3600
-        L"u, ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
+        L"u, \quad ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
     end
     v_title = @lift let
         t_val = @sprintf "%03.1f" sp.f * $t / 2π
         hr_val = @sprintf "%03.0f" $t / 3600
-        L"v, ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
+        L"v, \quad ft / 2\pi = %$(t_val) \quad t = %$(hr_val)~\text{hr}"
     end
     
     U = [-variable_strain_rate(t, sp) * x for t in times, x in xsᶠ, y in 1:1, z in 1:1] .* background
