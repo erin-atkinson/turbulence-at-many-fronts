@@ -2,7 +2,6 @@ using Oceananigans
 using CUDA
 using JLD2
 using Printf
-using Oceananigans.BoundaryConditions: fill_halo_regions!
 
 include("base_state.jl")
 include("grid_faces.jl")
@@ -45,9 +44,9 @@ include("boundary_conditions.jl")
 # Closure
 include("closure.jl")
 
-model = NonhydrostaticModel(; grid,
-    clock=Clock(time=sp.start_time),
-    advection=WENO(; order=9),
+model = NonhydrostaticModel(grid;
+    clock = Clock(time=sp.start_time),
+    advection = WENO(; order=9),
     coriolis = FPlane(; sp.f),
     tracers = (:b, ),
     closure,

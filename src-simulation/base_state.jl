@@ -106,7 +106,7 @@ create_front_parameters(; ip...) = create_front_parameters(ip)
     fill_halo_regions!(b)
 
     # Compute the thermal wind shear
-    S_op = @at (Center, Face, Center) ∂x(b) / sp.f
+    S_op = @at (Center, Face, Face) ∂x(b) / sp.f
     S = compute!(Field(S_op))
 
     # Integrate
