@@ -2,8 +2,8 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --time=1:00:00
-#SBATCH --job-name=Init-b1_0-C2_0
-#SBATCH --output=../scratch/logs/Init-b1_0-C2_0.txt
+#SBATCH --job-name=Init-b1_0-C2_4
+#SBATCH --output=../scratch/logs/Init-b1_0-C2_4.txt
 
 module load julia/1.10.10
 
@@ -11,10 +11,10 @@ module load julia/1.10.10
 export JULIA_DEPOT_PATH=$SCRATCH/julia-trig
 cd ~/turbulence-at-many-fronts
 
-output_folder=$SCRATCH/turbulence-at-many-fronts/Init-b1_0-C2_0
+output_folder=$SCRATCH/turbulence-at-many-fronts/Init-b1_0-C2_4
 
-run_time="4e5"
-start_time="-4e5"
+run_time="3.3e5"
+start_time="-3.3e5"
 save_time="1e4"
 
 f="1e-4"
@@ -33,7 +33,7 @@ betal=6
 betaH=0.1
 
 Roalpha=0
-C=2.0
+C=2.4
 beta0=8
 
 comment="Initialized front with C = $C, beta b = $betab"
@@ -41,5 +41,5 @@ comment="Initialized front with C = $C, beta b = $betab"
 julia -t 24 -- src-simulation/simulation.jl $output_folder $run_time $start_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betab $betal $betaH $Roalpha $C $beta0 $comment
 
 # Copy to a t > 0 run
-mkdir $output_folder/../a0_10-b1_0-C2_0
-cp $output_folder/checkpoint_* $output_folder/../a0_10-b1_0-C2_0
+mkdir $output_folder/../a0_10-b1_0-C2_4
+cp $output_folder/checkpoint_* $output_folder/../a0_10-b1_0-C2_4

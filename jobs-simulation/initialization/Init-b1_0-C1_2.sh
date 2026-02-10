@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --time=4:00:00
+#SBATCH --time=1:00:00
 #SBATCH --job-name=Init-b1_0-C1_2
 #SBATCH --output=../scratch/logs/Init-b1_0-C1_2.txt
 
@@ -13,8 +13,8 @@ cd ~/turbulence-at-many-fronts
 
 output_folder=$SCRATCH/turbulence-at-many-fronts/Init-b1_0-C1_2
 
-run_time="8e5"
-start_time="-8e5"
+run_time="6.7e5"
+start_time="-6.7e5"
 save_time="1e4"
 
 f="1e-4"
