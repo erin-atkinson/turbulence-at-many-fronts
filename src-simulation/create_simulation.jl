@@ -108,6 +108,7 @@ simulation.callbacks[:advection] = Callback(calculate_U_callback, IterationInter
 # Output progress
 #progress(sim) = print(rpad("\rRunning simulation t=$(round(time(sim); digits=2)) iter=$(iteration(sim))", 80))
 
+# Output progress
 const prev_t = [0.0]
 const prev_wall_time = [0.0]
 function progress(sim)
@@ -134,7 +135,6 @@ function progress(sim)
 
     return nothing
 end
-
 simulation.callbacks[:progress] = Callback(progress, IterationInterval(50))
 
 @info simulation
