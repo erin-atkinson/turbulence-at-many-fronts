@@ -67,7 +67,17 @@ end
 
 # Take the latest checkpoint file
 prev_time = mapreduce(max, checkpoint_files; init=sp.start_time * 1.0) do checkpoint_file
-    jldopen(file->file["NonhydrostaticModel/clock"].time, joinpath(output_folder, checkpoint_file))
+    str = "simulation/model/clock"
+    checkpoint_path = joinpath(output_folder, checkpoint_file)
+    
+    jldopen(file->file[str].time, checkpoint_path)
+end
+
+previous_actuation = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
+    str = "simulation/output_writers/fields/schedule/previous_actuation"
+    checkpoint_path = joinpath(output_folder, checkpoint_file)
+    
+    jldopen(file->file[str], checkpoint_path)
 end
 
 simulation = Simulation(model; Δt, stop_time=prev_time+sp.run_time)
@@ -78,7 +88,9 @@ b = model.tracers.b
 pNHS = model.pressures.pNHS
 
 # This is a workaround for a quirk with loading a checkpoint
-writing_times = prev_time:sp.save_time:(prev_time+sp.run_time)
+# I don't want to talk about it
+writing_times = (prev_time + sp.save_time):sp.save_time:(prev_time+sp.run_time)
+writing_times = [prev_time .- (1:previous_actuation); writing_times]
 
 simulation.output_writers[:fields] = JLD2Writer(model, (; u, v, w, b, pNHS); 
     filename="$output_folder/output.jld2", 
