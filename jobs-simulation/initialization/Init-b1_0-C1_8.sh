@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --time=1:00:00
+#SBATCH --time=3:00:00
 #SBATCH --job-name=Init-b1_0-C1_8
 #SBATCH --output=../scratch/logs/Init-b1_0-C1_8.txt
 
