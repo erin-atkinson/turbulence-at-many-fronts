@@ -11,6 +11,8 @@ using Oceananigans.Advection: advective_momentum_flux_Uu,
                               advective_momentum_flux_Vw,
                               advective_momentum_flux_Ww
 
+using Oceananigans.Utils: SumOfArrays
+const weno = WENO(; order=9)
 # These are just for a reminder
 # div_𝐯u, div_𝐯v, div_𝐯w, div_Uc,
 # advective_tracer_flux_x,
