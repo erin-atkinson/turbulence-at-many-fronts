@@ -18,10 +18,12 @@ scriptname = ARGS[2]
 
 # Possible third argument is a temporary location
 buffer = length(ARGS) > 2 ? ARGS[3] : ARGS[1]
+mkpath(buffer)
 
 # Path to input data and output
 RAW = joinpath(foldername, "output.jld2")
 BUFFER = joinpath(buffer, "$scriptname.jld2")
+
 
 # Path to temp output
 TEMP = joinpath(buffer, "temp_$scriptname.jld2")

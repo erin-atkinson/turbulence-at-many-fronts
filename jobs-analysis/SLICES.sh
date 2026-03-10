@@ -7,15 +7,36 @@
 
 module load julia/1.10.10
 
-export RAM=/dev/shm/SLICES
-mkdir $RAM
-
 # Launch from scratch
 export JULIA_DEPOT_PATH=$SCRATCH/julia-tri
 cd ~/turbulence-at-many-fronts
 
-# Location of output.jld2
-export SIM_OUTPUT_FOLDER=../scratch/turbulence-at-many-fronts/Strain-l8
-julia -t 192 -- src-analysis/postprocess/postprocess.jl $SIM_OUTPUT_FOLDER SLICES $RAM
+PPFILE=SLICES
+RAM=/dev/shm/$PPFILE
+mkdir $RAM
 
+a=0_30
+b=1_0
+c=1_0
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+c=1_4
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+c=1_8
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+c=2_0
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+#c=2_2
+#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+c=2_6
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+c=3_0
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+
+wait
 rm $RAM -rf

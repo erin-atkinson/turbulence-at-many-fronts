@@ -1,16 +1,15 @@
-@inline function q_func(i, j, k, grid, clock, fields, dependency_fields, sp)
+@inline function q_func(i, j, k, grid, clock, sp, u, v, w, b)
     
-    ηx = ℑyzᵃᶜᶜ(i, j, k, grid, ηx_func, clock, fields, dependency_fields, sp)
-    ηy = ℑxzᶜᵃᶜ(i, j, k, grid, ηy_func, clock, fields, dependency_fields, sp)
-    ηz = ℑxyᶜᶜᵃ(i, j, k, grid, ηz_func, clock, fields, dependency_fields, sp)
+    ηx = ℑxᶠᵃᵃ(i, j, k, grid, ηx_func, clock, sp, v, w)
+    ηy = ℑyᵃᶠᵃ(i, j, k, grid, ηy_func, clock, sp, u, w)
+    ηz = ℑzᵃᵃᶠ(i, j, k, grid, ηz_func, clock, sp, u, v)
 
-    bx = ℑxᶜᵃᵃ(i, j, k, grid, ∂xᶠᶜᶜ, fields.b)
-    by = ℑyᵃᶜᵃ(i, j, k, grid, ∂yᶜᶠᶜ, fields.b)
-    bz = ℑzᵃᵃᶜ(i, j, k, grid, ∂zᶜᶜᶠ, fields.b)
+    bx = ∂xᶠᶜᶜ(i, j, k, grid, b)
+    by = ∂yᶜᶠᶜ(i, j, k, grid, b)
+    bz = ∂zᶜᶜᶠ(i, j, k, grid, b)
     
     return (bx * ηx
           + by * ηy
           + bz * ηz)
 end
 
-q_dependencies = ()

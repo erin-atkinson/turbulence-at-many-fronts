@@ -38,6 +38,12 @@ end
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
     return sp.B * turnon
 end
+
+function bin_counts(a, bins) 
+    map(bins[1:end-1], bins[2:end]) do bl, br
+        sum(bl .< a .< br)
+    end
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------

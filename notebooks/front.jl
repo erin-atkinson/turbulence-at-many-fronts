@@ -20,7 +20,7 @@ function avg_buoyancy(DFM, z1, z2)
     iterations, times = iterations_times(DFM)
 
     surface_mean(field) = mean(field[:, k1:k2]; dims=2)[:, 1]
-    b_surface = timeseries_of(surface_mean, DFM, "b_dfm", iterations)
+    b_surface = timeseries_of(surface_mean, DFM, "b_coarse", iterations)
 
     return b_surface
 end
