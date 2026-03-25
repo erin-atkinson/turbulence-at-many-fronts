@@ -1,7 +1,3 @@
-
-
-
-
 function avg_buoyancy(DFM, z1, z2)
     k1, k2 = zᶜbounds(DFM, z1, z2)
     iterations, times = iterations_times(DFM)
@@ -54,27 +50,4 @@ function cumulative_avg_b(file)
     Δt = times[2] - times[1]
     
     return -cumsum([surface_b_flux(t, sp) * Δt / sp.H for t in times])
-end
-
-function front_width(file, b_front, bl, br)
-    iterations, times = iterations_times(file)
-    sp = simulation_parameters(file)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(file)
-    
-    ilr = zeros(size(b_front, 1), 2)
-    xlr = zeros(size(b_front, 1), 2)
-    ℓ = zeros(size(b_front, 1))
-    
-    for i in 1:length(times)
-        il = interpolate(bl, b_front[i, :], 1:length(xsᶜ))
-        ir = interpolate(br, b_front[i, :], 1:length(xsᶜ))
-        
-        xl = interpolate(bl, b_front[i, :], xsᶜ)
-        xr = interpolate(br, b_front[i, :], xsᶜ)
-        
-        ilr[i, :] .= [il, ir]
-        xlr[i, :] .= [xl, xr]
-        ℓ[i] = xr - xl
-    end
-    return ilr, xlr, ℓ
 end
