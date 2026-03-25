@@ -76,4 +76,5 @@ include("get_field.jl")
 include("timeseries_of.jl")
 include("time_average_of.jl")
 include("front_width.jl")
+include("record.jl")
 # -------------------------------------------------------------
