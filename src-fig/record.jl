@@ -2,7 +2,7 @@ function prettyrecord(observable, fig, filename, frames; record_kw...)
     N = length(frames)
     t0 = time()
     record(fig, filename, 1:N; record_kw) do i
-        observable[] = i
+        observable[] = frames[i]
         
         t = time() - t0
         total_time = N * t / i
