@@ -44,6 +44,18 @@ function bin_counts(a, bins)
         sum(bl .< a .< br)
     end
 end
+
+function normalized_time(file)
+    iterations, times = iterations_times(file)
+    sp = simulation_parameters(file)
+
+    ds = map(enumerate(times)) do (i, t)
+        Δt = times[i] - times[max(1, i-1)]
+        variable_strain_rate(t, sp) * Δt
+    end
+    
+    return cumsum(ds)
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------

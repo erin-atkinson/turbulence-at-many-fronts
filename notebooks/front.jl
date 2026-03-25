@@ -7,13 +7,7 @@
     return fs[i1] + df
 end
 
-function normalized_time(file)
-    iterations, times = iterations_times(file)
-    sp = simulation_parameters(file)
-    Δt = times[2] - times[1]
-    
-    return cumsum([variable_strain_rate(t, sp) * Δt for t in times])
-end
+
 
 function avg_buoyancy(DFM, z1, z2)
     k1, k2 = zᶜbounds(DFM, z1, z2)
