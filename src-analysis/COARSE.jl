@@ -1,6 +1,6 @@
 include("terms/terms.jl")
 
-frames = 1:10:1000
+#frames = 1:10:1000
 
 # Average
 u_dfm = dfm(input_fields.u)
