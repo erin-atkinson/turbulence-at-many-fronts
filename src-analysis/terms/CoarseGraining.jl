@@ -88,6 +88,13 @@ function coarse_grain_z(i, j, k, grid, loc, kernel::CoarseKernel, field)
     return res / weight
 end
 
+function coarse_grain(i, j, k, grid, ℓx, ℓy, ℓz, kernels, field)
+    coarse_grain_x(i, j, k, grid, ℓx, kernels[1],
+        coarse_grain_y, ℓy, kernels[2], 
+        coarse_grain_z, ℓz, kernels[3], 
+        field
+    )
+end
 """
     struct Gaussian{S}
 Gaussian coarse-graining kernel
