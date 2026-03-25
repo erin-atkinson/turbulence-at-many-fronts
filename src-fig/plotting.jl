@@ -56,6 +56,15 @@ function normalized_time(file)
     
     return cumsum(ds)
 end
+
+@inline function interpolate(x, xs, fs)
+    i1 = findlast(xs .<= x)
+    i1 == nothing && return fs[end]
+    i2 = i1 + 1
+    i2 > length(fs) && return fs[i1]
+    df = (x - xs[i1]) * (fs[i2] - fs[i1]) / (xs[i2] - xs[i1])
+    return fs[i1] + df
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
