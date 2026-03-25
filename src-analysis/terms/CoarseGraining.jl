@@ -1,4 +1,7 @@
 using Oceananigans.Grids: xnode, ynode, znode
+using Oceananigans: location
+
+struct AbstractKernel end
 
 """
     coarse_grain(i, j, k, grid, kernel, loc, field)
@@ -31,7 +34,7 @@ const ZPeriodicGrid = AbstractGrid{<:Any, <:Any, <:Any, Periodic}
     return x && y && z
 end
 
-function coarse_grain_x(i, j, k, grid, loc, kernel::CoarseKernel, args...)
+function coarse_grain_x(i, j, k, grid, loc, kernel::AbstractKernel, args...)
     hw = half_width_x(i, j, k, grid, loc, kernel)
     x = xnode(i, j, k, grid, loc, nothing, nothing)
 
@@ -50,7 +53,7 @@ function coarse_grain_x(i, j, k, grid, loc, kernel::CoarseKernel, args...)
     return res / weight
 end
 
-function coarse_grain_y(i, j, k, grid, loc, kernel::CoarseKernel, field)
+function coarse_grain_y(i, j, k, grid, loc, kernel::AbstractKernel, field)
     hw = half_width_y(i, j, k, grid, loc, kernel)
     y = ynode(i, j, k, grid, nothing, loc, nothing)
 
@@ -69,7 +72,7 @@ function coarse_grain_y(i, j, k, grid, loc, kernel::CoarseKernel, field)
     return res / weight
 end
 
-function coarse_grain_z(i, j, k, grid, loc, kernel::CoarseKernel, field)
+function coarse_grain_z(i, j, k, grid, loc, kernel::AbstractKernel, field)
     hw = half_width_z(i, j, k, grid, loc, kernel)
     z = znode(i, j, k, grid, nothing, nothing, loc)
 
@@ -95,11 +98,20 @@ function coarse_grain(i, j, k, grid, ℓx, ℓy, ℓz, kernels, field)
         field
     )
 end
+
+function Coarse(field, k1, k2, k3)
+    (ℓx, ℓy, ℓz) = location(field)
+    kernels = (k1, k2, k3)
+    grid = field.grid
+    
+    return KernelFunctionOperation{ℓx, ℓy, ℓz}(coarse_grain, grid, ℓx(), ℓy(), ℓz(), kernels, field)
+end
+
 """
     struct Gaussian{S}
 Gaussian coarse-graining kernel
 """
-struct Gaussian{S} <: CoarseKernel
+struct Gaussian{S} <: AbstractKernel
     σ :: S
 end
 

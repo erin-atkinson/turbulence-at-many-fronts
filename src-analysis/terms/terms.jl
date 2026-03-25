@@ -108,3 +108,4 @@ end
 
 include("strainflow.jl")
 include("CoarseGraining.jl")
+include("constants.jl")
