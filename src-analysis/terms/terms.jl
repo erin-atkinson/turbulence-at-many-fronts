@@ -39,6 +39,9 @@ end
 @inline f′g′(i, j, k, grid, f, f_dfm, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * f′(i, j, k, grid, g, g_dfm)
 @inline f′Gg′(i, j, k, grid, f, f_dfm, G, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * G(i, j, k, grid, f′, g, g_dfm)
 
+locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
+    ℓu isa Type{Nothing} ? ℓu : ℓ
+end
 #=
 # Faster to assume that the kernel is separable and normalized
 @inline function coarse_grain_x(i, j, k, grid, weights, f::F, args...) where {F <: Function}
