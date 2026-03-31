@@ -21,5 +21,5 @@ Deformation shear production due to a background U
 function DSP(u, v, u_next, v_next, U)
     grid = u.grid
     loc = locationornothing((Center, Nothing, Center), u)
-    return KernelFunctionOperation{Center, Nothing, Center}(DSP_func, grid, u, v, u_next, v_next, U)
+    return KernelFunctionOperation{loc...}(DSP_func, grid, u, v, u_next, v_next, U)
 end

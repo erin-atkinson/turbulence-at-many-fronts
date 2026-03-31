@@ -1,4 +1,4 @@
-@inline function KE_func(i, j, k, grid, clock, u, v, w)
+@inline function KE_func(i, j, k, grid, u, v, w)
     
     U = ℑxᶜᵃᵃ(i, j, k, grid, u)
     V = ℑyᵃᶜᵃ(i, j, k, grid, v)
