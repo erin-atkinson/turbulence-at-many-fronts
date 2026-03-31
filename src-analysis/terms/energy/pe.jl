@@ -1,6 +1,6 @@
 @inline function PE_func(i, j, k, grid, b)
     
-    z = node(i, j, k, grid, nothing, nothing, Center())
+    x, y, z = node(i, j, k, grid, Center(), Center(), Center())
     
     return @inbounds b[i, j, k] * z
 end

@@ -5,11 +5,6 @@ using Oceananigans.Utils: SumOfArrays
 #= 
 =#
 
-# Create advection schemes
-const weno = WENO(; order=9)
-const centered = Centered(; order=10)
-
-
 # Momentum
 for v in (:u, :v, :w)
     for V in (:U, :V, :W)

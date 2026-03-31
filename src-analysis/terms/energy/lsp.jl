@@ -8,9 +8,9 @@
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    uu = fluxes.uu
-    uv = fluxes.uv
-    uw = fluxes.uw
+    uu = @inbounds fluxes.uu[i, j, k]
+    uv = @inbounds fluxes.uv[i, j, k]
+    uw = @inbounds fluxes.uw[i, j, k]
 
     ux = ∂xᶜᶜᶜ(i, j, k, grid, a_avg, u, u_next)
     vx = ℑxᶜᵃᵃ(i, j, k, grid, ∂xᶠᶜᶜ, a_avg, v, v_next)

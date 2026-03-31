@@ -8,12 +8,12 @@
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    uu = fluxes.uu
-    uv = fluxes.uv
-    uw = fluxes.uw
+    uu = @inbounds fluxes.uu[i, j, k]
+    uv = @inbounds fluxes.uv[i, j, k]
+    uw = @inbounds fluxes.uw[i, j, k]
 
     uz = ℑxzᶜᵃᶜ(i, j, k, grid, ∂zᶠᶜᶠ, a_avg, u, u_next)
-    vz = ℑxᵃᵃᶜ(i, j, k, grid, ∂zᶜᶜᶠ, a_avg, v, v_next)
+    vz = ℑxᶜᵃᵃ(i, j, k, grid, ∂zᶜᶜᶠ, a_avg, v, v_next)
     wz = ∂xᶜᶜᶜ(i, j, k, grid, a_avg, w, w_next)
     
     return -(
