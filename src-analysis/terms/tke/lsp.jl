@@ -1,4 +1,4 @@
-@inline function LSP3D_func(i, j, k, grid, clock, fields, dependency_fields, sp)
+@inline function LSP_func(i, j, k, grid, U, V, W, uu, uv, uw)
 
     u = fields.u
     v = fields.v
@@ -35,11 +35,7 @@
     )
 end
 
-LSP_dependencies = (
-    :u_dfm,
-    :v_dfm,
-    :w_dfm,
-    :u_next_dfm,
-    :v_next_dfm,
-    :w_next_dfm,
-)
+function LSP(U, V, W, uu, uv, uw)
+    grid = u.grid
+    return KernelFunctionOperation(LSP_func, grid, U, V, W, uu, uv, uw)
+end

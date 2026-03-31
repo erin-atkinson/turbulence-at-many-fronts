@@ -1,22 +1,14 @@
-@inline function TKE3D_func(i, j, k, grid, clock, fields, dependency_fields, sp)
+@inline function TKE3D_func(i, j, k, grid, clock, input_fields, coarse_fields)
 
-    u = fields.u
-    v = fields.v
-    w = fields.w
+    u = ℑxᶜᵃᵃ(i, j, k, grid, input_fields.u)
+    v = ℑyᵃᶜᵃ(i, j, k, grid, input_fields.v)
+    w = ℑzᵃᵃᶜ(i, j, k, grid, input_fields.w)
     
-    u_dfm = dependency_fields.u_dfm
-    v_dfm = dependency_fields.v_dfm
-    w_dfm = dependency_fields.w_dfm
-    
-    uu = ℑxᶜᵃᵃ(i, j, k, grid, f′g′, u, u_dfm, u, u_dfm)
-    vv = ℑyᵃᶜᵃ(i, j, k, grid, f′g′, v, v_dfm, v, v_dfm)
-    ww = ℑzᵃᵃᶜ(i, j, k, grid, f′g′, w, w_dfm, w, w_dfm)
-    
-    return (uu + vv + ww) / 2
+    U = ℑxᶜᵃᵃ(i, j, k, grid, coarse_fields.u_coarse)
+    V = ℑyᵃᶜᵃ(i, j, k, grid, coarse_fields.v_coarse)
+    W = ℑzᵃᵃᶜ(i, j, k, grid, coarse_fields.w_coarse)
+
+    KE = (u^2 + v^2 + w^2) / 2
+    MKE = (U^2 + V^2 + W^2) / 2
+    return KE - MKE
 end
-
-TKE_dependencies = (
-    :u_dfm,
-    :v_dfm,
-    :w_dfm,
-)

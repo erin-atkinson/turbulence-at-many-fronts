@@ -13,8 +13,8 @@ V = Field{Nothing, Face, Nothing}(grid)
 W = ZeroField()
 
 # This is probably unnecessary
-const Xs = Field{Face, Nothing, Nothing}(grid)
-const Ys = Field{Nothing, Face, Nothing}(grid)
+Xs = Field{Face, Nothing, Nothing}(grid)
+Ys = Field{Nothing, Face, Nothing}(grid)
 
 Xs.data.parent[:, 1, 1] .= grid.xᶠᵃᵃ.parent
 Ys.data.parent[1, :, 1] .= grid.yᵃᶠᵃ.parent

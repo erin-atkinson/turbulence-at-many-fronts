@@ -1,17 +1,13 @@
-using Oceananigans.Grids: xnode, ynode, znode
+using Oceananigans.Grids: xnode, ynode, znode, AbstractGrid
 using Oceananigans: location
 
-struct AbstractKernel end
+abstract type AbstractKernel end
 
-"""
-    coarse_grain(i, j, k, grid, kernel, loc, field)
-Kernel function operation that returns a coarse-grained field
-"""
 for ξ in (:x, :y, :z)
-    coarse_grain_ξ = Symbol(:coarse_grain, ξ)
+    coarse_grain_ξ = Symbol(:coarse_grain_, ξ)
     @eval begin
-        $coarse_grain_ξ(i, j, k, grid, kernel, loc, field) = @inbounds field[i, j, k]
-        $coarse_grain_ξ(i, j, k, grid, kernel, loc, f::Function, args...) = f(i, j, k, grid, args...)
+        $coarse_grain_ξ(i, j, k, grid, loc, kernel, field) = @inbounds field[i, j, k]
+        $coarse_grain_ξ(i, j, k, grid, loc, kernel, f::Function, args...) = f(i, j, k, grid, args...)
     end
 end
 
@@ -23,108 +19,101 @@ const YPeriodicGrid = AbstractGrid{<:Any, <:Any, Periodic}
 const ZPeriodicGrid = AbstractGrid{<:Any, <:Any, <:Any, Periodic}
 
 @inline function ingrid(i, j, k, grid, ℓx, ℓy, ℓz)
-    Nx = grid.Nx + ℓx isa Face
-    Ny = grid.Ny + ℓy isa Face
-    Nz = grid.Nz + ℓz isa Face
+    Nx = grid.Nx + (ℓx isa Face)
+    Ny = grid.Ny + (ℓy isa Face)
+    Nz = grid.Nz + (ℓz isa Face)
 
-    x = 1 <= i <= Nx || grid isa XPeriodicGrid
-    y = 1 <= j <= Ny || grid isa YPeriodicGrid
-    z = 1 <= k <= Nz || grid isa ZPeriodicGrid
+    x = 1 <= i <= Nx || (grid isa XPeriodicGrid)
+    y = 1 <= j <= Ny || (grid isa YPeriodicGrid)
+    z = 1 <= k <= Nz || (grid isa ZPeriodicGrid)
 
     return x && y && z
 end
 
-function coarse_grain_x(i, j, k, grid, loc, kernel::AbstractKernel, args...)
-    hw = half_width_x(i, j, k, grid, loc, kernel)
-    x = xnode(i, j, k, grid, loc, nothing, nothing)
-
-    res = 0.0
-    weights = 0.0
-
-    for di in -hw:hw
-        !ingrid(i + di, j, k, grid, loc, nothing, nothing) && continue
-
-        dx = xnode(i + di, j, k, grid, loc, nothing, nothing) - x
-        weight = kernel_func(kernel, dx)
-        res += f(i + di, j, k, grid, weight, args...)
-        weights += weight
-    end
-
-    return res / weight
-end
-
-function coarse_grain_y(i, j, k, grid, loc, kernel::AbstractKernel, field)
-    hw = half_width_y(i, j, k, grid, loc, kernel)
-    y = ynode(i, j, k, grid, nothing, loc, nothing)
-
-    res = 0.0
-    weights = 0.0
-
-    for dj in -hw:hw
-        !ingrid(i, j + dj, k, grid, nothing, loc, nothing) && continue
-
-        dy = ynode(i, j + dj, k, grid, nothing, loc, nothing) - y
-        weight = kernel_func(kernel, dy)
-        res += f(i, j + dj, k, grid, weight, args...)
-        weights += weight
-    end
-
-    return res / weight
-end
-
-function coarse_grain_z(i, j, k, grid, loc, kernel::AbstractKernel, field)
-    hw = half_width_z(i, j, k, grid, loc, kernel)
-    z = znode(i, j, k, grid, nothing, nothing, loc)
-
-    res = 0.0
-    weights = 0.0
-
-    for dk in -hw:hw
-        !ingrid(i, j, k + dk, grid, nothing, nothing, loc) && continue
-
-        dz = znode(i, j, k + dk, grid, nothing, nothing, loc) - z
-        weight = kernel_func(kernel, dz)
-        res += f(i, j, k + dk, grid, weight, args...)
-        weights += weight
-    end
-
-    return res / weight
-end
-
-function coarse_grain(i, j, k, grid, ℓx, ℓy, ℓz, kernels, field)
-    coarse_grain_x(i, j, k, grid, ℓx, kernels[1],
-        coarse_grain_y, ℓy, kernels[2], 
-        coarse_grain_z, ℓz, kernels[3], 
-        field
-    )
-end
-
-function Coarse(field, k1, k2, k3)
-    (ℓx, ℓy, ℓz) = location(field)
-    kernels = (k1, k2, k3)
-    grid = field.grid
+function coarse_grain(i, j, k, grid, ℓx, ℓy, ℓz, kernel, field)
+    σx = kernel.σx
+    σy = kernel.σy
+    σz = kernel.σz
+    wx = kernel.wx
+    wy = kernel.wy
+    wz = kernel.wz
     
-    return KernelFunctionOperation{ℓx, ℓy, ℓz}(coarse_grain, grid, ℓx(), ℓy(), ℓz(), kernels, field)
+    (x, y, z) = node(i, j, k, grid, ℓx, ℓy, ℓz)
+    
+    res = 0.0
+    weights = 0.0
+
+    for di in -wx:wx
+        _i, _j, _k = i + di, j, k
+        
+        !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
+        (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
+        
+        weight = kernel_func(kernel, dx, dy, dz)
+        
+        res += @inbounds field[_i, _j, _k] * weight
+        weights += weight
+    end
+
+    for dj in -wy:wy
+        _i, _j, _k = i, j + dj, k
+        
+        !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
+        (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
+        
+        weight = kernel_func(kernel, dx, dy, dz)
+        
+        res += @inbounds field[_i, _j, _k] * weight
+        weights += weight
+    end
+
+    for dk in -wz:wz
+        _i, _j, _k = i, j, k + dk
+        
+        !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
+        (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
+        
+        weight = kernel_func(kernel, dx, dy, dz)
+        
+        res += @inbounds field[_i, _j, _k] * weight
+        weights += weight
+    end
+    
+    weights == 0.0 && return 0.0
+    return res / weights
+end
+
+regularize_location(loc) = loc
+regularize_location(loc::Nothing) = Center()
+
+function Coarse(field, kernel)
+    (ℓx, ℓy, ℓz) = location(field)
+    
+    grid = field.grid
+    locs = (regularize_location(a()) for a in (ℓx, ℓy, ℓz))
+    return KernelFunctionOperation{ℓx, ℓy, ℓz}(coarse_grain, grid, locs..., kernel, field)
 end
 
 """
     struct Gaussian{S}
 Gaussian coarse-graining kernel
 """
-struct Gaussian{S} <: AbstractKernel
-    σ :: S
+struct Gaussian{G, S, I} <: AbstractKernel
+    grid::G
+    σx::S
+    σy::S
+    σz::S
+    wx::I
+    wy::I
+    wz::I
 end
 
-@inline kernel_func(kernel::Gaussian, dx) = exp(-dx^2 / 2kernel.σ^2)
+function Gaussian(grid, σx, σy, σz)
+    wx = Integer((5 * σx) ÷ minimum_xspacing(grid))
+    wy = Integer((5 * σy) ÷ minimum_yspacing(grid))
+    wz = Integer((5 * σz) ÷ minimum_zspacing(grid))
 
-@inline function half_width_x(i, j, k, grid, loc, kernel::Gaussian)
-    return Integer(1 + (5 * kernel.σ) / minimum_xspacing(grid))
+    return Gaussian(grid, σx, σy, σz, wx, wy, wz)
 end
 
-@inline function half_width_y(i, j, k, grid, loc, kernel::Gaussian)
-    return Integer(1 + (5 * kernel.σ) / minimum_yspacing(grid))
-end
-
-@inline function half_width_z(i, j, k, grid, loc, kernel::Gaussian)
-    return Integer(1 + (5 * kernel.σ) / minimum_zspacing(grid))
-end
+@inline kernel_func(kernel::Gaussian, dx, dy, dz) = exp(-dx^2 / 2kernel.σx^2) * exp(-dy^2 / 2kernel.σy^2) * exp(-dz^2 / 2kernel.σz^2)

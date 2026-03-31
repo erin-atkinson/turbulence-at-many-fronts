@@ -1,31 +1,24 @@
-@inline function DSP3D_func(i, j, k, grid, clock, fields, dependency_fields, sp)
+@inline function DSP_func(i, j, k, grid, u, v, u_next, v_next, U)
 
-    α = variable_strain_rate(clock.time, sp)
-
-    u = fields.u
-    v = fields.v
+    α = ∂xᶜᵃᵃ(i, j, k, grid, U)
     
-    u_next = fields.u_next
-    v_next = fields.v_next
-
-    u_dfm = dependency_fields.u_dfm
-    v_dfm = dependency_fields.v_dfm
+    uᶜᶜᶜ = ℑxᶜᵃᵃ(i, j, k, grid, u)
+    vᶜᶜᶜ = ℑyᵃᶜᵃ(i, j, k, grid, v)
     
-    u_next_dfm = dependency_fields.u_next_dfm
-    v_next_dfm = dependency_fields.v_next_dfm
-
-    uu = ℑxᶜᵃᵃ(i, j, k, grid, fGg, u, a_avg, u, u_next)
-    vv = ℑyᵃᶜᵃ(i, j, k, grid, fGg, v, a_avg, v, v_next)
+    uᶜᶜᶜ_next = ℑxᶜᵃᵃ(i, j, k, grid, u_next)
+    vᶜᶜᶜ_next = ℑyᵃᶜᵃ(i, j, k, grid, v_next)
 
     uu_dfm = ℑxᶜᵃᵃ(i, j, k, grid, fGg, u_dfm, a_avg, u_dfm, u_next_dfm)
     vv_dfm = ℑyᵃᶜᵃ(i, j, k, grid, fGg, v_dfm, a_avg, v_dfm, v_next_dfm)
     
-    return -α * ((uu - uu_dfm) - (vv - vv_dfm))
+    return α * (uᶜᶜᶜ_next * uᶜᶜᶜ - vᶜᶜᶜ_next * vᶜᶜᶜ)
 end
 
-DSP_dependencies = (
-    :u_dfm,
-    :v_dfm,
-    :u_next_dfm,
-    :v_next_dfm,
-)
+"""
+    DSP(u, v, u_next, v_next, U)
+Deformation shear production due to a background U
+"""
+function DSP(u, v, u_next, v_next, U)
+    grid = u.grid
+    return KernelFunctionOperation{Center, Nothing, Center}(DSP_func, grid, u, v, u_next, v_next, U)
+end
