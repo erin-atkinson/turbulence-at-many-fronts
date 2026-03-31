@@ -11,7 +11,7 @@
     uu_dfm = ℑxᶜᵃᵃ(i, j, k, grid, fGg, u_dfm, a_avg, u_dfm, u_next_dfm)
     vv_dfm = ℑyᵃᶜᵃ(i, j, k, grid, fGg, v_dfm, a_avg, v_dfm, v_next_dfm)
     
-    return α * (uᶜᶜᶜ_next * uᶜᶜᶜ - vᶜᶜᶜ_next * vᶜᶜᶜ)
+    return α * ((uᶜᶜᶜ_next + uᶜᶜᶜ) * uᶜᶜᶜ - (vᶜᶜᶜ_next + vᶜᶜᶜ) * vᶜᶜᶜ) / 2
 end
 
 """
@@ -20,6 +20,6 @@ Deformation shear production due to a background U
 """
 function DSP(u, v, u_next, v_next, U)
     grid = u.grid
-    loc = location(u)
+    loc = locationornothing((Center, Nothing, Center), u)
     return KernelFunctionOperation{Center, Nothing, Center}(DSP_func, grid, u, v, u_next, v_next, U)
 end

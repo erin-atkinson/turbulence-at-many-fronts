@@ -3,12 +3,10 @@ include("terms/terms.jl")
 include("terms/advection/advection.jl")
 include("terms/advection/operators.jl")
 
-include("terms/tke/tke.jl")
-include("terms/tke/bflux.jl")
-include("terms/tke/dissipation.jl")
-include("terms/tke/dsp.jl")
-include("terms/tke/lsp.jl")
-include("terms/tke/vsp.jl")
+include("terms/energy/tke.jl")
+include("terms/energy/dsp.jl")
+include("terms/energy/lsp.jl")
+include("terms/energy/vsp.jl")
 
 # Average
 u_dfm = dfm(input_fields.u)
