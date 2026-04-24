@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=192
-#SBATCH --time=4:00:00
+#SBATCH --time=0:30:00
 #SBATCH --job-name=ppTKE
 #SBATCH --output=../scratch/logs/ppTKE.txt
 
@@ -15,7 +15,7 @@ PPFILE=TKE
 RAM=/dev/shm/$PPFILE
 mkdir $RAM
 
-a=0_10
+a=0_05
 b=1_0
 c=1_0
 julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &

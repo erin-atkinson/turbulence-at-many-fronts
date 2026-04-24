@@ -10,7 +10,7 @@ include("terms/energy/dsp.jl")
 include("terms/energy/lsp.jl")
 include("terms/energy/vsp.jl")
 
-frames = 1:10:1000
+frames = frames[1:10:end]
 
 # Average
 @info "Down-front averaged fields"
@@ -50,7 +50,7 @@ dependency_fields = merge(dependency_fields, coarse_fields)
 # Total fluxes
 @info "Total advective fluxes"
 (uu, uv, uw, wu, wv, ww, wb) = let u = input_fields.u, 
-    v = input_fields.u, w = input_fields.w,
+    v = input_fields.v, w = input_fields.w,
     U = input_fields.U, b = input_fields.b
     
     uu = Field(UuFlux(weno, u, u; background=U))

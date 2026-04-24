@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=192
-#SBATCH --time=2:15:00
+#SBATCH --time=0:30:00
 #SBATCH --job-name=ppPV
 #SBATCH --output=../scratch/logs/ppPV.txt
 
@@ -18,25 +18,25 @@ mkdir $RAM
 a=0_05
 b=1_0
 c=1_0
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=1_4
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=1_8
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=2_0
 julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=2_2
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=2_6
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 c=3_0
-#julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &
 
 wait
 
