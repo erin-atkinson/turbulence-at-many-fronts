@@ -28,14 +28,22 @@ end
     return α * turnon
 end
 
+@inline function velocity_profile(x, sp)
+    A = 2sp.Lx / (sp.Lx - sp.Lh)^2
+    x > sp.Lh/2 && return -x + A * (x - sp.Lh/2)^2
+    x < -sp.Lh/2 && return -x - A * (x + sp.Lh/2)^2
+    return -x
+end
+
+@inline function strain_profile(x, sp)
+    A = 2sp.Lx / (sp.Lx - sp.Lh)^2
+    x > sp.Lh/2 && return 1 - 2A * (x - sp.Lh/2)
+    x < -sp.Lh/2 && return 1 + 2A * (x + sp.Lh/2)
+    return 1
+end
+
 # Background velocity fields
 U = Field{Face, Nothing, Nothing}(grid)
-
-# This is probably unnecessary
-Xs = Field{Face, Nothing, Nothing}(grid)
-@allowscalar begin 
-    Xs.data.parent[:, 1, 1] .= grid.xᶠᵃᵃ.parent
-end
 
 # U is calculated directly to avoid issues with boundary conditions
 # Open never really worked...
@@ -43,8 +51,7 @@ end
     t = simulation.model.clock.time
     α = variable_strain_rate(t, sp.α, sp.f)
     
-    # Need to bypass halo
-    U.data.parent .= -α * Xs.data.parent
+    set!(U, x->α * velocity_profile(x, sp))
     
     return nothing
 end
@@ -52,7 +59,7 @@ end
 
 # ---------------------------------------
 # Background velocity forcing
-@inline αf_func(x, y, z, t, f) = -variable_strain_rate(t, sp.α, sp.f) * f
+@inline αf_func(x, y, z, t, f) = -variable_strain_rate(t, sp.α, sp.f) * strain_profile(x, sp) * f
 @inline v_forcing_func(x, y, z, t, v) = 2αf_func(x, y, z, t, v)
 # ---------------------------------------
 
