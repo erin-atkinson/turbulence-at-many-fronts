@@ -8,18 +8,18 @@
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    uu = @inbounds fluxes.uu[i, j, k]
-    uv = @inbounds fluxes.uv[i, j, k]
-    uw = @inbounds fluxes.uw[i, j, k]
+    uu = fluxes.uu
+    uv = fluxes.uv
+    uw = fluxes.uw
 
-    ux = ∂xᶜᶜᶜ(i, j, k, grid, a_avg, u, u_next)
-    vx = ℑxᶜᵃᵃ(i, j, k, grid, ∂xᶠᶜᶜ, a_avg, v, v_next)
-    wx = ℑxzᶜᵃᶜ(i, j, k, grid, ∂xᶠᶜᶠ, a_avg, w, w_next)
+    uuux = ∂xᶜᶜᶜ(i, j, k, grid, fGg, uu, a_avg, u, u_next)
+    uvvx = ℑxyᶜᶜᵃ(i, j, k, grid, fGg, uv, ∂xᶠᶠᶜ, a_avg, v, v_next)
+    uwwx = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, uw, ∂xᶠᶜᶠ, a_avg, w, w_next)
     
     return -(
-          uu * ux
-        + uv * vx
-        + uw * wx
+          uuux
+        + uvvx
+        + uwwx
     )
 end
 

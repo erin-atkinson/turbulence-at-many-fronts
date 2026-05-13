@@ -121,7 +121,7 @@ w′u′ = Field(wu_coarse - coarse_wu)
 w′v′ = Field(wv_coarse - coarse_wv)
 w′w′ = Field(ww_coarse - coarse_ww)
 
-bflux = Field(wb_coarse - coarse_wb)
+bflux = Field(@at (Center, Nothing, Center) wb_coarse - coarse_wb)
 turbulent_fluxes = (; u′u′, u′v′, u′w′, w′u′, w′v′, w′w′, bflux)
 dependency_fields = merge(dependency_fields, turbulent_fluxes)
 @info turbulent_fluxes

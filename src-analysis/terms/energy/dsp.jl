@@ -1,17 +1,11 @@
 @inline function DSP_func(i, j, k, grid, u, v, u_next, v_next, U)
 
     α = ∂xᶜᵃᵃ(i, j, k, grid, U)
-    
-    uᶜᶜᶜ = ℑxᶜᵃᵃ(i, j, k, grid, u)
-    vᶜᶜᶜ = ℑyᵃᶜᵃ(i, j, k, grid, v)
-    
-    uᶜᶜᶜ_next = ℑxᶜᵃᵃ(i, j, k, grid, u_next)
-    vᶜᶜᶜ_next = ℑyᵃᶜᵃ(i, j, k, grid, v_next)
 
-    uu_dfm = ℑxᶜᵃᵃ(i, j, k, grid, fGg, u_dfm, a_avg, u_dfm, u_next_dfm)
-    vv_dfm = ℑyᵃᶜᵃ(i, j, k, grid, fGg, v_dfm, a_avg, v_dfm, v_next_dfm)
+    uu = ℑxᶜᵃᵃ(i, j, k, grid, fGg, u, a_avg, u, u_next)
+    vv = ℑyᵃᶜᵃ(i, j, k, grid, fGg, v, a_avg, v, v_next)
     
-    return α * ((uᶜᶜᶜ_next + uᶜᶜᶜ) * uᶜᶜᶜ - (vᶜᶜᶜ_next + vᶜᶜᶜ) * vᶜᶜᶜ) / 2
+    return α * (uu - vv)
 end
 
 """

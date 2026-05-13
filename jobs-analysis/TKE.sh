@@ -15,7 +15,7 @@ PPFILE=TKE
 RAM=/dev/shm/$PPFILE
 mkdir $RAM
 
-a=0_05
+a=0_10
 b=1_0
 c=1_0
 julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/a$a-b$b-C$c $PPFILE $RAM/a$a-b$b-C$c &

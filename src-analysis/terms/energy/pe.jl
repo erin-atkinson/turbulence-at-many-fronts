@@ -2,7 +2,7 @@
     
     x, y, z = node(i, j, k, grid, Center(), Center(), Center())
     
-    return @inbounds b[i, j, k] * z
+    return @inbounds -b[i, j, k] * z
 end
 
 """
