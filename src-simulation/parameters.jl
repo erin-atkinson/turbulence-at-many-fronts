@@ -6,7 +6,7 @@ default_inputs = (;
     βx = 4, βh = 1,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 256,
     βb = 1, βℓ = 1, βH = 0.1,
-    Roα = 0.1, C = 1.7, β₀ = 8,
+    Roα = 0.1, C = 1.7, β₀ = 8, D = 0.1, wind_θ = 0.0,
     comment = ""
 )
 
@@ -27,6 +27,10 @@ default_inputs = (;
     # Cooling from mixing rate
     τ = 1 / (ip.f * ip.C)
     B = fp.H^2 / τ^3
+
+    # Wind from turbulence scale?
+    wind_u = ip.D * fp.Δb₀ * fp.H / ip.L / ip.f
+    wind_τ = wind_u^2
     
     # Physical constants needed to construct surface BC
     αV = 2.0678e-4 # K⁻¹
@@ -41,7 +45,7 @@ default_inputs = (;
     # Sponge layer damping rate
     σ = 0.5 * sqrt(fp.N₀²) / (2π)
     
-    return merge(ip, fp, (; Lh, Lx, Ly, Lz, B, σ, τ, α, Q))
+    return merge(ip, fp, (; Lh, Lx, Ly, Lz, B, σ, τ, α, Q, wind_u, wind_τ))
 end
 
 @inline function create_simulation_parameters(; input_parameters...)
