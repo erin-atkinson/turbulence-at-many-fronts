@@ -9,29 +9,30 @@
 
         [02]: Simulation run time in seconds
         [03]: Start time of simulation (negative for a cooling pre-initialisation)
-        [04]: Save interval
+        [04]
+        [05]: Save interval
 
-        [05]: Coriolis parameter in 1/seconds
-        [06]: Deformation radius in metres
+        [06]: Coriolis parameter in 1/seconds
+        [07]: Deformation radius in metres
 
-        [07]: Across-front domain size (relative to front)
-        [08]: Central region domain size (relative to front)
+        [08]: Across-front domain size (relative to front)
+        [09]: Central region domain size (relative to front)
 
-        [09]: Number of across-front (x) grid points
-        [10]: Number of central region (x) grid points
-        [11]: Number of along-front (y) grid points
-        [12]: Number of vertical (z) grid points
+        [10]: Number of across-front (x) grid points
+        [11]: Number of central region (x) grid points
+        [12]: Number of along-front (y) grid points
+        [13]: Number of vertical (z) grid points
 
-        [13]: Initial width of front relative to deformation radius
-        [14]: Height of front relative to deformation radius
+        [14]: Initial width of front relative to deformation radius
+        [15]: Height of front relative to deformation radius
 
-        [15]: Strain Rossby number
-        [16]: Surface buoyancy flux 
-        [17]: Surface wind stress
-        [18]: Surface wind stress angle (0: along front pi/2: across front)
-        [19]: Deep deformation radius
+        [16]: Strain Rossby number
+        [17]: Surface buoyancy flux 
+        [18]: Surface wind stress
+        [19]: Surface wind stress angle (0: along front pi/2: across front)
+        [20]: Deep deformation radius
         
-        [20]: Comment
+        [21]: Comment
 =#
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
@@ -43,39 +44,40 @@ simulation_parameters = let
     # Simulation times
     run_time = parse(Float64, ARGS[2])
     start_time = parse(Float64, ARGS[3])
-    save_time = parse(Float64, ARGS[4])
+    max_time = parse(Float64, ARGS[4])
+    save_time = parse(Float64, ARGS[5])
 
     # Coriolis frequency
-    f = parse(Float64, ARGS[5])
+    f = parse(Float64, ARGS[6])
 
     # Deformation radius
-    L = parse(Float64, ARGS[6])
+    L = parse(Float64, ARGS[7])
 
     # Grid extent
-    βx = parse(Float64, ARGS[7])
-    βh = parse(Float64, ARGS[8])
+    βx = parse(Float64, ARGS[8])
+    βh = parse(Float64, ARGS[9])
 
     # Grid sizes
-    Nx = parse(Int64, ARGS[9])
-    Nh = parse(Int64, ARGS[10])
-    Ny = parse(Int64, ARGS[11])
-    Nz = parse(Int64, ARGS[12])
+    Nx = parse(Int64, ARGS[10])
+    Nh = parse(Int64, ARGS[11])
+    Ny = parse(Int64, ARGS[12])
+    Nz = parse(Int64, ARGS[13])
 
     # Front
-    βℓ = parse(Float64, ARGS[13])
-    βH = parse(Float64, ARGS[14])
+    βℓ = parse(Float64, ARGS[14])
+    βH = parse(Float64, ARGS[15])
 
     # Background
-    βα = parse(Float64, ARGS[15])
-    βB = parse(Float64, ARGS[16])
-    βτ = parse(Float64, ARGS[17])
-    θτ = parse(Float64, ARGS[18])
-    β₀ = parse(Float64, ARGS[19])
+    βα = parse(Float64, ARGS[16])
+    βB = parse(Float64, ARGS[17])
+    βτ = parse(Float64, ARGS[18])
+    θτ = parse(Float64, ARGS[19])
+    β₀ = parse(Float64, ARGS[20])
 
-    comment = join(ARGS[20:end], " ")
+    comment = join(ARGS[21:end], " ")
     
     (;
-        run_time, start_time, save_time,
+        run_time, start_time, save_time, max_time,
         f, L,
         βx, βh,
         Nx, Nh, Ny, Nz,

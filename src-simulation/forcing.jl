@@ -23,9 +23,12 @@ end
 
 # ---------------------------------------
 # Strain turns on slowly starting at t=0
-@inline function variable_strain_rate(t, α, f)
+@inline function variable_strain_rate(t, α, f, T_max)
     turnon = max(1-exp(-f * t / 15), 0)
-    return α * turnon
+    T_max <= 0 && return α * turnon
+    
+    turnoff = max(1-exp(-f * (t - T_max) / 15), 0)
+    return α * (turnon - turnoff)
 end
 
 @inline function velocity_profile(x, Lh)
@@ -49,7 +52,7 @@ end
 # Open never really worked...
 @inline function calculate_U_callback(simulation, sp)
     t = simulation.model.clock.time
-    α = variable_strain_rate(t, sp.α, sp.f)
+    α = variable_strain_rate(t, sp.α, sp.f, sp.max_time)
     
     U.data.parent .= α .* velocity_profile_array.data.parent
     
@@ -59,7 +62,7 @@ end
 
 # ---------------------------------------
 # Background velocity forcing
-@inline αf_func(x, y, z, t, f) = -variable_strain_rate(t, sp.α, sp.f) * strain_profile(x, sp.Lh) * f
+@inline αf_func(x, y, z, t, f) = -variable_strain_rate(t, sp.α, sp.f, sp.max_time) * strain_profile(x, sp.Lh) * f
 @inline v_forcing_func(x, y, z, t, v) = 2αf_func(x, y, z, t, v)
 # ---------------------------------------
 
