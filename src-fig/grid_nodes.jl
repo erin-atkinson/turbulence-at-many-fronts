@@ -22,9 +22,14 @@ end
 center_indices(filename::String) = jldopen(center_indices, filename)
 
 nov = no_offset_view
-@inline halos(file) = file["grid/Hx"], file["grid/Hz"], file["grid/Hz"]
+@inline function halos(file)
+    grid = file["serialized/grid"]
+    return grid.Hx, grid.Hy, grid.Hz
+end
 
-function grid_nodes(file; with_halos=false)
+function grid_nodes(file; with_halos=false, reshape=false)
+    return serialized_grid_nodes(file; with_halos, reshape)
+    
     xsᶜ = nov(file["grid/xᶜᵃᵃ"])
     xsᶠ = nov(file["grid/xᶠᵃᵃ"])
 
