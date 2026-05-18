@@ -21,7 +21,7 @@ buffer = length(ARGS) > 2 ? ARGS[3] : ARGS[1]
 mkpath(buffer)
 
 # Path to input data and output
-RAW = joinpath(foldername, "output.jld2")
+RAW = joinpath(foldername, "OUTPUT.jld2")
 BUFFER = joinpath(buffer, "$scriptname.jld2")
 
 

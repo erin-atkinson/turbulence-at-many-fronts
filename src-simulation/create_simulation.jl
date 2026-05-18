@@ -93,7 +93,7 @@ writing_times = (prev_time + sp.save_time):sp.save_time:(prev_time+sp.run_time)
 writing_times = [prev_time .- (1:previous_actuation); writing_times]
 
 simulation.output_writers[:fields] = JLD2Writer(model, (; u, v, w, b, pNHS); 
-    filename="$output_folder/output.jld2", 
+    filename="$output_folder/OUTPUT.jld2", 
     schedule=SpecifiedTimes(writing_times),
     overwrite_existing=false,
     with_halos=true,
