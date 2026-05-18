@@ -12,25 +12,26 @@
         [04]: Save interval
 
         [05]: Coriolis parameter in 1/seconds
+        [06]: Deformation radius in metres
 
-        [06]: Across-front domain size (relative to front)
-        [07]: Central region domain size (relative to front)
-        [08]: Height of the mixed layer in metres
+        [07]: Across-front domain size (relative to front)
+        [08]: Central region domain size (relative to front)
 
         [09]: Number of across-front (x) grid points
         [10]: Number of central region (x) grid points
         [11]: Number of along-front (y) grid points
         [12]: Number of vertical (z) grid points
 
-        [13]: Maximum Rossby number of front
-        [14]: Minimum Richardson number of front
-        [15]: Front buoyancy change
+        [13]: Initial width of front relative to deformation radius
+        [14]: Height of front relative to deformation radius
 
-        [16]: Strain rate in 1 / seconds
-        [17]: Surface buoyancy loss (positive for cooling) in watts / sq. metre
-        [18]: Background stratification in 1 / seconds
+        [15]: Strain Rossby number
+        [16]: Surface buoyancy flux 
+        [17]: Surface wind stress
+        [18]: Surface wind stress angle (0: along front pi/2: across front)
+        [19]: Deep deformation radius
         
-        [19]: Comment
+        [20]: Comment
 =#
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
@@ -61,24 +62,25 @@ simulation_parameters = let
     Nz = parse(Int64, ARGS[12])
 
     # Front
-    βb = parse(Float64, ARGS[13])
-    βℓ = parse(Float64, ARGS[14])
-    βH = parse(Float64, ARGS[15])
+    βℓ = parse(Float64, ARGS[13])
+    βH = parse(Float64, ARGS[14])
 
     # Background
-    Roα = parse(Float64, ARGS[16])
-    C = parse(Float64, ARGS[17])
-    β₀ = parse(Float64, ARGS[18])
+    βα = parse(Float64, ARGS[15])
+    βB = parse(Float64, ARGS[16])
+    βτ = parse(Float64, ARGS[17])
+    θτ = parse(Float64, ARGS[18])
+    β₀ = parse(Float64, ARGS[19])
 
-    comment = ARGS[19]
-
+    comment = join(ARGS[20:end], " ")
+    
     (;
         run_time, start_time, save_time,
         f, L,
         βx, βh,
         Nx, Nh, Ny, Nz,
-        βb, βℓ, βH,
-        Roα, C, β₀,
+        βℓ, βH,
+        βα, βB, βτ, θτ, β₀,
         comment
     )
 end

@@ -16,7 +16,7 @@ const f′′_max = maximum(s->-tanh(s) * sech(s)^2, range(-10, 10, 1000))
 
 # Buoyancy
 @inline function front_buoyancy(x, z, sp)
-    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
     return sp.Δb * f(x₁) * g′(z₁) + b∞(z, sp)
@@ -24,11 +24,11 @@ end
 
 # Stratification
 @inline function front_N²(x, z, sp)
-    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
     return (
-          (sp.Δb / sp.H) * f′(x₁) * g′(z₁)
+          sp.a * (sp.Δb / sp.H) * f′(x₁) * g′(z₁)
         + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′′(z₁)
         + sp.N₀² * g′(-z₁)
     )
@@ -36,7 +36,7 @@ end
 
 # Horizontal buoyancy gradient
 @inline function front_M²(x, z, sp)
-    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
+    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
     return (sp.Δb / sp.ℓ) * f′(x₁) * g′(z₁)
@@ -46,40 +46,35 @@ end
 @inline front_S(x, z, sp) = front_M²(x, z, sp) / sp.f
 
 @inline function approximate_front_velocity(x, z, sp)
-    x₁ = x / sp.ℓ + (z + sp.H / 2) / sp.H
-    x₂ = x / sp.ℓ - 1 / 2
+    x₁ = x / sp.ℓ + sp.a * (z + sp.H / 2) / sp.H
+    x₂ = x / sp.ℓ - sp.a / 2
     z₁ = (z + sp.H) / (sp.λ * sp.H)
     
-    return (sp.H * sp.Δb / (sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g′(z₁)
+    return (sp.H * sp.Δb / (sp.a * sp.ℓ * sp.f)) * (f(x₁) - f(x₂)) * g′(z₁)
 end
 
 @inline function approximate_surface_velocity(x, sp)
-    x₁ = x / sp.ℓ
+    x₁ = x / sp.ℓ + sp.a / 2
     
     return (sp.H * sp.Δb / (sp.ℓ * sp.f)) * f′(x₁)
 end
 
 @inline front_Ri(x, z, sp) = front_N²(x, z, sp) / front_shear(x, z, sp)^2
 
-@inline function minimum_Ri(ip)
-    return ip.βℓ^2 / ip.βb 
-end
-
 @inline function maximum_front_velocity(ip)
-    return ip.L * ip.f * ip.βb / ip.βℓ
+    return ip.L * ip.f / ip.βℓ
 end
 
 @inline function maximum_Ro(ip)
     # Maximum Rossby number occurs at the surface
-    return 2f′′_max * maximum_front_velocity(ip) / ip.βℓ
+    return 2f′′_max * ip.f / ip.βℓ^2
 end
 
 @inline function create_front_parameters(ip)
     λ = 0.03
 
     # Buoyancy change of Ri = 1 front
-    Δb₀ = 2ip.L * ip.f^2 / ip.βH
-    Δb = ip.βb * Δb₀
+    Δb = 2ip.L * ip.f^2 / ip.βH
 
     # Size relative to deformation radius
     ℓ = ip.βℓ * ip.L
@@ -91,10 +86,10 @@ end
     N₀² = (ip.f * ip.β₀ * ip.L / H)^2
 
     Ro = maximum_Ro(ip)
-    Ri = minimum_Ri(ip)
     V = maximum_front_velocity(ip)
-
-    return (; λ, Δb₀, Δb, ℓ, H, N₀², Ro, Ri, V)
+    a = 1/ip.βℓ^2
+    
+    return (; λ, Δb, ℓ, H, N₀², Ro, V, a)
 end
 create_front_parameters(; ip...) = create_front_parameters(ip)
 
