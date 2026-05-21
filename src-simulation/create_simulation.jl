@@ -73,26 +73,28 @@ prev_time = mapreduce(max, checkpoint_files; init=sp.start_time * 1.0) do checkp
     jldopen(file->file[str].time, checkpoint_path)
 end
 
-previous_actuation = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
-    str = "simulation/output_writers/fields/schedule/previous_actuation"
+prev_iteration = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
+    str = "simulation/model/clock"
     checkpoint_path = joinpath(output_folder, checkpoint_file)
     
-    jldopen(file->file[str], checkpoint_path)
+    jldopen(file->file[str].iteration, checkpoint_path)
 end
 
-simulation = Simulation(model; Δt, stop_time=prev_time+sp.run_time)
+simulation = Simulation(model; Δt, stop_time=sp.run_time, wall_time_limit=3 * 3600)
 
 # Save pressure anomaly and velocities and tracers
 u, v, w = model.velocities
 b = model.tracers.b
 pNHS = model.pressures.pNHS
 
-# This is a workaround for a quirk with loading a checkpoint
-# I don't want to talk about it
-writing_times = (prev_time + sp.save_time):sp.save_time:(prev_time+sp.run_time)
-writing_times = [prev_time .- (1:previous_actuation); writing_times]
+# Need to define a new outputwriter as save_time may change
+writing_times_pos = filter(t-> t >= prev_time, 0:sp.save_time:sp.run_time)
+writing_times_neg = filter(t-> t > prev_time, sp.start_time:sp.save_time:0)
+writing_times = [writing_times_neg; writing_times_pos]
 
-simulation.output_writers[:fields] = JLD2Writer(model, (; u, v, w, b, pNHS); 
+output_symbol = Symbol(:fields, prev_iteration)
+
+simulation.output_writers[output_symbol] = JLD2Writer(model, (; u, v, w, b, pNHS); 
     filename="$output_folder/OUTPUT.jld2", 
     schedule=SpecifiedTimes(writing_times),
     overwrite_existing=false,
@@ -100,7 +102,6 @@ simulation.output_writers[:fields] = JLD2Writer(model, (; u, v, w, b, pNHS);
     init=init_jld2!
 )
 
-# Add a checkpointer
 simulation.output_writers[:checkpointer] = Checkpointer(model;
     schedule=SpecifiedTimes(writing_times[end]),
     dir=output_folder,
@@ -115,9 +116,6 @@ simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 # Compute the advection
 simulation.callbacks[:advection] = Callback(calculate_U_callback, IterationInterval(1); parameters=sp)
-
-# Output progress
-#progress(sim) = print(rpad("\rRunning simulation t=$(round(time(sim); digits=2)) iter=$(iteration(sim))", 80))
 
 # Output progress
 const prev_t = [0.0]
@@ -149,4 +147,4 @@ end
 simulation.callbacks[:progress] = Callback(progress, IterationInterval(50))
 
 @info simulation
-run!(simulation; pickup=true)
+run!(simulation; pickup=true, checkpoint_at_end=true)
