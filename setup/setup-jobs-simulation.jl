@@ -7,7 +7,7 @@ function check_completion(simname)
     filenames = readdir(foldername)
     !mapreduce(a->startswith(a, "checkpoint"), |, filenames) && return "$simname: Uninitialised (no checkpoint)"
     !mapreduce(a->startswith(a, "OUTPUT"), |, filenames) && return "$simname: Initialised only (no output)"
-    checkpointname = filter(a->startswith(a, "checkpoint"), filenames)[1]
+    checkpointnames = filter(a->startswith(a, "checkpoint"), filenames)
     iterations = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         keys(file["timeseries/t"])
     end
@@ -17,7 +17,7 @@ function check_completion(simname)
     sp = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         file["metadata/parameters"]
     end
-    "$simname: Run until ft = $(sp.f * ts[end]), αt = $(sp.α * ts[end]), $(iterations[end]) $checkpointname"
+    "$simname: Run until ft = $(sp.f * ts[end]), αt = $(sp.α * ts[end]), $(iterations[end]) $checkpointnames"
 end
 
 function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
@@ -47,7 +47,7 @@ function make_preamble(jobname, T)
     
     # Launch from scratch
     export JULIA_DEPOT_PATH=\$SCRATCH/julia-trig
-    export JULIA_CUDA_SOFT_MEMORY_LIMIT=10%
+    # export JULIA_CUDA_SOFT_MEMORY_LIMIT=10%
     cd ~/turbulence-at-many-fronts
     """
 end
@@ -123,6 +123,10 @@ default_ip = (;
     βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 6,
     comment = ""
 )
+# All the simulations run until wall-time is 3 hours, then checkpoint.
+# Run this file again to check for completion, then submit others
+# Let's leave some wiggle room
+T = "4:00:00"
 
 println()
 println("TEST: VARYING CENTRAL REGION SIZE")
@@ -141,7 +145,7 @@ filenames = [
     "size-test-h5",
 ]
 for (ip, filename) in zip(ips, filenames)
-    save_script(filename, "2:00:00", ip, filename; loc=path)
+    save_script(filename, T, ip, filename; loc=path)
 end
 
 println()
@@ -164,15 +168,8 @@ filenames = [
     "resolution-test-x800-z64",
     "resolution-test-x800-z32",
 ]
-Ts = [
-    "5:00:00"
-    "4:00:00"
-    "4:00:00"
-    "2:00:00"
-    "2:00:00"
-    "2:00:00"
-]
-for (T, ip, filename) in zip(Ts, ips, filenames)
+
+for (ip, filename) in zip(ips, filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
@@ -192,13 +189,7 @@ filenames = [
     "outer-test-x1000",
     "outer-test-x1100",
 ]
-Ts = [
-    "3:00:00"
-    "3:00:00"
-    "3:00:00"
-    "3:00:00"
-]
-for (T, ip, filename) in zip(Ts, ips, filenames)
+for (ip, filename) in zip(ips, filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
@@ -243,24 +234,8 @@ destfilenamess = map(ips) do ip
         make_filename(ip; θτ=θτ_from_str(ip), βα=0.05)
     ]
 end
-Ts = [
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-    "04:00:00",
-]
-for (T, ip, filename, copy_to) in zip(Ts, ips, filenames, destfilenamess)
+
+for (ip, filename, copy_to) in zip(ips, filenames, destfilenamess)
     save_script(filename, T, ip, filename; loc=path, copy_to)
 end
 
