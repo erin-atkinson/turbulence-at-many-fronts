@@ -1,3 +1,17 @@
+function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
+    strs = map([βH, βα, βB, βτ, θτ]) do β
+        replace(string(β), "."=>"_")
+    end
+    ext = ext == nothing ? "" : ".$ext"
+    return joinpath(pre, join(strs, "-") * ext)
+end
+
+function θτ_from_str(ip)
+    ip.βτ == 0 && return "C"
+    ip.θτ == 0 && return "N"
+    ip.θτ == π/2 && return "E"
+end
+
 function make_preamble(jobname, scriptname, T)
     """
     #!/bin/bash
@@ -45,54 +59,38 @@ function save_script(jobname, foldernames, scriptname, T; loc="")
     return nothing
 end
 
-foldernames = [
-    "size-test-h2",
-    "size-test-h3",
-    "size-test-h4",
-    "size-test-h5"
+include("ensemble.jl")
+
+save_script("size-test-DFM", size_test.filenames, "DFM", "0:30:00"; loc="jobs-analysis")
+save_script("resolution-test-DFM", resolution_test.filenames, "DFM", "0:30:00"; loc="jobs-analysis")
+save_script("outer-test-DFM", outer_test.filenames, "DFM", "0:30:00"; loc="jobs-analysis")
+
+save_script("cooling-depth-init-DFM", cooling_depth_init.filenames, "DFM", "0:45:00"; loc="jobs-analysis")
+save_script("cooling-depth-init-TKE", cooling_depth_init.filenames, "TKE", "0:45:00"; loc="jobs-analysis")
+save_script("cooling-depth-init-TKE-L", cooling_depth_init.filenames, "TKE-L", "0:45:00"; loc="jobs-analysis")
+
+setnames = [
+    "cooling-depth-0_1",
+    "cooling-depth-0_2",
+    "cooling-depth-0_05",
+    "cooling-only",
+    "depth-only",
 ]
 
-save_script("size-test-DFM", foldernames, "DFM", "0:30:00"; loc="jobs-analysis")
-
-foldernames = [
-    "resolution-test-x1400-z96",
-    "resolution-test-x1400-z64",
-    "resolution-test-x1024-z96",
-    "resolution-test-x1024-z32",
-    "resolution-test-x800-z64",
-    "resolution-test-x800-z32",
+sets = [
+    cooling_depth_01,
+    cooling_depth_02,
+    cooling_depth_005,
+    cooling_only,
+    depth_only,
 ]
-save_script("resolution-test-DFM", foldernames, "DFM", "0:30:00"; loc="jobs-analysis")
 
-foldernames = [
-    "outer-test-x800",
-    "outer-test-x900",
-    "outer-test-x1000",
-    "outer-test-x1100",
-]
-save_script("outer-test-DFM", foldernames, "DFM", "0:30:00"; loc="jobs-analysis")
-
-ips = [
-    (; default_ip..., Nz=39, βH=0.06, βB=0.01, run_time=4.3e5, start_time=-4.3e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.03, run_time=3e5, start_time=-3e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.05, run_time=2.5e5, start_time=-2.5e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.1, run_time=2e5, start_time=-2e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.2, run_time=1.6e5, start_time=-1.6e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.01, run_time=6.0e5, start_time=-6.0e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.03, run_time=4.2e5, start_time=-4.2e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.05, run_time=3.5e5, start_time=-3.5e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.1, run_time=2.8e5, start_time=-2.8e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.2, run_time=2.2e5, start_time=-2.2e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.01, run_time=7.5e5, start_time=-7.5e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.03, run_time=5.2e5, start_time=-5.2e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.05, run_time=4.4e5, start_time=-4.4e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.1, run_time=3.5e5, start_time=-3.5e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.2, run_time=2.8e5, start_time=-2.8e5),
-]
-foldernames = map(ips) do ip
-    make_filename(ip; θτ=θτ_from_str(ip), βα="init")
+map(sets, setnames) do set, setname
+    save_script("$setname-DFM", set.filenames, "DFM", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-COARSE", set.filenames, "COARSE", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-TKE", set.filenames, "TKE", "2:30:00"; loc="jobs-analysis")
+    save_script("$setname-TKE-L", set.filenames, "TKE-L", "2:30:00"; loc="jobs-analysis")
+    save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
+    save_script("$setname-PV-L", set.filenames, "PV-L", "2:30:00"; loc="jobs-analysis")
+    save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
 end
-save_script("cooling-depth-init-DFM", foldernames, "DFM", "0:45:00"; loc="jobs-analysis")
-save_script("cooling-depth-init-TKE", foldernames, "TKE", "0:45:00"; loc="jobs-analysis")
-save_script("cooling-depth-init-TKE-L", foldernames, "TKE-L", "0:45:00"; loc="jobs-analysis")
-

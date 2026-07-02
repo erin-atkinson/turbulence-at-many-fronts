@@ -31,7 +31,18 @@ simulation_parameters(filename::String) = jldopen(simulation_parameters, filenam
 
 @inline function variable_strain_rate(t, sp)
     turnon = max(1-exp(-sp.f * t / 15), 0)
-    return sp.α * turnon
+    sp.max_time <= 0 && return sp.α * turnon
+    
+    turnoff = max(1-exp(-sp.f * (t - sp.max_time) / 15), 0)
+    return sp.α * (turnon - turnoff)
+end
+
+@inline function velocity_profile(x, sp)
+    return -2sp.Lh * tanh(x / 2sp.Lh)
+end
+
+@inline function strain_profile(x, sp)
+    return sech(x / 2sp.Lh)^2
 end
 
 @inline function surface_b_flux(t, sp) 
@@ -77,4 +88,5 @@ include("timeseries_of.jl")
 include("time_average_of.jl")
 include("front_width.jl")
 include("record.jl")
+include("filenames.jl")
 # -------------------------------------------------------------

@@ -17,11 +17,14 @@ dependency_fields = mean_fields
 σz = coarse_σz
 
 # Coarse-grained fields
-u_coarse = Field(Coarse(u_dfm, Gaussian(grid, σx, 1.0, σz)))
-v_coarse = Field(Coarse(v_dfm, Gaussian(grid, σx, 1.0, σz)))
-w_coarse = Field(Coarse(w_dfm, Gaussian(grid, σx, 1.0, σz)))
-b_coarse = Field(Coarse(b_dfm, Gaussian(grid, σx, 1.0, σz)))
-coarse = (; u_coarse, v_coarse, w_coarse, b_coarse)
+kernel = Gaussian(grid, σx, 0, σz)
+u_coarse = Field(Coarse(u_dfm, kernel))
+v_coarse = Field(Coarse(v_dfm, kernel))
+w_coarse = Field(Coarse(w_dfm, kernel))
+b_coarse = Field(Coarse(b_dfm, kernel))
+
+ψ_coarse = Field(CumulativeIntegral(-u_coarse; dims=3))
+coarse = (; u_coarse, v_coarse, w_coarse, b_coarse, ψ_coarse)
 dependency_fields = merge(dependency_fields, coarse)
 @info coarse
 

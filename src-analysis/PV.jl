@@ -9,8 +9,6 @@ include("terms/pv/q.jl")
 include("terms/pv/Jx.jl")
 include("terms/pv/Jz.jl")
 
-frames = frames[1:10:end]
-
 # Average
 @info "Down-front averaged fields"
 u_dfm = dfm(input_fields.u)
@@ -31,7 +29,7 @@ dependency_fields = mean_fields
 
 # Coarse-grained fields
 @info "Coarse-grained fields"
-kernel = Gaussian(grid, σx, 1.0, σz)
+kernel = Gaussian(grid, σx, 0, σz)
 u_coarse = Field(Coarse(u_dfm, kernel))
 v_coarse = Field(Coarse(v_dfm, kernel))
 w_coarse = Field(Coarse(w_dfm, kernel))

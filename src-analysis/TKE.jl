@@ -10,7 +10,7 @@ include("terms/energy/dsp.jl")
 include("terms/energy/lsp.jl")
 include("terms/energy/vsp.jl")
 
-frames = frames[1:10:end]
+#frames = frames[1:10:end]
 
 # Average
 @info "Down-front averaged fields"
@@ -33,7 +33,7 @@ dependency_fields = mean_fields
 
 # Coarse-grained fields
 @info "Coarse-grained fields"
-kernel = Gaussian(grid, σx, 1.0, σz)
+kernel = Gaussian(grid, σx, 0, σz)
 u_coarse = Field(Coarse(u_dfm, kernel))
 v_coarse = Field(Coarse(v_dfm, kernel))
 w_coarse = Field(Coarse(w_dfm, kernel))

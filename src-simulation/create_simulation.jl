@@ -80,7 +80,7 @@ prev_iteration = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
     jldopen(file->file[str].iteration, checkpoint_path)
 end
 
-simulation = Simulation(model; Δt, stop_time=sp.run_time, wall_time_limit=3 * 3600)
+simulation = Simulation(model; Δt, stop_time=sp.run_time + prev_time, wall_time_limit=3 * 3600)
 
 # Save pressure anomaly and velocities and tracers
 u, v, w = model.velocities

@@ -114,37 +114,18 @@ function save_script(jobname, T, ip, filename; loc="", copy_to=[])
     return nothing
 end
 
-default_ip = (;
-    run_time = 8e5, start_time = -2e5, save_time = 3e3, max_time = -1.0,
-    f = 1e-4, L = 1e3,
-    βx = 20, βh = 3,
-    Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
-    βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 6,
-    comment = ""
-)
+include("ensemble.jl")
+
 # All the simulations run until wall-time is 3 hours, then checkpoint.
 # Run this file again to check for completion, then submit others
-# Let's leave some wiggle room
 T = "4:00:00"
 
 println()
 println("TEST: VARYING CENTRAL REGION SIZE")
 path = "jobs-simulation/size-test"
 mkpath(path)
-ips = [
-    (; default_ip..., βh=2, save_time=1e4, comment="Central region size test 2"),
-    (; default_ip..., βh=3, save_time=1e4, comment="Central region size test 3"),
-    (; default_ip..., βh=4, save_time=1e4, comment="Central region size test 4"),
-    (; default_ip..., βh=5, save_time=1e4, comment="Central region size test 5"),
-]
-filenames = [
-    "size-test-h2",
-    "size-test-h3",
-    "size-test-h4",
-    "size-test-h5",
-]
-for (ip, filename) in zip(ips, filenames)
+
+for (ip, filename) in zip(size_test.ips, size_test.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
@@ -152,24 +133,8 @@ println()
 println("TEST: VARYING RESOLUTION")
 path = "jobs-simulation/resolution-test"
 mkpath(path)
-ips = [
-    (; default_ip..., save_time=1e4, βh = 4, Nx=1400, Nh=1024, Nz=96, comment="Resolution test x1400 z96"),
-    (; default_ip..., save_time=1e4, βh = 4, Nx=1400, Nh=1024, Nz=64, comment="Resolution test x1400 z64"),
-    (; default_ip..., save_time=1e4, βh = 4, Nx=1024, Nh=768, Nz=96, comment="Resolution test x1024 z96"),
-    (; default_ip..., save_time=1e4, βh = 4, Nx=1024, Nh=768, Nz=32, comment="Resolution test x1024 z32"),
-    (; default_ip..., save_time=1e4, βh = 4, Nx=800, Nh=600, Nz=64, comment="Resolution test x800 z64"),
-    (; default_ip..., save_time=1e4, βh = 4, Nx=800, Nh=600, Nz=32, comment="Resolution test x800 z32"),
-]
-filenames = [
-    "resolution-test-x1400-z96",
-    "resolution-test-x1400-z64",
-    "resolution-test-x1024-z96",
-    "resolution-test-x1024-z32",
-    "resolution-test-x800-z64",
-    "resolution-test-x800-z32",
-]
 
-for (ip, filename) in zip(ips, filenames)
+for (ip, filename) in zip(resolution_test.ips, resolution_test.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
@@ -177,65 +142,15 @@ println()
 println("TEST: VARYING OUTER REGION RESOLUION")
 path = "jobs-simulation/outer-test"
 mkpath(path)
-ips = [
-    (; default_ip..., save_time=1e4, βh = 3, Nx=800, Nh=700, Nz=64, comment="Outer test x800"),
-    (; default_ip..., save_time=1e4, βh = 3, Nx=900, Nh=700, Nz=64, comment="Outer test x900"),
-    (; default_ip..., save_time=1e4, βh = 3, Nx=1000, Nh=700, Nz=64, comment="Outer test x1000"),
-    (; default_ip..., save_time=1e4, βh = 3, Nx=1100, Nh=700, Nz=64, comment="Outer test x1100"),
-]
-filenames = [
-    "outer-test-x800",
-    "outer-test-x900",
-    "outer-test-x1000",
-    "outer-test-x1100",
-]
-for (ip, filename) in zip(ips, filenames)
+
+for (ip, filename) in zip(outer_test.ips, outer_test.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
 println()
 println("VARYING COOLING AND DEPTH: INITIALISATION")
-default_ip = (;
-    run_time = 8e5, start_time = -2e5, save_time = 1e4, max_time = -1.0,
-    f = 1e-4, L = 1e3,
-    βx = 20, βh = 3,
-    Nx = 1400, Nh = 1024, Ny = 128, Nz = 64,
-    βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 6,
-    comment = "Cooling, depth initialisation"
-)
 
-path = "jobs-simulation/cooling-depth-init"
-mkpath(path)
-ips = [
-    (; default_ip..., Nz=39, βH=0.06, βB=0.01, run_time=4.3e5, start_time=-4.3e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.03, run_time=3e5, start_time=-3e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.05, run_time=2.5e5, start_time=-2.5e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.1, run_time=2e5, start_time=-2e5),
-    (; default_ip..., Nz=39, βH=0.06, βB=0.2, run_time=1.6e5, start_time=-1.6e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.01, run_time=6.0e5, start_time=-6.0e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.03, run_time=4.2e5, start_time=-4.2e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.05, run_time=3.5e5, start_time=-3.5e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.1, run_time=2.8e5, start_time=-2.8e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.2, run_time=2.2e5, start_time=-2.2e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.01, run_time=7.5e5, start_time=-7.5e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.03, run_time=5.2e5, start_time=-5.2e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.05, run_time=4.4e5, start_time=-4.4e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.1, run_time=3.5e5, start_time=-3.5e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.2, run_time=2.8e5, start_time=-2.8e5),
-]
-filenames = map(ips) do ip
-    make_filename(ip; θτ=θτ_from_str(ip), βα="init")
-end
-destfilenamess = map(ips) do ip
-    [
-        make_filename(ip; θτ=θτ_from_str(ip), βα=0.1), 
-        make_filename(ip; θτ=θτ_from_str(ip), βα=0.2), 
-        make_filename(ip; θτ=θτ_from_str(ip), βα=0.05)
-    ]
-end
-
-for (ip, filename, copy_to) in zip(ips, filenames, destfilenamess)
+for (ip, filename, copy_to) in zip(cooling_depth_init.ips, cooling_depth_init.filenames, cooling_depth_init.destfilenamess)
     save_script(filename, T, ip, filename; loc=path, copy_to)
 end
 
@@ -243,16 +158,30 @@ println()
 println("VARYING COOLING, DEPTH AND STRAIN")
 path = "jobs-simulation/cooling-depth"
 mkpath(path)
-# Run with βα = 0.1
-ips = map(ips) do ip
-    (; ip..., run_time=5e5, βα=0.1, save_time=3e3)
+
+println("01")
+for (ip, filename) in zip(cooling_depth_01.ips, cooling_depth_01.filenames)
+    save_script(filename, T, ip, filename; loc=path)
 end
 
-# Varying strain rate for two cooling rates
-for (T, ip, destfilenames) in zip(Ts, ips, destfilenamess)
-    save_script(destfilenames[1], "04:00:00", (; ip..., βα=0.1, run_time=10e5), destfilenames[1]; loc=path)
-    save_script(destfilenames[2], "04:00:00", (; ip..., βα=0.2, run_time=5e5), destfilenames[2]; loc=path)
-    save_script(destfilenames[3], "04:00:00", (; ip..., βα=0.05, run_time=20e5), destfilenames[3]; loc=path)
+println("02")
+for (ip, filename) in zip(cooling_depth_02.ips, cooling_depth_02.filenames)
+    save_script(filename, T, ip, filename; loc=path)
+end
+
+println("005")
+for (ip, filename) in zip(cooling_depth_005.ips, cooling_depth_005.filenames)
+    save_script(filename, T, ip, filename; loc=path)
+end
+
+println("Cooling only")
+for (ip, filename) in zip(cooling_only.ips, cooling_only.filenames)
+    save_script(filename, T, ip, filename; loc=path)
+end
+
+println("Depth only")
+for (ip, filename) in zip(depth_only.ips, depth_only.filenames)
+    save_script(filename, T, ip, filename; loc=path)
 end
 
 # Varying along-front winds

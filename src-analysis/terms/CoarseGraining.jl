@@ -43,32 +43,8 @@ function coarse_grain(i, j, k, grid, ℓx, ℓy, ℓz, kernel, field)
     res = 0.0
     weights = 0.0
 
-    for di in -wx:wx
-        _i, _j, _k = i + di, j, k
-        
-        !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
-        (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
-        
-        weight = kernel_func(kernel, dx, dy, dz)
-        
-        res += @inbounds field[_i, _j, _k] * weight
-        weights += weight
-    end
-
-    for dj in -wy:wy
-        _i, _j, _k = i, j + dj, k
-        
-        !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
-        (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
-        
-        weight = kernel_func(kernel, dx, dy, dz)
-        
-        res += @inbounds field[_i, _j, _k] * weight
-        weights += weight
-    end
-
-    for dk in -wz:wz
-        _i, _j, _k = i, j, k + dk
+    for di in -wx:wx, dj in -wy:wy, dk in -wz:wz
+        _i, _j, _k = i + di, j + dj, k + dk
         
         !ingrid(_i, _j, _k, grid, ℓx, ℓy, ℓz) && continue
         (dx, dy, dz) = node(_i, _j, _k, grid, ℓx, ℓy, ℓz) .- (x, y, z)
@@ -109,11 +85,18 @@ struct Gaussian{G, S, I} <: AbstractKernel
 end
 
 function Gaussian(grid, σx, σy, σz)
-    wx = Integer((5 * σx) ÷ minimum_xspacing(grid))
-    wy = Integer((5 * σy) ÷ minimum_yspacing(grid))
-    wz = Integer((5 * σz) ÷ minimum_zspacing(grid))
+    wx = σx == 0 ? 0 : Integer((5 * σx) ÷ minimum_xspacing(grid))
+    wy = σy == 0 ? 0 : Integer((5 * σy) ÷ minimum_yspacing(grid))
+    wz = σz == 0 ? 0 : Integer((5 * σz) ÷ minimum_zspacing(grid))
 
+    σx, σy, σz = promote(σx, σy, σz)
     return Gaussian(grid, σx, σy, σz, wx, wy, wz)
 end
 
-@inline kernel_func(kernel::Gaussian, dx, dy, dz) = exp(-dx^2 / 2kernel.σx^2) * exp(-dy^2 / 2kernel.σy^2) * exp(-dz^2 / 2kernel.σz^2)
+@inline function gaussian_func(x, σ)
+    iszero(x) && return one(x)
+    iszero(σ) && return zero(x)
+    return exp(-x^2 / 2σ^2)
+end
+
+@inline kernel_func(kernel::Gaussian, dx, dy, dz) = gaussian_func(dx, kernel.σx) * gaussian_func(dy, kernel.σy) * gaussian_func(dz, kernel.σz)

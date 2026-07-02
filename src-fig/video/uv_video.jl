@@ -12,7 +12,7 @@ function uv_video(foldername, frames, filename, z;
 
     file = joinpath(foldername, coarse ? "COARSE.jld2" : "DFM.jld2")
     FILE = jldopen(file)
-    OUTPUT = jldopen(joinpath(foldername, "output.jld2"))
+    OUTPUT = jldopen(joinpath(foldername, "OUTPUT.jld2"))
 
     iterations, times = iterations_times(FILE)
     ∫αdt = normalized_time(FILE)
@@ -27,20 +27,20 @@ function uv_video(foldername, frames, filename, z;
     
     fig = Figure(; size=(1000, 540), fontsize=18)
 
-    C = @sprintf "%02.1f" :C in keys(sp) ? sp.C : sp.Ek
-    Roa = @sprintf "%02.2f" sp.Roα
+    βB = @sprintf "%02.2f" sp.βB
+    βα = @sprintf "%02.2f" sp.βα
 
     title = @lift let
         hr_val = @sprintf "%03.0f" times[$n] / 3600
         s_val = @sprintf "%03.2f" ∫αdt[$n]
-        L"(%$Roa, %$C) \quad s = %$(s_val) \quad t = %$(hr_val)\,\text{hr}"
+        L"(\beta_B = %$βB, \beta_\alpha = %$βα) \quad s = %$(s_val) \quad t = %$(hr_val)\,\text{hr}"
     end
 
     u_name = coarse ? "u_coarse" : "u_dfm"
     v_name = coarse ? "v_coarse" : "v_dfm"
     b_name = coarse ? "b_coarse" : "b_dfm"
 
-    U = @lift background .* [-100variable_strain_rate($t, sp) * x for x in xsᶠ, y in 1:1]
+    U = @lift background .* [100variable_strain_rate($t, sp) * velocity_profile(x, sp) for x in xsᶠ, y in 1:1]
 
     u = @lift get_field(FILE, u_name, $iteration) do field
         field .* 100 .+ $U
@@ -56,16 +56,14 @@ function uv_video(foldername, frames, filename, z;
         field[:, :, k] .* 100
     end
     
-    b = @lift get_field(FILE, b_name, $iteration)
+    b = @lift get_field(FILE, b_name, $iteration) do field
+        field ./ sp.Δb
+    end
     bh = @lift get_field(OUTPUT, "b", $iteration) do field
-        field[:, :, k]
+        field[:, :, k] ./ sp.Δb
     end
 
-    levels = @lift begin
-        bmin = min(minimum($b), minimum($bh))
-        bmax = max(maximum($b), maximum($bh))
-        bmin:(sp.Δb / 6):bmax
-    end
+    b_levels = -10:0.166:1
     
     ax_kw = (; 
         xlabel = L"x / \text{km}",
@@ -87,14 +85,14 @@ function uv_video(foldername, frames, filename, z;
 
     ax_u = Axis(fig[1, 1]; ax_kw...)
     ax_v = Axis(fig[2, 1]; ax_kw..., title="")
-    hidexdecorations!(ax_u)
+    hidexdecorations!(ax_u; ticks=false)
 
     axh_u = Axis(fig[1, 2]; axh_kw...)
     axh_v = Axis(fig[2, 2]; axh_kw..., title="")
-    hidexdecorations!(axh_u)
+    hidexdecorations!(axh_u; ticks=false)
     
     ct_kw = (; 
-        levels,
+        levels = b_levels,
         color = (:black, 0.5),
         ct_kw...
     )

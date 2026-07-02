@@ -82,8 +82,8 @@ end
     # MLD
     H = ip.βH * ip.L
 
-    # Deep water buoyancy frequency from deformation radius
-    N₀² = (ip.f * ip.β₀ * ip.L / H)^2
+    # Deep water buoyancy frequency ratio
+    N₀² = (ip.β₀ * ip.f)^2
 
     Ro = maximum_Ro(ip)
     V = maximum_front_velocity(ip)

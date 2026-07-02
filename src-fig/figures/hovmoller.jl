@@ -5,8 +5,9 @@ function hovmoller(
         ax_kw=(; ),
         ht_kw=(; ),
         ct_kw=(; ),
-        σ=0,
-        background=false,
+        σ = 0,
+        background = false,
+        compensate = false
     )
 
     DFM = joinpath(foldername, "DFM.jld2")
@@ -23,15 +24,19 @@ function hovmoller(
         fig_kw...
     )
 
-    U = [-variable_strain_rate(t, sp) * x for t in times, x in xsᶠ] .* background
+    U = background .* [variable_strain_rate(t, sp) * velocity_profile(x, sp) for t in times, x in xsᶠ]
     
     u = 100 * (timeseries_of(a->filt(a[:, z_indᶜ], σ), DFM, "u_dfm", iterations) .+ U)
-    b = timeseries_of(a->a[:, z_indᶜ], DFM, "b_dfm", iterations)
+    b = timeseries_of(a->a[:, z_indᶜ], DFM, "b_dfm", iterations) ./ sp.Δb
     
     u_surface = 100 * (timeseries_of(a->filt(a[:, end], σ), DFM, "u_dfm", iterations))
-    b_surface = timeseries_of(a->a[:, end], DFM, "b_dfm", iterations)
+    b_surface = timeseries_of(a->a[:, end], DFM, "b_dfm", iterations) ./ sp.Δb
 
-    b_offset = b[1:1, inds[1:1]] .- b[:, inds[1:1]]
+    b_offset = if compensate
+        b[1:1, inds[1:1]] .- b[:, inds[1:1]]
+    else
+        0
+    end
     
     b = filt(b .+ b_offset, σ)
     b_surface = filt(b_surface .+ b_offset, σ)
@@ -42,7 +47,7 @@ function hovmoller(
         xlabel=L"t/\text{hr}",
         ylabel=L"x/\text{km}",
         yticks=[-2, -1, 0, 1, 2],
-        limits=(0, 200, -sp.ℓ / 1000, sp.ℓ / 1000),
+        limits=(0, 200, -sp.Lh / 2000, sp.Lh / 2000),
         ax_kw...
     )
     ax = Axis(fig[1, 1]; ax_kw..., title=L"z=%$z~\text{m}")
@@ -61,7 +66,7 @@ function hovmoller(
     
     ct_kw = (;
         color=(:black, 0.5),
-        levels=b_levels,
+        levels=-10:0.166:1,
         ct_kw...
     )
     
