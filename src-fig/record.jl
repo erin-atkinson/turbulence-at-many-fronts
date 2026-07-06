@@ -1,4 +1,4 @@
-function prettyrecord(observable, fig, filename, frames; record_kw...)
+function prettyrecord(observable, fig, filename, frames::AbstractVector; record_kw...)
     N = length(frames)
     t0 = time()
     record(fig, filename, 1:N; record_kw...) do i
@@ -12,5 +12,9 @@ function prettyrecord(observable, fig, filename, frames; record_kw...)
         
         print(str * nl)
     end
+    return nothing
+end
+
+function prettyrecord(observable, fig, filename, frames; record_kw...)
     return nothing
 end
