@@ -93,4 +93,5 @@ map(sets, setnames) do set, setname
     save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
     save_script("$setname-PV-L", set.filenames, "PV-L", "2:30:00"; loc="jobs-analysis")
     save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-MLD", set.filenames, "MLD", "0:45:00"; loc="jobs-analysis")
 end
