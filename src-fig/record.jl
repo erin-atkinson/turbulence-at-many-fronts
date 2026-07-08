@@ -15,6 +15,7 @@ function prettyrecord(observable, fig, filename, frames::AbstractVector; record_
     return nothing
 end
 
-function prettyrecord(observable, fig, filename, frames; record_kw...)
+function prettyrecord(observable, fig, filename, frame::Integer; record_kw...)
+    observable[] = frame
     return nothing
 end

@@ -1,8 +1,6 @@
 include("terms/terms.jl")
 include("terms/advection/advection.jl")
-include("terms/bbalance/turbulence.jl")
-
-frames = 1:10:1000
+include("terms/advection/operators.jl")
 
 # Average
 u_dfm = dfm(input_fields.u)
@@ -14,75 +12,76 @@ mean_fields = (; u_dfm, v_dfm, w_dfm, b_dfm)
 dependency_fields = mean_fields
 @info mean_fields
 
-# Build weights
-const kernel_size = (40 * sp.Nh) ÷ 768
-const kernel_σ = sp.Lh / 75
+# Filter widths
+σx = coarse_σx
+σz = coarse_σz
 
-# Coarse-grained fields
-u_coarse = Field(KernelFunctionOperation{Face, Nothing, Center}(coarse_grain_variable_x, grid, Face(), kernel_size, kernel_σ, u_dfm))
-v_coarse = Field(KernelFunctionOperation{Center, Nothing, Center}(coarse_grain_variable_x, grid, Center(), kernel_size, kernel_σ, v_dfm))
-w_coarse = Field(KernelFunctionOperation{Center, Nothing, Face}(coarse_grain_variable_x, grid, Center(), kernel_size, kernel_σ, w_dfm))
-b_coarse = Field(KernelFunctionOperation{Center, Nothing, Center}(coarse_grain_variable_x, grid, Center(), kernel_size, kernel_σ, b_dfm))
-coarse = (; u_coarse, v_coarse, w_coarse, b_coarse)
-dependency_fields = merge(dependency_fields, coarse)
-@info coarse
+@info "Coarse-grained fields"
+kernel = Gaussian(grid, σx, 1.0, σz)
+u_coarse = Field(Coarse(u_dfm, kernel))
+w_coarse = Field(Coarse(w_dfm, kernel))
+b_coarse = Field(Coarse(b_dfm, kernel))
 
-# Fluxes
-ub = Field(KernelFunctionOperation{Face, Nothing, Center}(fGg, grid, u_coarse, ℑxᶠᵃᵃ, b_coarse))
-wb = Field(KernelFunctionOperation{Center, Nothing, Face}(fGg, grid, w_coarse, ℑzᵃᵃᶠ, b_coarse))
-Ub = Field(KernelFunctionOperation{Face, Nothing, Center}(fGg, grid, U, ℑxᶠᵃᵃ, b_coarse))
-fluxes = (; ub, wb, Ub)
-dependency_fields = merge(dependency_fields, fluxes)
-@info fluxes
+@info "Horizontal total flux"
+utotb = Field(UcFlux(weno, input_fields.u, input_fields.b; background=input_fields.U))
+utotb_dfm = dfm(utotb)
+utotb_coarse = Field(Coarse(utotb_dfm, kernel))
 
-# Turbulent fluxes
-ub_full = Field(KernelFunctionOperation{Face, Center, Center}(ub_func, grid, clock, input_fields, dependency_fields, sp))
-wb_full = Field(KernelFunctionOperation{Center, Center, Face}(wb_func, grid, clock, input_fields, dependency_fields, sp))
-println("Full")
+ub_total = (; utotb, utotb_dfm, utotb_coarse)
+dependency_fields = merge(dependency_fields, ub_total)
+@info ub_total
 
-ub_dfm = dfm(ub_full)
-wb_dfm = dfm(wb_full)
-println("DFM")
+@info "Vertical total flux"
+wb = Field(WcFlux(weno, input_fields.w, input_fields.b))
+wb_dfm = dfm(wb)
+wb_coarse = Field(Coarse(wb_dfm, kernel))
 
-ub_coarse = Field(KernelFunctionOperation{Face, Nothing, Center}(coarse_grain_variable_x, grid, Face(), kernel_size, kernel_σ, ub_dfm))
-wb_coarse = Field(KernelFunctionOperation{Center, Nothing, Face}(coarse_grain_variable_x, grid, Center(), kernel_size, kernel_σ, wb_dfm))
-println("Coarse")
+wb_total = (; wb, wb_dfm, wb_coarse)
+dependency_fields = merge(dependency_fields, wb_total)
+@info wb_total
 
-Fx = Field(ub_coarse - (ub + Ub))
-Fz = Field(wb_coarse - wb)
+@info "Advective fluxes due to coarse-grained fields"
+coarse_utotb = Field(UcFlux(centered, u_coarse, b_coarse; background=input_fields.U))
+coarse_ub = Field(UcFlux(centered, u_coarse, b_coarse))
+coarse_wb = Field(WcFlux(centered, w_coarse, b_coarse))
 
-turbulent_fluxes = (; ub_full, wb_full, ub_dfm, wb_dfm, ub_coarse, wb_coarse, Fx, Fz)
+coarse_adv = (; coarse_utotb, coarse_ub, coarse_wb)
+dependency_fields = merge(dependency_fields, coarse_adv)
+@info coarse_adv
+
+@info "Turbulent fluxes"
+u′b′_coarse = Field(utotb_coarse - coarse_utotb)
+w′b′_coarse = Field(wb_coarse - coarse_wb)
+
+turbulent_fluxes = (; u′b′_coarse, w′b′_coarse)
 dependency_fields = merge(dependency_fields, turbulent_fluxes)
 @info turbulent_fluxes
 
-# Gradients
-∂b∂x = Field(∂x(b_coarse)) # FNC
-∂b∂z = Field(∂z(b_coarse)) # CNF
-gradients = (; ∂b∂x, ∂b∂z)
-dependency_fields = merge(dependency_fields, gradients)
-@info gradients
+@info "Advection by the mean"
+adv_x = Field(-∂x(coarse_ub))
+adv_z = Field(-∂z(coarse_wb))
+strain = Field(-∂x(coarse_utotb - coarse_ub) + ∂x(input_fields.U) * b_coarse)
+adv = (; adv_x, adv_z, strain)
+dependency_fields = merge(dependency_fields, adv)
+@info adv
 
-# Advection by the mean
-∂ub∂x = Field(∂x(ub)) # CNC
-∂wb∂z = Field(∂z(wb)) # CNC
-U∂b∂x = Field(∂x(Ub) - ∂x(U) * b_coarse)
-mean_adv = (; ∂ub∂x, ∂wb∂z, U∂b∂x)
-dependency_fields = merge(dependency_fields, mean_adv)
-@info mean_adv
+@info "Gradients of turbulent fluxes"
+mix_x = Field(-∂x(u′b′_coarse))
+mix_z = Field(-∂z(w′b′_coarse))
+mix = (; mix_x, mix_z)
+dependency_fields = merge(dependency_fields, mix)
+@info mix
 
-# Gradients of turbulent fluxes
-∂Fx∂x = Field(∂x(Fx))
-∂Fz∂z = Field(∂z(Fz))
-turbulent_adv = (; ∂Fx∂x, ∂Fz∂z)
-dependency_fields = merge(dependency_fields, turbulent_adv)
-@info turbulent_adv
+#=
+@info "Sponge layer"
+sponge = Field(KernelFunctionOperation{Center, Center, Center}(b_forcing_func, grid, clock, input_fields.b, sp))
+sponge_dfm = dfm(sponge)
+sponge_coarse = Field(Coarse(sponge_dfm, kernel))
 
-# Diffusivity estimates
-κₕ = Field(-Fx / ∂b∂x)
-κᵥ = Field(-Fz / ∂b∂z)
-diffusivities = (; κₕ, κᵥ)
-dependency_fields = merge(dependency_fields, diffusivities)
-@info diffusivities
+sponge_layer = (; sponge, sponge_dfm, sponge_coarse)
+dependency_fields = merge(dependency_fields, sponge_layer)
+@info sponge_layer
+=#
 
-output_fields = merge(mean_adv, turbulent_adv, diffusivities)
+output_fields = merge(adv, mix, (; coarse_ub, u′b′_coarse, coarse_wb, w′b′_coarse))
 skip_update = (:pNHS, :u_next, :v_next, :w_next, :b_next, :pNHS_next)

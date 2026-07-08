@@ -33,12 +33,17 @@ dependency_fields = merge(dependency_fields, coarse_fields)
 @info "MLD averaged"
 ε = sp.Δb/6
 mld = Field(MLD(b_coarse, ε))
+constant_mld = Field(ConstantMLD(b_coarse, ε))
 
 u_coarse_mld = Field(ML_Average(u_coarse, mld))
 v_coarse_mld = Field(ML_Average(v_coarse, mld))
 b_coarse_mld = Field(ML_Average(b_coarse, mld))
 
-mld_fields = (; mld, u_coarse_mld, v_coarse_mld, b_coarse_mld)
+u_coarse_constant_mld = Field(ML_Average(u_coarse, constant_mld))
+v_coarse_constant_mld = Field(ML_Average(v_coarse, constant_mld))
+b_coarse_constant_mld = Field(ML_Average(b_coarse, constant_mld))
+
+mld_fields = (; mld, constant_mld, u_coarse_mld, v_coarse_mld, b_coarse_mld, u_coarse_constant_mld, v_coarse_constant_mld, b_coarse_constant_mld)
 dependency_fields = merge(dependency_fields, mld_fields)
 @info mld_fields
 

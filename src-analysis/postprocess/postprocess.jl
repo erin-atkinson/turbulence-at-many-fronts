@@ -122,10 +122,10 @@ for (i, frame) in enumerate(frames)
 
     # Update clock
     update_clock!(clock, iterations, times, frame)
-
+    
     # Update inputs
     update_fields!(input_fields, fds, clock, frame; skip_update)
-
+    
     for field in dependency_fields
         compute_at!(field, t)
     end

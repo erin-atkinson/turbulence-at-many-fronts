@@ -43,72 +43,23 @@ end
 locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
 end
-#=
-# Faster to assume that the kernel is separable and normalized
-@inline function coarse_grain_x(i, j, k, grid, weights, f::F, args...) where {F <: Function}
-    res = 0
-    for d in axes(weights, 1)
-        w = @inbounds weights[d]
-        ind =  min(max(i+d - size(weights, 1) ÷ 2, 1), grid.Nx)
-        res += f(ind, j, k, grid, args...) * w
-    end
 
-    return res
+# Quadratic damping mask
+@inline function sponge_layer_func(x, y, z, sp)
+    s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
+    return (1 - abs(s))^2
 end
 
-@inline function coarse_grain_y(i, j, k, grid, weights, f::F, args...) where {F <: Function}
-    res = 0
-    for d in axes(weights, 1)
-        w = @inbounds weights[d]
-        ind =  min(max(j+d - size(weights, 1) ÷ 2, 1), grid.Ny)
-        res += f(i, ind, k, grid, args...) * w
-    end
+# Damp b towards the bottom value
+@inline function b_forcing_func(i, j, k, grid, clock, b, sp)
+    (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
+    (z_bottom, ) = node(i, j, 1, grid, Nothing(), Nothing(), Center())
 
-    return res
+    b = @inbounds b[i, j, k]
+    tb = @inbounds b[i, j, 1] + sp.N₀² * (z - z_bottom)
+    
+    return sp.σ * min(tb - b, 0) * sponge_layer_func(x, y, z, sp)
 end
-
-@inline function coarse_grain_z(i, j, k, grid, weights, f::F, args...) where {F <: Function}
-    res = 0
-    for d in axes(weights, 1)
-        w = @inbounds weights[d]
-        ind =  min(max(k+d - size(weights, 1) ÷ 2, 1), grid.Nz)
-        res += f(i, j, ind, grid, args...) * w
-    end
-
-    return res
-end
-
-@inline identityc(i, j, k, grid, field) = @inbounds field[i, j, k]
-@inline coarse_grain_x(i, j, k, grid, weights, field) = coarse_grain_x(i, j, k, grid, weights, identityc, field)
-@inline coarse_grain_y(i, j, k, grid, weights, field) = coarse_grain_y(i, j, k, grid, weights, identityc, field)
-@inline coarse_grain_z(i, j, k, grid, weights, field) = coarse_grain_z(i, j, k, grid, weights, identityc, field)
-
-@inline function coarse_grain_variable_x(i, j, k, grid, Lx, kernel_size, σ, args...)
-    weights = gaussian_weights_x(i, j, k, grid, Lx, kernel_size, σ)
-    return coarse_grain_x(i, j, k, grid, weights, args...)
-end
-
-# 1D array of normalized weights
-@inline function gaussian_weights(Δx, σ)
-    weights = map(Δx) do x
-        exp(-x^2 / 2σ^2)
-    end
-    return weights ./ sum(weights)
-end
-
-# 1D array of normalized weights
-@inline function gaussian_weights_x(i, j, k, grid, Lx, kernel_size, σ)
-    x, = node(i, j, k, grid, Lx, Nothing(), Nothing())
-
-    Δx = map(-kernel_size:kernel_size) do di
-        i2 = min(max(i+di, 1), grid.Nx)
-        x1, = node(i2, j, k, grid, Lx, Nothing(), Nothing())
-        x1 - x
-    end
-
-    return gaussian_weights(Δx, σ)
-end
-=#
 
 include("strainflow.jl")
 include("CoarseGraining.jl")

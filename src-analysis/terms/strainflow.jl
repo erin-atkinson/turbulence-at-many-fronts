@@ -35,8 +35,6 @@ velocity_profile_array.data.parent[:, 1, 1] .= velocity_profile.(grid.xᶠᵃᵃ
 @inline function compute_background!(U, V, W, clock)
     t = clock.time
     α = variable_strain_rate(t)
-    
     U.data.parent .= α .* velocity_profile_array.data.parent
-    
     return nothing
 end
