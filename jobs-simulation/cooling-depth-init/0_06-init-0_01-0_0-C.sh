@@ -14,7 +14,7 @@ cd ~/turbulence-at-many-fronts
 
 output_folder=$SCRATCH/turbulence-at-many-fronts/0_06-init-0_01-0_0-C
 
-run_time=430000.0
+stop_time=0.0
 start_time=-430000.0
 max_time=-1.0
 save_time=10000.0
@@ -41,7 +41,7 @@ beta0=60
 
 comment="Cooling, depth initialisation"
 
-julia -t 8 -- src-simulation/simulation.jl $output_folder $run_time $start_time $max_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betal $betaH $betaalpha $betaB $betatau $thetatau $beta0 $comment
+julia -t 8 -- src-simulation/simulation.jl $output_folder $stop_time $start_time $max_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betal $betaH $betaalpha $betaB $betatau $thetatau $beta0 $comment
 
 mkdir $output_folder/../0_06-0_1-0_01-0_0-C
 cp $output_folder/checkpoint* $output_folder/../0_06-0_1-0_01-0_0-C

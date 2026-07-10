@@ -1,13 +1,24 @@
 using JLD2
+using Oceananigans.TimeSteppers: Clock
 
 function check_completion(simname)
     foldername = "../scratch/turbulence-at-many-fronts/$simname"
     
     !isdir(foldername) && return "$simname: Uninitialised (no folder)"
     filenames = readdir(foldername)
-    !mapreduce(a->startswith(a, "checkpoint"), |, filenames) && return "$simname: Uninitialised (no checkpoint)"
-    !mapreduce(a->startswith(a, "OUTPUT"), |, filenames) && return "$simname: Initialised only (no output)"
+    !mapreduce(a->startswith(a, "checkpoint"), |, filenames; init=false) && return "$simname: Uninitialised (no checkpoint)"
+    
     checkpointnames = filter(a->startswith(a, "checkpoint"), filenames)
+    prev_time = mapreduce(max, checkpointnames; init=-Inf) do checkpoint_file
+        str = "simulation/model/clock"
+        checkpoint_path = joinpath(foldername, checkpoint_file)
+        
+        jldopen(file->file[str].time, checkpoint_path)
+    end
+    prev_time < 0 && return "$simname: Uninitialised (no checkpoint at t=0)"
+    
+    !mapreduce(a->startswith(a, "OUTPUT"), |, filenames) && return "$simname: Initialised only (no output)"
+    
     iterations = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         keys(file["timeseries/t"])
     end
@@ -57,7 +68,7 @@ function make_body(ip, filename)
     
     output_folder=\$SCRATCH/turbulence-at-many-fronts/$filename
 
-    run_time=$(ip.run_time)
+    stop_time=$(ip.stop_time)
     start_time=$(ip.start_time)
     max_time=$(ip.max_time)
     save_time=$(ip.save_time)
@@ -84,7 +95,7 @@ function make_body(ip, filename)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$run_time \$start_time \$max_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$comment
+    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$start_time \$max_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$comment
     """
 end
 
@@ -149,6 +160,8 @@ end
 
 println()
 println("VARYING COOLING AND DEPTH: INITIALISATION")
+path = "jobs-simulation/cooling-depth-init"
+mkpath(path)
 
 for (ip, filename, copy_to) in zip(cooling_depth_init.ips, cooling_depth_init.filenames, cooling_depth_init.destfilenamess)
     save_script(filename, T, ip, filename; loc=path, copy_to)

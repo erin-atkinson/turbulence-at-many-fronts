@@ -51,7 +51,7 @@ frames = 1:length(iterations)
 
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => fds[k][1] for k in fieldnames)
-nextrawfields = NamedTuple(Symbol(k, :_next) => fds[k][2] for k in fieldnames)
+nextrawfields = NamedTuple(Symbol(k, :_next) => fds[k][2] for k in (:u, :v, :w, :b))
 
 # Setup background strain
 include("../terms/strainflow.jl")

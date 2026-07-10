@@ -14,7 +14,7 @@ cd ~/turbulence-at-many-fronts
 
 output_folder=$SCRATCH/turbulence-at-many-fronts/resolution-test-x1024-z32
 
-run_time=800000.0
+stop_time=1.0e6
 start_time=-200000.0
 max_time=-1.0
 save_time=10000.0
@@ -41,4 +41,4 @@ beta0=6
 
 comment="Resolution test x1024 z32"
 
-julia -t 8 -- src-simulation/simulation.jl $output_folder $run_time $start_time $max_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betal $betaH $betaalpha $betaB $betatau $thetatau $beta0 $comment
+julia -t 8 -- src-simulation/simulation.jl $output_folder $stop_time $start_time $max_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betal $betaH $betaalpha $betaB $betatau $thetatau $beta0 $comment

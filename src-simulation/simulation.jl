@@ -7,7 +7,7 @@
     ARGS is a set of input arguments:
         [01]: Path to output folder
 
-        [02]: Simulation run time in seconds
+        [02]: Simulation stop time in seconds
         [03]: Start time of simulation (negative for a cooling pre-initialisation)
         [04]
         [05]: Save interval
@@ -42,7 +42,7 @@ output_folder = ARGS[1]
 simulation_parameters = let
 
     # Simulation times
-    run_time = parse(Float64, ARGS[2])
+    stop_time = parse(Float64, ARGS[2])
     start_time = parse(Float64, ARGS[3])
     max_time = parse(Float64, ARGS[4])
     save_time = parse(Float64, ARGS[5])
@@ -77,7 +77,7 @@ simulation_parameters = let
     comment = join(ARGS[21:end], " ")
     
     (;
-        run_time, start_time, save_time, max_time,
+        stop_time, start_time, save_time, max_time,
         f, L,
         βx, βh,
         Nx, Nh, Ny, Nz,

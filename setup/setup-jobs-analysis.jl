@@ -82,7 +82,7 @@ sets = [
     cooling_depth_02,
     cooling_depth_005,
     cooling_only,
-    depth_only,
+    depth_only
 ]
 
 map(sets, setnames) do set, setname

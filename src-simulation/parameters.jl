@@ -1,7 +1,7 @@
 # parameters.jl
 
 default_inputs = (;
-    run_time = 8e5, start_time = -4e5, save_time = 1e3,
+    stop_time = 100e4, start_time = -40e4, save_time = 1e4,
     f = 1e-4, L = 1e3,
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,

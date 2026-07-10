@@ -52,7 +52,8 @@ model = NonhydrostaticModel(grid;
     closure,
     buoyancy = BuoyancyTracer(),
     forcing,
-    boundary_conditions
+    boundary_conditions,
+    hydrostatic_pressure_anomaly = CenterField(grid)
 )
 
 @info model
@@ -80,36 +81,23 @@ prev_iteration = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
     jldopen(file->file[str].iteration, checkpoint_path)
 end
 
-simulation = Simulation(model; Δt, stop_time=sp.run_time + prev_time, wall_time_limit=3 * 3600)
+simulation = Simulation(model; Δt, stop_time=sp.stop_time, wall_time_limit=3 * 3600)
 
-# Save pressure anomaly and velocities and tracers
-u, v, w = model.velocities
-b = model.tracers.b
-pNHS = model.pressures.pNHS
+include("time_average_output.jl")
+#=
+function init_checkpoint(simulation, output_folder)
+    !(time(simulation) ≈ 0.0) && return nothing
+    parent_path, run_id = splitdir(output_folder)
+    println("Checkpointing initialization")
+    init_path = joinpath(parent_path, "initialized")
+    mkpath(init_path)
+    
+    Oceananigans.OutputWriters.checkpoint(simulation; filepath=joinpath(init_path, "$run_id.jld2"))
+    return nothing
+end
 
-# Need to define a new outputwriter as save_time may change
-writing_times_pos = filter(t-> t >= prev_time, 0:sp.save_time:sp.run_time)
-writing_times_neg = filter(t-> t > prev_time, sp.start_time:sp.save_time:0)
-writing_times = [writing_times_neg; writing_times_pos]
-
-output_symbol = Symbol(:fields, prev_iteration)
-
-simulation.output_writers[output_symbol] = JLD2Writer(model, (; u, v, w, b, pNHS); 
-    filename="$output_folder/OUTPUT.jld2", 
-    schedule=SpecifiedTimes(writing_times),
-    overwrite_existing=false,
-    with_halos=true,
-    init=init_jld2!
-)
-
-simulation.output_writers[:checkpointer] = Checkpointer(model;
-    schedule=SpecifiedTimes(writing_times[end]),
-    dir=output_folder,
-    cleanup=true,
-    overwrite_existing=false,
-    verbose=true
-)
-
+simulation.callbacks[:init_checkpoint] = Callback(init_checkpoint, SpecifiedTimes([0.0]); parameters=output_folder)
+=#
 # Variable time step
 wizard = TimeStepWizard(; cfl=0.5, max_Δt=5e-2/sp.f)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
