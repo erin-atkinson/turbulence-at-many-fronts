@@ -83,7 +83,7 @@ function ke_func(i, j, k, grid, u, v, w)
     v² = ℑyᵃᶜᵃ(i, j, k, grid, v)^2
     w² = ℑzᵃᵃᶜ(i, j, k, grid, w)^2
 
-    return u² + v² + w²
+    return (u² + v² + w²) / 2
 end
 
 uu = KernelFunctionOperation{Center, Center, Center}(uu_func, grid, advection, u, U)
