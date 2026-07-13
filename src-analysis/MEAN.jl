@@ -1,7 +1,7 @@
 # Get mean state using an along-front average
 include("terms/terms.jl")
 
-fields = (:u, :v, :w, :b, :p, :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww)
+fields = (:u, :v, :w, :b, :p, :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww, :ub, :vb, :wb)
 
 for ξ in fields
     ξ_bar = Symbol(ξ, :_bar)
