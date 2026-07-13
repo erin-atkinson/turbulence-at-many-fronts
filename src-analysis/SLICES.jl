@@ -2,10 +2,11 @@ using Oceananigans: location
 include("terms/slices.jl")
 
 # x, y, z slices of the model fields
+fields = (:u, :v, :w, :b)
 dependency_fields = NamedTuple()
 
 # x = Lh/2, x = -Lh/2
-for ξ in (:u, :v, :w, :b)
+for ξ in fields
     left_ξ = Symbol(:left_, ξ)
     right_ξ = Symbol(:right_, ξ)
     @info "Slices $left_ξ and $right_ξ"
@@ -22,7 +23,7 @@ for ξ in (:u, :v, :w, :b)
 end
 
 # y = 0
-for ξ in (:u, :v, :w, :b)
+for ξ in fields
     center_ξ = Symbol(:center_, ξ)
     @info "Slices $center_ξ"
 
@@ -38,7 +39,7 @@ for ξ in (:u, :v, :w, :b)
 end
 
 # z = -0.05H, -0.25H, -0.5H, -0.75H, -0.95H
-for ξ in (:u, :v, :w, :b)
+for ξ in fields
     z005_ξ = Symbol(:z005_, ξ)
     z025_ξ = Symbol(:z025_, ξ)
     z050_ξ = Symbol(:z050_, ξ)
@@ -60,6 +61,5 @@ for ξ in (:u, :v, :w, :b)
     end
 end
 
-skip_update = (:pNHS, :u_next, :v_next, :w_next, :b_next, :pNHS_next)
-
+skip_update = filter(a->a ∉ fields, keys(input_fields))
 output_fields = dependency_fields
