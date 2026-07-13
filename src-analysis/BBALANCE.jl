@@ -12,14 +12,16 @@ for ξ in fields
     end
 end
 
+loc = (Center(), Nothing(), Center())
+
 flux_density_x = Field(UcFlux(centered, u_bar, b_bar))
 flux_density_background = Field(UcFlux(centered, input_fields.U, b_bar))
 flux_density_z = Field(WcFlux(centered, w_bar, b_bar))
 flux_density = (; flux_density_x, flux_density_background, flux_density_z)
 
-advection_x = Field(@at (Center(), Center(), Center()) -u_bar * ∂x(b_bar))
-advection_background = Field(@at (Center(), Center(), Center()) -input_fields.U * ∂x(b_bar))
-advection_z = Field(@at (Center(), Center(), Center()) -w_bar * ∂z(b_bar))
+advection_x = Field(@at loc -u_bar * ∂x(b_bar))
+advection_background = Field(@at loc -input_fields.U * ∂x(b_bar))
+advection_z = Field(@at loc -w_bar * ∂z(b_bar))
 advection = (; advection_x, advection_background, advection_z)
 
 turbulent_flux_density_x = Field(ub_bar - flux_density_x - flux_density_background)
