@@ -10,8 +10,16 @@ using Printf
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
-const b_step = 0.00004
-const b_levels = -0.002:0.00004:0.0004
+# Constants used for plotting 
+
+# Labels
+const u_bar_label = L"\overline{u} / \text{cm}\,\text{s}^{-1}"
+const v_bar_label = L"\overline{v} / \text{cm}\,\text{s}^{-1}"
+const w_bar_label = L"\overline{w} / \text{mm}\,\text{s}^{-1}"
+
+# Distance between b contours relative to Δb
+const b_step = 1/6
+
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
