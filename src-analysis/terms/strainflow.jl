@@ -1,25 +1,9 @@
 using Oceananigans.Fields: ZeroField
 
 # Strain turns on slowly starting at t=0
-@inline function variable_strain_rate(t, α, f, max_time)
-    turnon = max(1-exp(-f * t / 15), 0)
-    max_time <= 0 && return α * turnon
-    
-    turnoff = max(1-exp(-f * (t - max_time) / 15), 0)
-    return α * (turnon - turnoff)
-end
-
-@inline function velocity_profile(x, Lh)
-    return -2Lh * tanh(x / 2Lh)
-end
-
-@inline function strain_profile(x, Lh)
-    return sech(x / 2Lh)^2
-end
-
-@inline variable_strain_rate(t) = variable_strain_rate(t, sp.α, sp.f, sp.max_time)
-@inline velocity_profile(x) = velocity_profile(x, sp.Lh)
-@inline strain_profile(x) = strain_profile(x, sp.Lh)
+@inline variable_strain_rate(t) = variable_strain_rate(t, sp)
+@inline velocity_profile(x) = velocity_profile(x, sp)
+@inline strain_profile(x) = strain_profile(x, sp)
 
 # Background velocity fields
 U = Field{Face, Nothing, Nothing}(grid)

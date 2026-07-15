@@ -1,4 +1,4 @@
-@inline function VSP_func(i, j, k, grid, velocities, velocities_next, fluxes)
+@inline function vsp_density_func(i, j, k, grid, velocities, velocities_next, turbulent_fluxes)
 
     u = velocities.u
     v = velocities.v
@@ -8,9 +8,9 @@
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    wu = fluxes.wu
-    wv = fluxes.wv
-    ww = fluxes.ww
+    wu = turbulent_fluxes.wu
+    wv = turbulent_fluxes.wv
+    ww = turbulent_fluxes.ww
 
     wuuz = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, wu, ∂zᶠᶜᶠ, a_avg, u, u_next)
     wvvz = ℑyzᵃᶜᶜ(i, j, k, grid, fGg, wv, ∂zᶜᶠᶠ, a_avg, v, v_next)
@@ -24,11 +24,11 @@
 end
 
 """
-    VSP(velocities, velocities_next, fluxes)
-Input coarse-grained velocities and fluxes for vertical shear production
+    VSPDensity(velocities, velocities_next, fluxes)
+Input coarse-grained velocities and fluxes for vertical shear production density
 """
-function VSP(velocities, velocities_next, fluxes)
+function VSPDensity(velocities, velocities_next, turbulent_fluxes)
     grid = velocities.u.grid
     loc = locationornothing((Center, Center, Center), velocities.u)
-    return KernelFunctionOperation{loc...}(VSP_func, grid, velocities, velocities_next, fluxes)
+    return KernelFunctionOperation{loc...}(vsp_density_func, grid, velocities, velocities_next, turbulent_fluxes)
 end

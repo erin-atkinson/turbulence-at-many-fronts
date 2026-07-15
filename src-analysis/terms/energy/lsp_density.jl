@@ -1,4 +1,4 @@
-@inline function LSP_func(i, j, k, grid, velocities, velocities_next, fluxes)
+@inline function lsp_density_func(i, j, k, grid, velocities, velocities_next, turbulent_fluxes)
 
     u = velocities.u
     v = velocities.v
@@ -8,9 +8,9 @@
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    uu = fluxes.uu
-    uv = fluxes.uv
-    uw = fluxes.uw
+    uu = turbulent_fluxes.uu
+    uv = turbulent_fluxes.uv
+    uw = turbulent_fluxes.uw
 
     uuux = ∂xᶜᶜᶜ(i, j, k, grid, fGg, uu, a_avg, u, u_next)
     uvvx = ℑxyᶜᶜᵃ(i, j, k, grid, fGg, uv, ∂xᶠᶠᶜ, a_avg, v, v_next)
@@ -24,11 +24,11 @@
 end
 
 """
-    LSP(velocities, velocities_next, fluxes)
-Input coarse-grained velocities and fluxes for lateral shear production
+    LSPDensity(velocities, velocities_next, turbulent_fluxes)
+Input coarse-grained velocities and fluxes for lateral shear production density
 """
-function LSP(velocities, velocities_next, fluxes)
+function LSPDensity(velocities, velocities_next, turbulent_fluxes)
     grid = velocities.u.grid
     loc = locationornothing((Center, Center, Center), velocities.u)
-    return KernelFunctionOperation{loc...}(LSP_func, grid, velocities, velocities_next, fluxes)
+    return KernelFunctionOperation{loc...}(lsp_density_func, grid, velocities, velocities_next, fluxes)
 end

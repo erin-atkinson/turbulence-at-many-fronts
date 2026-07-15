@@ -7,7 +7,7 @@ using Oceananigans: location
 
 # Calculate a down front-mean of a field
 # Grid spacing is uniform in down-front direction
-@inline function discrete_down_front_mean(i, j, k, grid, f, args...)
+@inline function discrete_along_front_mean(i, j, k, grid, f, args...)
     j_indices = (grid.Hy+1):(grid.Hy+grid.Ny)
     total = mapreduce(+, j_indices) do _j
         f(i, _j, k, grid, args...)
@@ -15,7 +15,7 @@ using Oceananigans: location
     total / grid.Ny
 end
 
-@inline function discrete_down_front_mean(i, j, k, grid, field)
+@inline function discrete_along_front_mean(i, j, k, grid, field)
     j_indices = (grid.Hy+1):(grid.Hy+grid.Ny)
     total = mapreduce(+, j_indices) do _j
         @inbounds field[i, _j, k]
@@ -44,22 +44,61 @@ locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
 end
 
+# Sponge layer -----------------------------------------------------------------
 # Quadratic damping mask
-@inline function sponge_layer_func(x, y, z, sp)
+@inline function sponge_layer_func(z, sp)
     s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
     return (1 - abs(s))^2
 end
 
 # Damp b towards the bottom value
-@inline function b_forcing_func(i, j, k, grid, clock, b, sp)
+@inline function b_forcing_func(i, j, k, grid, b, sp)
     (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
     (z_bottom, ) = node(i, j, 1, grid, Nothing(), Nothing(), Center())
 
     b = @inbounds b[i, j, k]
     tb = @inbounds b[i, j, 1] + sp.N₀² * (z - z_bottom)
     
-    return sp.σ * min(tb - b, 0) * sponge_layer_func(x, y, z, sp)
+    return sp.σ * min(tb - b, 0) * sponge_layer_func(z, sp)
 end
+# ------------------------------------------------------------------------------
+
+# Surface ----------------------------------------------------------------------
+# Cooling turns on slowly
+@inline function b_flux_func(t, sp) 
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    return sp.B * turnon
+end
+
+# θ: angle relative to a down-front wind
+@inline function u_flux_func(x, t, sp) 
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    return sp.τ * turnon * sin(sp.θτ)
+end
+
+@inline function v_flux_func(x, t, sp) 
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    return sp.τ * turnon * cos(sp.θτ)
+end
+# ------------------------------------------------------------------------------
+
+# Background flow --------------------------------------------------------------
+@inline function variable_strain_rate(t, sp)
+    turnon = max(1-exp(-sp.f * t / 15), 0)
+    sp.T_max <= 0 && return sp.α * turnon
+    
+    turnoff = max(1-exp(-sp.f * (t - sp.T_max) / 15), 0)
+    return sp.α * (turnon - turnoff)
+end
+
+@inline function velocity_profile(x, sp)
+    return -2sp.Lh * tanh(x / 2sp.Lh)
+end
+
+@inline function strain_profile(x, sp)
+    return sech(x / 2sp.Lh)^2
+end
+# ------------------------------------------------------------------------------
 
 include("strainflow.jl")
 include("CoarseGraining.jl")
