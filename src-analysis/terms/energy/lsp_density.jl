@@ -30,5 +30,5 @@ Input coarse-grained velocities and fluxes for lateral shear production density
 function LSPDensity(velocities, velocities_next, turbulent_fluxes)
     grid = velocities.u.grid
     loc = locationornothing((Center, Center, Center), velocities.u)
-    return KernelFunctionOperation{loc...}(lsp_density_func, grid, velocities, velocities_next, fluxes)
+    return KernelFunctionOperation{loc...}(lsp_density_func, grid, velocities, velocities_next, turbulent_fluxes)
 end
