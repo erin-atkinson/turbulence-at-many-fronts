@@ -189,3 +189,8 @@ depth_only = (;
     ips,
     filenames,
 )
+
+test_set = (;
+    ips = cooling_only.ips[5:5],
+    filenames = cooling_only.filenames[5:5],
+)

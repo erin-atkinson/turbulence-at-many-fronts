@@ -75,6 +75,7 @@ setnames = [
     "cooling-depth-0_05",
     "cooling-only",
     "depth-only",
+    "test_set"
 ]
 
 sets = [
@@ -82,18 +83,19 @@ sets = [
     cooling_depth_02,
     cooling_depth_005,
     cooling_only,
-    depth_only
+    depth_only,
+    test_set
 ]
 
 map(sets, setnames) do set, setname
-    save_script("$setname-DFM", set.filenames, "DFM", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-COARSE", set.filenames, "COARSE", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-TKE", set.filenames, "TKE", "2:30:00"; loc="jobs-analysis")
-    save_script("$setname-TKE-L", set.filenames, "TKE-L", "2:30:00"; loc="jobs-analysis")
-    save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
-    save_script("$setname-PV-L", set.filenames, "PV-L", "2:30:00"; loc="jobs-analysis")
-    save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-MLD", set.filenames, "MLD", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis")
+    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis")
     save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-SHEARDISPERSION", set.filenames, "SHEARDISPERSION", "1:30:00"; loc="jobs-analysis")
+
+    save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis")
+
+    #save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
+    #save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
+    #save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")
 end
