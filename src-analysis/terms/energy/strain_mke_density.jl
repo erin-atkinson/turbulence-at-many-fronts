@@ -1,10 +1,10 @@
-@inline function αfg(i, j, k, grid, loc, t, u, u_next, sp)
+@inline function αff_avg(i, j, k, grid, loc, t, u, u_next, sp)
     x, y, z = node(i, j, k, grid, loc...)
 
     α = variable_strain_rate(t, sp) * strain_profile(x, sp)
     u_avg  = a_avg(i, j, k, grid, u, u_next)
 
-    return @inbounds -α * u[i, j, k] * u_avg / 2
+    return @inbounds -α * u[i, j, k] * u_avg
 end
 
 
@@ -19,11 +19,11 @@ end
     v_next = velocities_next.v
     w_next = velocities_next.w
 
-    αuu = ℑxᶜᵃᵃ(i, j, k, grid, αfg, (Face(), Center(), Center()), t, u, u_next, sp)
-    αvv = ℑyᵃᶜᵃ(i, j, k, grid, αfg, (Center(), Face(), Center()), t, v, v_next, sp)
-    αww = ℑzᵃᵃᶜ(i, j, k, grid, αfg, (Center(), Center(), Face()), t, w, w_next, sp)
+    αuu = ℑxᶜᵃᵃ(i, j, k, grid, αff_avg, (Face(), Center(), Center()), t, u, u_next, sp)
+    αvv = ℑyᵃᶜᵃ(i, j, k, grid, αff_avg, (Center(), Face(), Center()), t, v, v_next, sp)
+    αww = ℑzᵃᵃᶜ(i, j, k, grid, αff_avg, (Center(), Center(), Face()), t, w, w_next, sp)
     
-    return αuu + αvv + αww
+    return (αuu + αvv + αww) / 2
 end
 
 """
