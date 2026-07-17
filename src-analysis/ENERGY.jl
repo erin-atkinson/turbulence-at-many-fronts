@@ -1,17 +1,21 @@
 include("terms/terms.jl")
+include("terms/advection/advection.jl")
+include("terms/advection/operators.jl")
 
 fields = (
     :u, :v, :w, :b, :p,
     :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww,
     :ub, :vb, :wb,
-    :u_next, :v_next, :w_next, :b_next
+    :u_next, :v_next, :w_next, :b_next,
+    :ke
 )
 
+mean_fields = NamedTuple()
 for ξ in fields
     ξ_bar = Symbol(ξ, :_bar)
     @eval begin
         $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (mean_fields..., $ξ_bar)
+        mean_fields = (; mean_fields..., $ξ_bar)
     end
 end
 
@@ -24,7 +28,7 @@ println("Turbulent fluxes")
 u′u′ = Field(uu_bar - UuFlux(centered, u_bar, u_bar; background=input_fields.U))
 u′v′ = Field(uv_bar - UvFlux(centered, u_bar, v_bar; background=input_fields.U))
 u′w′ = Field(uw_bar - UwFlux(centered, u_bar, w_bar; background=input_fields.U))
-u′b′ = Field(ub_bar - UbFlux(centered, u_bar, b_bar; background=input_fields.U))
+u′b′ = Field(ub_bar - UcFlux(centered, u_bar, b_bar; background=input_fields.U))
 
 v′u′ = Field(vu_bar - VuFlux(centered, v_bar, u_bar))
 v′v′ = Field(vv_bar - VvFlux(centered, v_bar, v_bar))
@@ -53,14 +57,15 @@ include("terms/energy/sponge_mke_density.jl")
 include("terms/energy/strain_mke_density.jl")
 include("terms/energy/stress.jl")
 
-dsp_density = Field(DSPDensity(velocities, velocities_next, input_fields.U))
+dsp_density = Field(DSPDensity(clock, velocities, velocities_next, sp))
 lsp_density = Field(LSPDensity(velocities, velocities_next, turbulent_fluxes))
 vsp_density = Field(VSPDensity(velocities, velocities_next, turbulent_fluxes))
-buoyancy_density = Field(BUOYANCYDensity(w_bar, w_bar_next, b_bar))
+buoyancy_density = Field(BUOYANCYDensity(w_bar, w_next_bar, b_bar))
 mke_density = Field(MKEDensity(velocities))
 sponge_mke_density = Field(SPONGEMKEDensity(velocities, velocities_next, sp))
 strain_mke_density = Field(STRAINMKEDensity(clock, velocities, velocities_next, sp))
 stress = Field(STRESS(clock, velocities, velocities_next, sp))
+tke_density = Field(ke_bar - mke_density)
 
 mke_production_density = (;
     dsp_density,
@@ -70,7 +75,8 @@ mke_production_density = (;
     mke_density,
     sponge_mke_density,
     strain_mke_density,
-    stress
+    stress,
+    tke_density
 )
 dependency_fields = merge(dependency_fields, mke_production_density)
 @info mke_production_density
@@ -83,6 +89,7 @@ mke = Field(Integral(mke_density))
 sponge_mke = Field(Integral(sponge_mke_density))
 strain_mke = Field(Integral(strain_mke_density))
 wind = Field(Integral(stress))
+tke = Field(Integral(tke_density))
 
 mke_production = (;
     dsp,
@@ -92,7 +99,8 @@ mke_production = (;
     mke,
     sponge_mke,
     strain_mke,
-    wind
+    wind,
+    tke
 )
 dependency_fields = merge(dependency_fields, mke_production)
 @info mke_production
@@ -108,8 +116,11 @@ include("terms/energy/bflux_density.jl")
 b_profile = Field(Average(b_bar; dims=1))
 b_next_profile = Field(Average(b_next_bar; dims=1))
 
-h_ml = MLD(b_profile, 0.9sp.N₀²)
-h_ml_next = MLD(b_next_profile, 0.9sp.N₀²)
+h_ml = Field(MLD(b_profile, 2sp.Δb / sp.H))
+h_ml_next = Field(MLD(b_next_profile, 2sp.Δb / sp.H))
+
+mixed_layer = (; b_profile, b_next_profile, h_ml, h_ml_next)
+dependency_fields = merge(dependency_fields, mixed_layer)
 
 mpe_density = Field(MPEDensity(b_bar, h_ml))
 mixed_density = Field(MIXEDDensity(clock, b_bar, b_next_bar, h_ml, h_ml_next))
@@ -136,7 +147,8 @@ mpe_production = (;
     mixed,
     strain_mpe,
     bflux,
-    cooling
+    cooling,
+    h_ml
 )
 dependency_fields = merge(dependency_fields, mpe_production)
 @info mpe_production
@@ -145,6 +157,7 @@ mke_total = Field(dsp + wind + buoyancy + sponge_mke - lsp - vsp + strain_mke)
 mpe_total = Field(-buoyancy - bflux + mixed + cooling + strain_mpe)
 
 totals = (; mke_total, mpe_total)
+dependency_fields = merge(dependency_fields, totals)
 
 output_fields = merge(
     mke_production_density, 
@@ -153,4 +166,4 @@ output_fields = merge(
     mpe_production,
     totals
 )
-skip_update = (:p)
+skip_update = (:p, )

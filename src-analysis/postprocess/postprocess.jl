@@ -4,6 +4,7 @@ using Printf
 
 using Oceananigans.Fields: compute_at!
 using Oceananigans.OutputWriters: saveproperty!
+using Oceananigans: fill_halo_regions!
 
 include("update_clock.jl")
 include("update_fields.jl")
@@ -128,6 +129,7 @@ for (i, frame) in enumerate(frames)
     
     for field in dependency_fields
         compute_at!(field, t)
+        fill_halo_regions!(field)
     end
     
     set!(output_fds, iteration, t; output_fields...)

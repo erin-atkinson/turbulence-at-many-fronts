@@ -1,4 +1,5 @@
 using Oceananigans.Fields: ZeroField
+include("forcing_bc_funcs.jl")
 
 # Strain turns on slowly starting at t=0
 @inline variable_strain_rate(t) = variable_strain_rate(t, sp)

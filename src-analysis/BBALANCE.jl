@@ -4,11 +4,12 @@ include("terms/advection/operators.jl")
 
 fields = (:u, :v, :w, :b, :ub, :wb)
 
+mean_fields = NamedTuple()
 for ξ in fields
     ξ_bar = Symbol(ξ, :_bar)
     @eval begin
         $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (mean_fields..., $ξ_bar)
+        mean_fields = (; mean_fields..., $ξ_bar)
     end
 end
 
