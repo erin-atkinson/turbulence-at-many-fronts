@@ -41,5 +41,5 @@ other = (; coriolis_x, pressure_x, strain_x)
 total = Field(-∂x(flux_density_x + flux_density_background) - ∂z(flux_density_z) + mixing_x + mixing_z + coriolis_x + pressure_x + strain_x)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
-dependency_fields = merge(flux_density, advection, turbulent_flux_density, mixing, other, (; total))
+dependency_fields = merge(mean_fields, flux_density, advection, turbulent_flux_density, mixing, other, (; total))
 output_fields = dependency_fields

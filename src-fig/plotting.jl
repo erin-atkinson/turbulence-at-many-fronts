@@ -3,23 +3,32 @@
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
+using Oceananigans
+using CairoMakie
+using CairoMakie.Colors
+using Statistics
+using Printf
 using JLD2
 using ImageFiltering: imfilter, Kernel.gaussian
 using OffsetArrays: no_offset_view
 using Printf
+using Oceananigans.Units: Time
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
 # Constants used for plotting 
+scratchpath = "/home/atkin163/scratch/turbulence-at-many-fronts"
 
 # Labels
 const u_bar_label = L"\overline{u} / \text{cm}\,\text{s}^{-1}"
+const tot_u_bar_label = L"(\overline{u} + U) / \text{cm}\,\text{s}^{-1}"
 const v_bar_label = L"\overline{v} / \text{cm}\,\text{s}^{-1}"
 const w_bar_label = L"\overline{w} / \text{mm}\,\text{s}^{-1}"
 
 # Distance between b contours relative to Δb
 const b_step = 1/6
-
+b_levels(fds::FieldDataset) = minimum(interior(fds.b_bar[end], :, 1, :)):(fds.metadata["parameters"].Δb * b_step):maximum(interior(fds.b_bar[1], :, 1, :))
+b_levels(fts, sp) = minimum(interior(fts[end], :, 1, :)):(sp.Δb * b_step):maximum(interior(fts[1], :, 1, :))
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -36,27 +45,6 @@ iterations_times(filename::String) = jldopen(iterations_times, filename)
 
 simulation_parameters(file) = file["metadata/parameters"]
 simulation_parameters(filename::String) = jldopen(simulation_parameters, filename)
-
-@inline function variable_strain_rate(t, sp)
-    turnon = max(1-exp(-sp.f * t / 15), 0)
-    sp.max_time <= 0 && return sp.α * turnon
-    
-    turnoff = max(1-exp(-sp.f * (t - sp.max_time) / 15), 0)
-    return sp.α * (turnon - turnoff)
-end
-
-@inline function velocity_profile(x, sp)
-    return -2sp.Lh * tanh(x / 2sp.Lh)
-end
-
-@inline function strain_profile(x, sp)
-    return sech(x / 2sp.Lh)^2
-end
-
-@inline function surface_b_flux(t, sp) 
-    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
-    return sp.B * turnon
-end
 
 function bin_counts(a, bins) 
     map(bins[1:end-1], bins[2:end]) do bl, br
@@ -84,6 +72,12 @@ end
     df = (x - xs[i1]) * (fs[i2] - fs[i1]) / (xs[i2] - xs[i1])
     return fs[i1] + df
 end
+
+@inline function interp_time(n, times)
+    i = Integer(floor(n))
+    ξ = n - i
+    return times[i] + ξ * (times[min(i+1, length(times))] - times[i])
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -97,4 +91,5 @@ include("time_average_of.jl")
 include("front_width.jl")
 include("record.jl")
 include("filenames.jl")
+include("../src-analysis/terms/forcing_bc_funcs.jl")
 # -------------------------------------------------------------

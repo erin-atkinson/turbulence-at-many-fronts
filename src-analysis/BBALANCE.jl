@@ -36,6 +36,5 @@ mixing = (; mixing_x, mixing_z)
 total = Field(-∂x(flux_density_x + flux_density_background) - ∂z(flux_density_z) + mixing_x + mixing_z)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
-dependency_fields = merge(flux_density, advection, turbulent_flux_density, mixing, (; total))
+dependency_fields = merge(mean_fields, flux_density, advection, turbulent_flux_density, mixing, (; total))
 output_fields = dependency_fields
-
