@@ -19,7 +19,8 @@ end
 
 @inline function stress_func(i, j, k, grid, clock, velocities, velocities_next, sp)
     t = clock.time
-
+    k = grid.Nz
+    
     u = velocities.u
     v = velocities.v
     
@@ -38,6 +39,6 @@ Wind stress forcing
 """
 function STRESS(clock, velocities, velocities_next, sp)
     grid = velocities.u.grid
-    loc = locationornothing((Center, Center, Center), velocities.u)
+    loc = locationornothing((Center, Center, Nothing), velocities.u)
     return KernelFunctionOperation{loc...}(stress_func, grid, clock, velocities, velocities_next, sp)
 end

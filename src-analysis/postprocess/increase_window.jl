@@ -13,23 +13,21 @@ t0 = time()
 
 # Simulation output file
 RAW = ARGS[1]
-foldername = splitpath(RAW)[1]
+foldername, inputname = splitpath(RAW)
 
-# Defining output terms
-scriptname = ARGS[2]
+# Number of iterations to sum 
+N_window = parse(Int64, ARGS[2])
+outputname = splitext(inputname)[1] * "-$N_window"
 
 # Possible third argument is a temporary location
 buffer = length(ARGS) > 2 ? ARGS[3] : ARGS[1]
 mkpath(buffer)
 
 # Path to output
-BUFFER = joinpath(buffer, "$scriptname.jld2")
-
-# Path to temp output
-TEMP = joinpath(buffer, "temp_$scriptname.jld2")
+BUFFER = joinpath(buffer, "$outputname.jld2")
 
 # Final output folder
-PROCESSED = joinpath(foldername, "$scriptname.jld2")
+PROCESSED = joinpath(foldername, "$outputname.jld2")
 
 # Read simulation state
 fds = FieldDataset(RAW; backend=OnDisk())
@@ -47,55 +45,25 @@ grid = fds.u.grid
 times = fds.u.times
 iterations = jldopen(file->keys(file["timeseries/t"]), RAW)
 iterations = parse.(Int, iterations)
-frames = 1:length(iterations)
+frames = 1:N_window:length(iterations)
 
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
-nextrawfields = NamedTuple(Symbol(k, :_next) => deepcopy(fds[k][2]) for k in (:u, :v, :w, :b))
 
-# Setup background strain
-include("../terms/strainflow.jl")
-input_fields = merge(rawfields, nextrawfields, (; U, V, W))
+# Output fields
+output_fields = NamedTuple(k => deepcopy(v) for (k, v) in pairs(rawfields))
+
+# Accumulation fields
+accfields = NamedTuple(k => Field(output_fields.k + rawfields.k) for k in fieldnames)
 
 # Initialise a clock
 clock = Clock(; time=times[1])
-
-#= 
-Input Julia file should define some things:
-    `dependency_fields`:
-        NamedTuple of fields to call compute! on
-    `output_fields`:
-        NamedTuple of fields that will get saved. Note that these should also be in
-        `calculated_fields` if they need to be computed
-    `temp_fields`:
-        List of fields that will get saved temporarily. Note that these should also be in
-        `calculated_fields` if they need to be computed.
-    `cleanup`:
-        Function to be called before temp_fields is deleted
-In addition, it can redefine `frames` to process only a subset of frames
-=#
-dependency_fields = NamedTuple()
-temp_fields = NamedTuple()
-skip_update = ()
-cleanup() = nothing
-@info "Including $scriptname.jl"
-include("../$scriptname.jl")
 
 output_fds = FieldDataset(times, output_fields; 
     backend = OnDisk(), 
     path = BUFFER,
     metadata = fds.metadata
 )
-
-temp_fds = if length(temp_fields) > 0
-    FieldDataset(times, temp_fields; 
-        backend = OnDisk(), 
-        path = TEMP,
-        metadata = fds.metadata
-    )
-else
-    nothing
-end
 
 # Helpful for debugging to print times for all
 @info "Performing first computation..."
@@ -119,20 +87,20 @@ t2 = t1
 for (i, frame) in enumerate(frames)
     iteration = iterations[frame]
     t = times[frame]
+    
+    for k in fieldnames
+        set!(rawfields.k, 0)
+        set!(output_fields.k, 0)
+        set!(accfields.k, 0)
+    end
 
-    # Update clock
-    update_clock!(clock, iterations, times, frame)
-    
-    # Update inputs
-    update_fields!(input_fields, fds, clock, frame; skip_update)
-    
-    for field in dependency_fields
-        compute_at!(field, t)
-        fill_halo_regions!(field)
+    for n in 1:N_window
+        map(k->set!(rawfields.k, fds[k][frame + n]), fieldnames)
+        map(k->compute_at!(acc_fields.k, frame + n), fieldnames)
+        map(k->set!(output_fields.k, acc_fields.k), fieldnames)
     end
     
     set!(output_fds, iteration, t; output_fields...)
-    temp_fds != nothing && set!(temp_fds, iteration, t; temp_fields...)
 
     # Little bit of timekeeping for convenience
     tstr = if i < 11
@@ -149,8 +117,6 @@ for (i, frame) in enumerate(frames)
     print("$(frames[1]) -> $frame -> $(frames[end]) | $tstr\r")
 end
 println()
-@info "Cleaning up..."
-cleanup()
 
 # Write grid to file
 jldopen(file->saveproperty!(file, "grid", grid), BUFFER, "a")
@@ -159,8 +125,5 @@ if !isequal(BUFFER, PROCESSED)
     @info "Moving from $BUFFER to $PROCESSED"
     mv(BUFFER, PROCESSED; force=true)
 end
-rm(TEMP; force=true)
-
-
 
 @info "Done!"

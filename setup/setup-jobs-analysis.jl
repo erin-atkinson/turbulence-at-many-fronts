@@ -89,6 +89,8 @@ sets = [
 
 map(sets, setnames) do set, setname
     save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis")
+    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis")
+    
     save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis")
     save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis")
     save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")

@@ -1,5 +1,7 @@
 function prettyrecord(observable, fig, filename, frames::AbstractVector; record_kw...)
     N = length(frames)
+    N == 1 && return prettyrecord(observable, fig, filename, frames[1]; record_kw...)
+    
     t0 = time()
     record(fig, filename, 1:N; record_kw...) do i
         observable[] = frames[i]
@@ -15,7 +17,7 @@ function prettyrecord(observable, fig, filename, frames::AbstractVector; record_
     return nothing
 end
 
-function prettyrecord(observable, fig, filename, frame::Integer; record_kw...)
+function prettyrecord(observable, fig, filename, frame::Number; record_kw...)
     observable[] = frame
     return nothing
 end
