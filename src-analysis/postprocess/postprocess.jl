@@ -13,13 +13,14 @@ t0 = time()
 
 # Simulation output file
 RAW = ARGS[1]
-foldername = splitpath(RAW)[1]
+foldername = dirname(RAW)
+filename = basename(RAW)
 
 # Defining output terms
 scriptname = ARGS[2]
 
 # Possible third argument is a temporary location
-buffer = length(ARGS) > 2 ? ARGS[3] : ARGS[1]
+buffer = length(ARGS) > 2 ? ARGS[3] : foldername
 mkpath(buffer)
 
 # Path to output

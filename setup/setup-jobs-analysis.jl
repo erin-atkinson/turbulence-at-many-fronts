@@ -2,7 +2,7 @@ function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp
     strs = map([βH, βα, βB, βτ, θτ]) do β
         replace(string(β), "."=>"_")
     end
-    ext = ext == nothing ? "" : ".$ext"
+    ext = isnothing(ext) ? "" : ".$ext"
     return joinpath(pre, join(strs, "-") * ext)
 end
 
@@ -33,9 +33,9 @@ function make_preamble(jobname, scriptname, T)
     """
 end
 
-function make_body(foldername, scriptname)
+function make_body(foldername, scriptname; filename="OUTPUT.jld2")
     """
-    julia -t 24 -- src-analysis/postprocess/postprocess.jl \$SCRATCH/turbulence-at-many-fronts/$foldername \$PPFILE \$RAM/$foldername &
+    julia -t 24 -- src-analysis/postprocess/postprocess.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/$filename \$PPFILE \$RAM/$foldername &
     """
 end
 
@@ -47,15 +47,15 @@ function make_cleanup()
     """
 end
 
-function make_script(jobname, foldernames, scriptname, T)
+function make_script(jobname, foldernames, scriptname, T; filename="OUTPUT.jld2")
     body = mapreduce(*, foldernames) do foldername
-        make_body(foldername, scriptname)
+        make_body(foldername, scriptname; filename)
     end
     return make_preamble(jobname, scriptname, T) * body * make_cleanup()
 end
 
-function save_script(jobname, foldernames, scriptname, T; loc="")
-    write(joinpath(loc, jobname * ".sh"), make_script(jobname, foldernames, scriptname, T))
+function save_script(jobname, foldernames, scriptname, T; loc="", filename="OUTPUT.jld2")
+    write(joinpath(loc, jobname * ".sh"), make_script(jobname, foldernames, scriptname, T; filename))
     return nothing
 end
 

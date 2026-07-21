@@ -13,14 +13,15 @@ t0 = time()
 
 # Simulation output file
 RAW = ARGS[1]
-foldername, inputname = splitpath(RAW)
+foldername = dirname(RAW)
+filename = basename(RAW)
 
 # Number of iterations to sum 
 N_window = parse(Int64, ARGS[2])
-outputname = splitext(inputname)[1] * "-$N_window"
+outputname = splitext(filename)[1] * "-$N_window"
 
 # Possible third argument is a temporary location
-buffer = length(ARGS) > 2 ? ARGS[3] : ARGS[1]
+buffer = length(ARGS) > 2 ? ARGS[3] : foldername
 mkpath(buffer)
 
 # Path to output
@@ -94,7 +95,7 @@ for (i, frame) in enumerate(frames)
         set!(accfields.k, 0)
     end
 
-    for n in 1:N_window
+    for n in 0:(N_window - 1)
         map(k->set!(rawfields.k, fds[k][frame + n]), fieldnames)
         map(k->compute_at!(acc_fields.k, frame + n), fieldnames)
         map(k->set!(output_fields.k, acc_fields.k), fieldnames)
