@@ -50,37 +50,19 @@ frames = 1:N_window:length(iterations)
 
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
+input_fields = rawfields
 
 # Output fields
 output_fields = NamedTuple(k => deepcopy(v) for (k, v) in pairs(rawfields))
 
 # Accumulation fields
-accfields = NamedTuple(k => Field(output_fields.k + rawfields.k) for k in fieldnames)
-
-# Initialise a clock
-clock = Clock(; time=times[1])
+accfields = NamedTuple(k => Field(output_fields[k] + rawfields[k]) for k in fieldnames)
 
 output_fds = FieldDataset(times, output_fields; 
     backend = OnDisk(), 
     path = BUFFER,
     metadata = fds.metadata
 )
-
-# Helpful for debugging to print times for all
-@info "Performing first computation..."
-print("Updating clock...\r")
-dt = @elapsed update_clock!(clock, iterations, times, frames[1])
-@printf "Updated clock! Elapsed: %.2f\n" dt
-
-print("Updating fields...\r")
-dt = @elapsed update_fields!(input_fields, fds, clock, frames[1]; skip_update)
-@printf "Updated fields! Elapsed: %.2f\n" dt
-
-for (k, dependency_field) in pairs(dependency_fields)
-    print("Calculating $k...\r")
-    local dt = @elapsed compute_at!(dependency_field, frames[2])
-    @printf "Calculated %s! Elapsed: %.2f\n" k dt
-end
 
 @info "Computing..."
 t1 = time()
@@ -90,21 +72,22 @@ for (i, frame) in enumerate(frames)
     t = times[frame]
     
     for k in fieldnames
-        set!(rawfields.k, 0)
-        set!(output_fields.k, 0)
-        set!(accfields.k, 0)
+        set!(rawfields[k], 0)
+        set!(output_fields[k], 0)
+        set!(accfields[k], 0)
     end
 
     for n in 0:(N_window - 1)
-        map(k->set!(rawfields.k, fds[k][frame + n]), fieldnames)
-        map(k->compute_at!(acc_fields.k, frame + n), fieldnames)
-        map(k->set!(output_fields.k, acc_fields.k), fieldnames)
+        map(k->set!(rawfields[k], fds[k][frame + n]), fieldnames)
+        map(k->compute_at!(accfields[k], frame + n), fieldnames)
+        map(k->set!(output_fields[k], accfields[k]), fieldnames)
     end
     
     set!(output_fds, iteration, t; output_fields...)
 
     # Little bit of timekeeping for convenience
-    tstr = if i < 11
+    
+    tstr = if true
         global t2 = time()
         setup_time = t2 - t0
         tstr = @sprintf "Setup: %.2f s" setup_time
@@ -115,6 +98,7 @@ for (i, frame) in enumerate(frames)
         total_time = setup_time + avg_time * (length(frames) - 10)
         @sprintf "Setup: %.2f s, Avg: %.2f s, Total: %.2f s" setup_time avg_time total_time
     end
+    
     print("$(frames[1]) -> $frame -> $(frames[end]) | $tstr\r")
 end
 println()

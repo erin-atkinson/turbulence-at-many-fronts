@@ -26,24 +26,16 @@ function make_preamble(jobname, T)
     # Launch from scratch
     export JULIA_DEPOT_PATH=\$SCRATCH/julia-tri
     cd ~/turbulence-at-many-fronts
-
-    RAM=/dev/shm/$jobname
-    mkdir \$RAM
     """
 end
 
 function make_body(foldername, N_window)
     """
-    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/OUTPUT.jld2 $N_window \$RAM/$foldername &
+    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/OUTPUT.jld2 $N_window &
     """
 end
 
 function make_cleanup()
-    """
-    wait
-    
-    rm \$RAM -rf
-    """
 end
 
 function make_script(jobname, foldernames, N_window, T)
@@ -60,7 +52,7 @@ end
 
 include("ensemble.jl")
 
-save_script("$setname-WINDOW", set.filenames, 5, "0:30:00"; loc="jobs-analysis")
+#save_script("$setname-WINDOW", set.filenames, 5, "0:30:00"; loc="jobs-analysis")
 
 setnames = [
     "cooling-depth-0_1",
