@@ -22,26 +22,39 @@ p = PressureField(model)
 b = model.tracers.b
 
 advection = model.advection
+centered = Centered(; order=2)
 
 # Across-front
-function uu_func(i, j, k, grid, advection, u, U)
+function uu_func(i, j, k, grid, advection, centered, u, U)
     u_tot = SumOfArrays{2}(u, U)
-    return advective_momentum_flux_Uu(i, j, k, grid, advection, u_tot, u) / Axᶜᶜᶜ(i, j, k, grid)
+    adv = advective_momentum_flux_Uu(i, j, k, grid, advection, u_tot, u)
+    back = advective_momentum_flux_Uu(i, j, k, grid, centered, U, u)
+    
+    return (adv - back) / Axᶜᶜᶜ(i, j, k, grid)
 end
 
-function uv_func(i, j, k, grid, advection, u, U, v)
+function uv_func(i, j, k, grid, advection, centered, u, U, v)
     u_tot = SumOfArrays{2}(u, U)
-    return advective_momentum_flux_Uv(i, j, k, grid, advection, u_tot, v) / Axᶠᶠᶜ(i, j, k, grid)
+    adv = advective_momentum_flux_Uv(i, j, k, grid, advection, u_tot, v)
+    back = advective_momentum_flux_Uv(i, j, k, grid, centered, U, v)
+    
+    return  (adv - back) / Axᶠᶠᶜ(i, j, k, grid)
 end
 
-function uw_func(i, j, k, grid, advection, u, U, w)
+function uw_func(i, j, k, grid, advection, centered, u, U, w)
     u_tot = SumOfArrays{2}(u, U)
-    return advective_momentum_flux_Uw(i, j, k, grid, advection, u_tot, w) / Axᶠᶜᶠ(i, j, k, grid)
+    adv = advective_momentum_flux_Uw(i, j, k, grid, advection, u_tot, w)
+    back = advective_momentum_flux_Uw(i, j, k, grid, centered, U, w)
+    
+    return (adv - back) / Axᶠᶜᶠ(i, j, k, grid)
 end
 
-function ub_func(i, j, k, grid, advection, u, U, b)
+function ub_func(i, j, k, grid, advection, centered, u, U, b)
     u_tot = SumOfArrays{2}(u, U)
-    return advective_tracer_flux_x(i, j, k, grid, advection, u_tot, b) / Axᶠᶜᶜ(i, j, k, grid)
+    adv = advective_tracer_flux_x(i, j, k, grid, advection, u_tot, b)
+    back = advective_tracer_flux_x(i, j, k, grid, centered, U, b)
+    
+    return (adv - back) / Axᶠᶜᶜ(i, j, k, grid)
 end
 
 # Along-front
@@ -86,10 +99,10 @@ function ke_func(i, j, k, grid, u, v, w)
     return (u² + v² + w²) / 2
 end
 
-uu = KernelFunctionOperation{Center, Center, Center}(uu_func, grid, advection, u, U)
-uv = KernelFunctionOperation{Face, Face, Center}(uv_func, grid, advection, u, U, v)
-uw = KernelFunctionOperation{Face, Center, Face}(uw_func, grid, advection, u, U, w)
-ub = KernelFunctionOperation{Face, Center, Center}(ub_func, grid, advection, u, U, b)
+uu = KernelFunctionOperation{Center, Center, Center}(uu_func, grid, advection, centered, u, U)
+uv = KernelFunctionOperation{Face, Face, Center}(uv_func, grid, advection, centered, u, U, v)
+uw = KernelFunctionOperation{Face, Center, Face}(uw_func, grid, advection, centered, u, U, w)
+ub = KernelFunctionOperation{Face, Center, Center}(ub_func, grid, advection, centered, u, U, b)
 
 vu = KernelFunctionOperation{Face, Face, Center}(vu_func, grid, advection, u, v)
 vv = KernelFunctionOperation{Center, Center, Center}(vv_func, grid, advection, v)
