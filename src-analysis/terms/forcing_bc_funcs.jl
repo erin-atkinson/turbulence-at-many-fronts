@@ -2,7 +2,7 @@
 # Quadratic damping mask
 @inline function sponge_layer_func(z, sp)
     s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
-    return (1 - abs(s))^2
+    return sp.σ * (1 - abs(s))^2
 end
 
 # Damp b towards the bottom value
