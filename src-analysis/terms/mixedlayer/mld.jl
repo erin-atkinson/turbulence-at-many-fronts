@@ -143,14 +143,14 @@ function ε_estimate(initial_b, sp)
     return mean(b_profile[k_below:end]) - b_profile[k_below]
 end
 
-function growth_rate(i, j, k, grid, clock, mld, mld_next)
-    mld_avg = @inbounds (mld_next[i, j, k] + mld[i, j, k]) / 2
-    mld_diff = @inbounds (mld_next[i, j, k] - mld[i, j, k])
+function growth_rate_func(i, j, k, grid, clock, mld, mld_prev)
+    mld_avg = @inbounds (mld[i, j, k] + mld_prev[i, j, k]) / 2
+    mld_diff = @inbounds (mld[i, j, k] - mld_prev[i, j, k])
     return mld_diff / clock.last_Δt / mld_avg
 end
 
-function GrowthRate(clock, mld, mld_next)
+function GrowthRate(clock, mld, mld_prev)
     (ℓx, ℓy, ℓz) = location(mld)
     grid = mld.grid
-    KernelFunctionOperation{ℓx, ℓy, ℓz}(growth_rate, grid, clock, mld, mld_next)
+    KernelFunctionOperation{ℓx, ℓy, ℓz}(growth_rate_func, grid, clock, mld, mld_prev)
 end

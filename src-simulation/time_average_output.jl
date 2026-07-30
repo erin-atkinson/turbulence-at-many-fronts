@@ -91,10 +91,11 @@ function wb_func(i, j, k, grid, advection, w, b)
     return advective_tracer_flux_z(i, j, k, grid, advection, w, b) / Azᶜᶜᶠ(i, j, k, grid)
 end
 
+@inline u_sq(i, j, k, grid, u) = @inbounds u[i, j, k]^2
 function ke_func(i, j, k, grid, u, v, w)
-    u² = ℑxᶜᵃᵃ(i, j, k, grid, u)^2
-    v² = ℑyᵃᶜᵃ(i, j, k, grid, v)^2
-    w² = ℑzᵃᵃᶜ(i, j, k, grid, w)^2
+    u² = ℑxᶜᵃᵃ(i, j, k, grid, u_sq, u)
+    v² = ℑyᵃᶜᵃ(i, j, k, grid, u_sq, v)
+    w² = ℑzᵃᵃᶜ(i, j, k, grid, u_sq, w)
 
     return (u² + v² + w²) / 2
 end
@@ -109,9 +110,9 @@ vv = KernelFunctionOperation{Center, Center, Center}(vv_func, grid, advection, v
 vw = KernelFunctionOperation{Center, Face, Face}(vw_func, grid, advection, v, w)
 vb = KernelFunctionOperation{Center, Face, Center}(vb_func, grid, advection, v, b)
 
-wu = KernelFunctionOperation{Face, Center, Face}(uu_func, grid, advection, u, U)
-wv = KernelFunctionOperation{Center, Face, Face}(uv_func, grid, advection, u, U, v)
-ww = KernelFunctionOperation{Center, Center, Center}(uw_func, grid, advection, u, U, w)
+wu = KernelFunctionOperation{Face, Center, Face}(wu_func, grid, advection, u, w)
+wv = KernelFunctionOperation{Center, Face, Face}(wv_func, grid, advection, v, w)
+ww = KernelFunctionOperation{Center, Center, Center}(ww_func, grid, advection, w)
 wb = KernelFunctionOperation{Center, Center, Face}(wb_func, grid, advection, w, b)
 
 ke = KernelFunctionOperation{Center, Center, Center}(ke_func, grid, u, v, w)

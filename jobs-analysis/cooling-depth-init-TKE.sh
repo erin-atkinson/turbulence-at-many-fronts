@@ -14,21 +14,21 @@ cd ~/turbulence-at-many-fronts
 PPFILE=TKE
 RAM=/dev/shm/cooling-depth-init-TKE
 mkdir $RAM
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_01-0_0-C $PPFILE $RAM/0_06-init-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_03-0_0-C $PPFILE $RAM/0_06-init-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_05-0_0-C $PPFILE $RAM/0_06-init-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_1-0_0-C $PPFILE $RAM/0_06-init-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_2-0_0-C $PPFILE $RAM/0_06-init-0_2-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_01-0_0-C $PPFILE $RAM/0_1-init-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_03-0_0-C $PPFILE $RAM/0_1-init-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_05-0_0-C $PPFILE $RAM/0_1-init-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_1-0_0-C $PPFILE $RAM/0_1-init-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_2-0_0-C $PPFILE $RAM/0_1-init-0_2-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_01-0_0-C $PPFILE $RAM/0_14-init-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_03-0_0-C $PPFILE $RAM/0_14-init-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_05-0_0-C $PPFILE $RAM/0_14-init-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_1-0_0-C $PPFILE $RAM/0_14-init-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_2-0_0-C $PPFILE $RAM/0_14-init-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_01-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_06-init-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_03-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_06-init-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_05-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_06-init-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_1-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_06-init-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-init-0_2-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_06-init-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_01-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_1-init-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_03-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_1-init-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_05-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_1-init-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_1-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_1-init-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-init-0_2-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_1-init-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_01-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_14-init-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_03-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_14-init-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_05-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_14-init-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_1-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_14-init-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-init-0_2-0_0-C/OUTPUT.jld2 $PPFILE TKE.jld2 $RAM/0_14-init-0_2-0_0-C &
 wait
 
-rm $RAM -rf
+rmdir $RAM

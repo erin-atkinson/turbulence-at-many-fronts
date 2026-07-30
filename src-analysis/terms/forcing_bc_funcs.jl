@@ -5,6 +5,12 @@
     return sp.σ * (1 - abs(s))^2
 end
 
+@inline function sponge_func(i, j, k, grid, loc, field, sp)
+    z = znode(i, j, k, grid, loc...)
+    σ = sponge_layer_func(z, sp)
+    return @inbounds -σ * field[i, j, k]
+end
+
 # Damp b towards the bottom value
 @inline function b_forcing_func(i, j, k, grid, b, sp)
     (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
@@ -14,6 +20,13 @@ end
     tb = @inbounds b[i, j, 1] + sp.N₀² * (z - z_bottom)
     
     return sp.σ * min(tb - b, 0) * sponge_layer_func(z, sp)
+end
+
+function Sponge(field, sp)
+    (ℓx, ℓy, ℓz) = location(field)
+    grid = field.grid
+    
+    return KernelFunctionOperation{ℓx, ℓy, ℓz}(sponge_func, grid, (ℓx(), ℓy(), ℓz()), field, sp)
 end
 # ------------------------------------------------------------------------------
 

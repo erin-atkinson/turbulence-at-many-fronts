@@ -191,6 +191,11 @@ depth_only = (;
 )
 
 test_set = (;
-    ips = cooling_only.ips[5:5],
-    filenames = cooling_only.filenames[5:5],
+    ips = [cooling_only.ips[5]],
+    filenames = [cooling_only.filenames[5]],
+)
+
+test_set_init = (;
+    ips = [cooling_depth_init.ips[8]],
+    filenames = [cooling_depth_init.filenames[8]],
 )

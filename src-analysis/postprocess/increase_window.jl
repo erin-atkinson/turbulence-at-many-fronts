@@ -56,7 +56,7 @@ input_fields = rawfields
 output_fields = NamedTuple(k => deepcopy(v) for (k, v) in pairs(rawfields))
 
 # Accumulation fields
-accfields = NamedTuple(k => Field(output_fields[k] + rawfields[k]) for k in fieldnames)
+accfields = NamedTuple(k => Field(output_fields[k] + rawfields[k] / N_window) for k in fieldnames)
 
 output_fds = FieldDataset(times, output_fields; 
     backend = OnDisk(), 
@@ -87,7 +87,7 @@ for (i, frame) in enumerate(frames)
 
     # Little bit of timekeeping for convenience
     
-    tstr = if true
+    tstr = if i < 2
         global t2 = time()
         setup_time = t2 - t0
         tstr = @sprintf "Setup: %.2f s" setup_time

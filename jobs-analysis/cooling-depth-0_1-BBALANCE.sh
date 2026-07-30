@@ -14,21 +14,21 @@ cd ~/turbulence-at-many-fronts
 PPFILE=BBALANCE
 RAM=/dev/shm/cooling-depth-0_1-BBALANCE
 mkdir $RAM
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_01-0_0-C $PPFILE $RAM/0_06-0_1-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_03-0_0-C $PPFILE $RAM/0_06-0_1-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_05-0_0-C $PPFILE $RAM/0_06-0_1-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_1-0_0-C $PPFILE $RAM/0_06-0_1-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_2-0_0-C $PPFILE $RAM/0_06-0_1-0_2-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_01-0_0-C $PPFILE $RAM/0_1-0_1-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_03-0_0-C $PPFILE $RAM/0_1-0_1-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_05-0_0-C $PPFILE $RAM/0_1-0_1-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_1-0_0-C $PPFILE $RAM/0_1-0_1-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_2-0_0-C $PPFILE $RAM/0_1-0_1-0_2-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_01-0_0-C $PPFILE $RAM/0_14-0_1-0_01-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_03-0_0-C $PPFILE $RAM/0_14-0_1-0_03-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_05-0_0-C $PPFILE $RAM/0_14-0_1-0_05-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_1-0_0-C $PPFILE $RAM/0_14-0_1-0_1-0_0-C &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_2-0_0-C $PPFILE $RAM/0_14-0_1-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_01-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_06-0_1-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_03-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_06-0_1-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_05-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_06-0_1-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_1-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_06-0_1-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_06-0_1-0_2-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_06-0_1-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_01-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_1-0_1-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_03-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_1-0_1-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_05-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_1-0_1-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_1-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_1-0_1-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_1-0_1-0_2-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_1-0_1-0_2-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_01-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_14-0_1-0_01-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_03-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_14-0_1-0_03-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_05-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_14-0_1-0_05-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_1-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_14-0_1-0_1-0_0-C &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/0_14-0_1-0_2-0_0-C/OUTPUT.jld2 $PPFILE BBALANCE.jld2 $RAM/0_14-0_1-0_2-0_0-C &
 wait
 
-rm $RAM -rf
+rmdir $RAM

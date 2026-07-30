@@ -1,7 +1,7 @@
 # Get mean state using an along-front average
 include("terms/terms.jl")
 
-fields = (:u, :v, :w, :b, :p, :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww, :ub, :vb, :wb)
+fields = (:u, :v, :w, :b, :p, :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww, :ub, :vb, :wb, :ke)
 
 mean_fields = NamedTuple()
 for ξ in fields

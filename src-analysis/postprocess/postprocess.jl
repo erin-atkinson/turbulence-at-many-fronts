@@ -19,18 +19,20 @@ filename = basename(RAW)
 # Defining output terms
 scriptname = ARGS[2]
 
-# Possible third argument is a temporary location
-buffer = length(ARGS) > 2 ? ARGS[3] : foldername
+outputname = ARGS[3]
+
+# Possible fourth argument is a temporary location
+buffer = length(ARGS) > 3 ? ARGS[4] : foldername
 mkpath(buffer)
 
 # Path to output
-BUFFER = joinpath(buffer, "$scriptname.jld2")
+BUFFER = joinpath(buffer, outputname)
 
 # Path to temp output
-TEMP = joinpath(buffer, "temp_$scriptname.jld2")
+TEMP = joinpath(buffer, "temp_$outputname")
 
 # Final output folder
-PROCESSED = joinpath(foldername, "$scriptname.jld2")
+PROCESSED = joinpath(foldername, outputname)
 
 # Read simulation state
 fds = FieldDataset(RAW; backend=OnDisk())
@@ -52,7 +54,7 @@ frames = 1:length(iterations)
 
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
-nextrawfields = NamedTuple(Symbol(k, :_next) => deepcopy(fds[k][2]) for k in (:u, :v, :w, :b))
+nextrawfields = NamedTuple(Symbol(k, :_prev) => deepcopy(fds[k][1]) for k in (:u, :v, :w, :b))
 
 # Setup background strain
 include("../terms/strainflow.jl")
@@ -159,9 +161,8 @@ jldopen(file->saveproperty!(file, "grid", grid), BUFFER, "a")
 if !isequal(BUFFER, PROCESSED)
     @info "Moving from $BUFFER to $PROCESSED"
     mv(BUFFER, PROCESSED; force=true)
+    rm(buffer; recursive=true)
 end
 rm(TEMP; force=true)
-
-
 
 @info "Done!"

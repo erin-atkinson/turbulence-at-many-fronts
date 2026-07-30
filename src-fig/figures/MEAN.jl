@@ -2,10 +2,12 @@ function mean_fields(foldername, frames, filename;
     fig_kw = NamedTuple(),
     ax_kw = NamedTuple(),
     record_kw = NamedTuple(),
-    background = true
+    background = true,
+    N_window = 1
     )
     
-    MEAN = joinpath(foldername, "MEAN.jld2")
+    suffix = N_window == 1 ? "" : "-$N_window"
+    MEAN = joinpath(foldername, "MEAN$suffix.jld2")
 
     fts_u_bar = FieldTimeSeries(MEAN, "u_bar")
     fts_v_bar = FieldTimeSeries(MEAN, "v_bar")
@@ -108,10 +110,12 @@ function mean_hovmoller(foldername, z;
     fig_kw = NamedTuple(),
     ax_kw = NamedTuple(),
     background = true,
-    remove_mean = false
+    remove_mean = false,
+    N_window = 1
     )
 
-    MEAN = joinpath(foldername, "MEAN.jld2")
+    suffix = N_window == 1 ? "" : "-$N_window"
+    MEAN = joinpath(foldername, "MEAN$suffix.jld2")
 
     fts_u_bar = FieldTimeSeries(MEAN, "u_bar")
     fts_v_bar = FieldTimeSeries(MEAN, "v_bar")

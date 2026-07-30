@@ -25,7 +25,7 @@ advection_background = Field(@at loc -input_fields.U * ∂x(v_bar))
 advection_z = Field(@at loc -w_bar * ∂z(v_bar))
 advection = (; advection_x, advection_background, advection_z)
 
-turbulent_flux_density_x = Field(uv_bar - flux_density_x - flux_density_background)
+turbulent_flux_density_x = Field(uv_bar - flux_density_x)
 turbulent_flux_density_z = Field(wv_bar - flux_density_z)
 turbulent_flux_density = (; turbulent_flux_density_x, turbulent_flux_density_z)
 
@@ -33,11 +33,13 @@ mixing_x = Field(-∂x(turbulent_flux_density_x))
 mixing_z = Field(-∂z(turbulent_flux_density_z))
 mixing = (; mixing_x, mixing_z)
 
-coriolis_y = Field(@at loc sp.f * v_bar)
-strain_y = Field(-v_bar * ∂x(input_fields.U))
-other = (; coriolis_y, strain_y)
+coriolis_y = Field(@at loc -1 * sp.f * u_bar)
+strain_y = Field(v_bar * ∂x(input_fields.U))
+sponge = Field(Sponge(v_bar, sp))
 
-total = Field(-∂x(flux_density_x + flux_density_background) - ∂z(flux_density_z) + mixing_x + mixing_z + coriolis_y + strain_y)
+other = (; coriolis_y, strain_y, sponge)
+
+total = Field(-∂x(flux_density_x) - ∂z(flux_density_z) + mixing_x + mixing_z + advection_background + coriolis_y + strain_y + sponge)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
 dependency_fields = merge(mean_fields, flux_density, advection, turbulent_flux_density, mixing, other, (; total))

@@ -14,10 +14,10 @@ cd ~/turbulence-at-many-fronts
 PPFILE=DFM
 RAM=/dev/shm/outer-test-DFM
 mkdir $RAM
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x800 $PPFILE $RAM/outer-test-x800 &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x900 $PPFILE $RAM/outer-test-x900 &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x1000 $PPFILE $RAM/outer-test-x1000 &
-julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x1100 $PPFILE $RAM/outer-test-x1100 &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x800/OUTPUT.jld2 $PPFILE DFM.jld2 $RAM/outer-test-x800 &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x900/OUTPUT.jld2 $PPFILE DFM.jld2 $RAM/outer-test-x900 &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x1000/OUTPUT.jld2 $PPFILE DFM.jld2 $RAM/outer-test-x1000 &
+julia -t 24 -- src-analysis/postprocess/postprocess.jl $SCRATCH/turbulence-at-many-fronts/outer-test-x1100/OUTPUT.jld2 $PPFILE DFM.jld2 $RAM/outer-test-x1100 &
 wait
 
-rm $RAM -rf
+rmdir $RAM

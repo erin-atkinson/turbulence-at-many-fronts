@@ -24,6 +24,21 @@ const u_bar_label = L"\overline{u} / \text{cm}\,\text{s}^{-1}"
 const tot_u_bar_label = L"(\overline{u} + U) / \text{cm}\,\text{s}^{-1}"
 const v_bar_label = L"\overline{v} / \text{cm}\,\text{s}^{-1}"
 const w_bar_label = L"\overline{w} / \text{mm}\,\text{s}^{-1}"
+const b_bar_label = L"\overline{b} / \text{m}\,\text{s}^{-2}" 
+
+const x_label = L"x / \text{km}"
+const y_label = L"y / \text{km}"
+const z_label = L"z / \text{m}"
+const t_label = L"t / \text{hr}"
+
+const u_unit = 1e-2
+const v_unit = 1e-2
+const w_unit = 1e-3
+
+const x_unit = 1e3
+const y_unit = 1e3
+const z_unit = 1
+const t_unit = 3600
 
 # Distance between b contours relative to Δb
 const b_step = 1/6
