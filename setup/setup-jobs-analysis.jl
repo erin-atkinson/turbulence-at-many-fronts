@@ -105,6 +105,8 @@ map(sets, setnames) do set, setname
     save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis")
     save_script("$setname-ENERGY-5", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="ENERGY-5.jld2")
 
+    save_script("$setname-GRADIENTS-5", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="GRADIENTS-5.jld2")
+
     #save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
     #save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
     #save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")

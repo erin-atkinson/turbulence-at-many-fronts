@@ -1,4 +1,6 @@
 include("terms/terms.jl")
+include("terms/vorticity/vorticity.jl")
+include("terms/pv/q.jl")
 
 fields = (:u, :v, :w, :b)
 
@@ -24,8 +26,12 @@ buoyancy = (; M², N²)
 
 S² = Field(∂z(u_bar)^2 + ∂z(v_bar)^2)
 Ri = Field(N² / S²)
-shear = (; S², Ri)
+Rib = Field(N² / M²^2 * sp.f^2)
+shear = (; S², Ri, Rib)
+
+q = Field(PV(sp, u_bar, v_bar, w_bar, b_bar))
+potential_vorticity = (; q)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
-dependency_fields = merge(vorticity, buoyancy, shear)
+dependency_fields = merge(vorticity, buoyancy, shear, potential_vorticity)
 output_fields = dependency_fields

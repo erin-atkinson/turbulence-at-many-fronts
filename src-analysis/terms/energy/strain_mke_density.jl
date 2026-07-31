@@ -4,7 +4,7 @@
     α = variable_strain_rate(t, sp) * strain_profile(x, sp)
     u_avg  = a_avg(i, j, k, grid, u, u_prev)
 
-    return @inbounds -α * u[i, j, k] * u_avg
+    return @inbounds α * u[i, j, k] * u_avg
 end
 
 
@@ -23,7 +23,7 @@ end
     αvv = ℑyᵃᶜᵃ(i, j, k, grid, αff_avg, (Center(), Face(), Center()), t, v, v_prev, sp)
     αww = ℑzᵃᵃᶜ(i, j, k, grid, αff_avg, (Center(), Center(), Face()), t, w, w_prev, sp)
     
-    return (αuu + αvv + αww) / 2
+    return -(αuu + αvv + αww) / 2
 end
 
 """

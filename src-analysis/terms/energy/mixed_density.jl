@@ -1,7 +1,7 @@
 @inline function mixed_density_func(i, j, k, grid, clock, b, b_prev, h_ml, h_ml_prev)
     Δt = clock.last_Δt
 
-    b_avg = a_avg(i, j, k, grid, b, b_next)
+    b_avg = a_avg(i, j, k, grid, b, b_prev)
     ∂h_ml∂t = @inbounds (h_ml[i, j, k] - h_ml_prev[i, j, k]) / Δt
 
     return -b_avg * ∂h_ml∂t

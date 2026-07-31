@@ -35,7 +35,7 @@ mixing = (; mixing_x, mixing_z)
 
 coriolis_y = Field(@at loc -1 * sp.f * u_bar)
 strain_y = Field(v_bar * ∂x(input_fields.U))
-sponge = Field(Sponge(v_bar, sp))
+sponge = Field(SpongeLayer(v_bar, sp))
 
 other = (; coriolis_y, strain_y, sponge)
 

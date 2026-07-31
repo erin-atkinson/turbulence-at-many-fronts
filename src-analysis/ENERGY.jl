@@ -3,7 +3,7 @@ include("terms/advection/advection.jl")
 include("terms/advection/operators.jl")
 
 fields = (
-    :u, :v, :w, :b, :p,
+    :u, :v, :w, :b,
     :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww,
     :ub, :vb, :wb,
     :u_prev, :v_prev, :w_prev, :b_prev,
@@ -114,7 +114,7 @@ include("terms/energy/cooling.jl")
 include("terms/energy/bflux_density.jl")
 
 b_profile = Field(Average(b_bar; dims=1))
-b_prev_profile = Field(Average(b_prev_bar; dims=1))
+b_prev_profile = Field(Average(b_bar; dims=1))
 
 h_ml = Field(MLD(b_profile, 2sp.Δb / sp.H))
 h_ml_prev = Field(MLD(b_prev_profile, 2sp.Δb / sp.H))
@@ -143,12 +143,12 @@ bflux = Field(Integral(bflux_density))
 cooling = Field(COOLING(clock, h_ml, h_ml_prev, sp))
 
 mpe_production = (;
+    h_ml,
     mpe,
     mixed,
     strain_mpe,
     bflux,
     cooling,
-    h_ml
 )
 dependency_fields = merge(dependency_fields, mpe_production)
 @info mpe_production

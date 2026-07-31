@@ -22,7 +22,7 @@ end
     return sp.σ * min(tb - b, 0) * sponge_layer_func(z, sp)
 end
 
-function Sponge(field, sp)
+function SpongeLayer(field, sp)
     (ℓx, ℓy, ℓz) = location(field)
     grid = field.grid
     
