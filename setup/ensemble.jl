@@ -111,11 +111,11 @@ ips_01 = map(ips) do ip
     (; ip..., stop_time=10e5, βα=0.1)
 end
 
-ips_02 = map(ips) do ip
+ips_02 = map(ips[7:9]) do ip
     (; ip..., stop_time=5e5, βα=0.2)
 end
 
-ips_005 = map(ips) do ip
+ips_005 = map(ips[7:9]) do ip
     (; ip..., stop_time=20e5, βα=0.05)
 end
 
@@ -134,6 +134,17 @@ cooling_depth_005 = (;
     filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_005)
 )
 
+test_set = (;
+    ips = cooling_depth_01.ips[7:9],
+    filenames = cooling_depth_01.filenames[7:9],
+)
+
+test_set_init = (;
+    ips = cooling_depth_init.ips[7:9],
+    filenames = cooling_depth_init.filenames[7:9],
+)
+
+#= I probably won't use these
 # Cooling only
 ips = [
     (; default_ip..., Nz=64, βH=0.1, βB=0.01, stop_time=0.0, start_time=-6.0e5),
@@ -189,13 +200,4 @@ depth_only = (;
     ips,
     filenames,
 )
-
-test_set = (;
-    ips = [cooling_only.ips[5]],
-    filenames = [cooling_only.filenames[5]],
-)
-
-test_set_init = (;
-    ips = [cooling_depth_init.ips[8]],
-    filenames = [cooling_depth_init.filenames[8]],
-)
+=#

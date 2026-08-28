@@ -114,7 +114,7 @@ include("terms/energy/cooling.jl")
 include("terms/energy/bflux_density.jl")
 
 b_profile = Field(Average(b_bar; dims=1))
-b_prev_profile = Field(Average(b_bar; dims=1))
+b_prev_profile = Field(Average(b_prev_bar; dims=1))
 
 h_ml = Field(MLD(b_profile, 2sp.Δb / sp.H))
 h_ml_prev = Field(MLD(b_prev_profile, 2sp.Δb / sp.H))

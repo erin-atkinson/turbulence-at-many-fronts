@@ -114,7 +114,6 @@ end
 @inline function constant_mld_func(i, j, k, grid, b, ε)
     res, = node(i, j, 1, grid, nothing, nothing, Center())
     res = -res
-    return res
     for i in axes(b, 1), j in axes(b, 2)
         res = min(mld_func(i, j, k, grid, b, ε), res)
     end

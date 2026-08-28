@@ -124,11 +124,20 @@ writing_times_neg = filter(t-> t > prev_time, (sp.start_time:sp.save_time:0)[1:e
 writing_times = [writing_times_neg; writing_times_pos]
 
 output_symbol = Symbol(:fields, prev_iteration)
+snapshot_symbol = Symbol(:snapshot, prev_iteration)
 checkpointer_symbol = Symbol(:checkpointer, prev_iteration)
 
 simulation.output_writers[output_symbol] = JLD2Writer(model, output_fields; 
-    filename = "$output_folder/OUTPUT.jld2", 
+    filename = "$output_folder/AVERAGE.jld2", 
     schedule = AveragedSpecifiedTimes(writing_times, sp.save_time),
+    overwrite_existing = false,
+    with_halos = true,
+    init = init_jld2!
+)
+
+simulation.output_writers[snapshot_symbol] = JLD2Writer(model, (; u, v, w, b); 
+    filename = "$output_folder/OUTPUT.jld2", 
+    schedule = SpecifiedTimes(writing_times),
     overwrite_existing = false,
     with_halos = true,
     init = init_jld2!

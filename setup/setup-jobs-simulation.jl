@@ -187,6 +187,7 @@ for (ip, filename) in zip(cooling_depth_005.ips, cooling_depth_005.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
+#=
 println("Cooling only")
 for (ip, filename) in zip(cooling_only.ips, cooling_only.filenames)
     save_script(filename, T, ip, filename; loc=path)
@@ -196,7 +197,7 @@ println("Depth only")
 for (ip, filename) in zip(depth_only.ips, depth_only.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
-
+=#
 # Varying along-front winds
 
 # Varying across-front winds

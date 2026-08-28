@@ -38,6 +38,7 @@ for ξ in fields
     end
 end
 
+eval(qute)
 # z = -0.05H, -0.25H, -0.5H, -0.75H, -0.95H
 for ξ in fields
     z005_ξ = Symbol(:z005_, ξ)
