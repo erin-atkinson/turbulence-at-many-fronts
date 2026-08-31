@@ -11,6 +11,12 @@ end
     return @inbounds -σ * field[i, j, k]
 end
 
+@inline function sponge_func(i, j, k, grid, loc, f, sp, args...)
+    z = znode(i, j, k, grid, loc...)
+    σ = sponge_layer_func(z, sp)
+    return -σ * f(i, j, k, grid, args...)
+end
+
 # Damp b towards the bottom value
 @inline function b_forcing_func(i, j, k, grid, b, sp)
     (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())

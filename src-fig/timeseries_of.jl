@@ -14,19 +14,33 @@ end
 
 expand(v::V) where {T, V<:Vector{T}} = v
 
-# Reduce Nd field using func (Nd->Md), then find it for all times
-@inline function timeseries_of(args...)
-    timeseries_of(identity, args...)
+@inline function openifstring(func::Function, file) 
+    func(file)
 end
 
+@inline function openifstring(func::Function, file::String)
+    jldopen(func, file)
+end
+
+# Helper function for getting all iterations
 @inline function timeseries_of(func::Function, file, field, iterations)
-    data = map(iteration->get_field(func, file, field, iteration), iterations)
-    expand(data)
+    data = openifstring(file) do file
+        map(iteration->get_field(func, file, field, iteration), iterations)
+    end
+    return expand(data)
 end
 
-# From a string
-@inline function timeseries_of(func::Function, filename::String, args...)
-    jldopen(filename) do file
-        timeseries_of(func, file, args...)
-    end
+# With no function given
+@inline function timeseries_of(file, field, iterations)
+    timeseries_of(identity, file, field, iterations)
 end
+
+# Over a named tuple of fields
+@inline function timeseries_of(func::Function, filename, iterations; kwargs...)
+    return NamedTuple(k => timeseries_of(func, filename, kwargs[k], iterations) for k in keys(kwargs))
+end
+
+@inline function timeseries_of(filename, iterations; kwargs...)
+    return NamedTuple(k => timeseries_of(filename, kwargs[k], iterations) for k in keys(kwargs))
+end
+

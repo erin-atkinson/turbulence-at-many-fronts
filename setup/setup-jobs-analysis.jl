@@ -89,6 +89,7 @@ let set = test_set,
     
     save_script("$setname-ENERGY-5", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-5.jld2", job=false, outputfilename="ENERGY-5.jld2")
     save_script("$setname-ENERGY-50", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-50.jld2", job=false, outputfilename="ENERGY-50.jld2")
+    save_script("$setname-MEAN-50", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE-50.jld2", job=false, outputfilename="MEAN-50.jld2")
     
     save_script("$setname-STREAMFUNCTION", set.filenames, "STREAMFUNCTION", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false, outputfilename="STREAMFUNCTION.jld2")
 
