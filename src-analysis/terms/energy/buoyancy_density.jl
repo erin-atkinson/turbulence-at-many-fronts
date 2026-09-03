@@ -2,9 +2,12 @@
     return @inbounds ℑzᵃᵃᶜ(i, j, k, grid, a_avg, w, w_prev) * b[i, j, k]
 end
 
-"""
+@doc raw"""
     BUOYANCYDensity(w, w_prev, b)
-Mean potential energy production
+Production of mean kinetic energy from potential energy of the mean state
+```math
+\text{BUOYANCY} = \int \text{d}V \overline{w}\overline{b}
+```
 """
 function BUOYANCYDensity(w, w_prev, b)
     grid = w.grid

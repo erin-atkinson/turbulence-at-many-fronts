@@ -1,3 +1,21 @@
+function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
+    strs = map([βH, βα, βB, βτ, θτ]) do β
+        replace(string(β), "."=>"_")
+    end
+    ext = isnothing(ext) ? "" : ".$ext"
+    return joinpath(pre, join(strs, "-") * ext)
+end
+
+function θτ_from_str(ip)
+    ip.βτ == 0 && return "C"
+    ip.θτ ≈ 0 && return "N" # Winds blow along front, same direction as jet
+    ip.θτ ≈ π && return "S" # Winds blow along front, opposite direction to jet
+    ip.θτ ≈ π/2 && return "E" # Winds blow across front, opposite direction to secondary circulation
+    ip.θτ ≈ 3π/2 && return "W" # Winds blow across front, same direction as secondary circulation
+    println("no close angle for θτ=$(ip.θτ)")
+    return ip.θτ
+end
+
 # Default
 default_ip = (;
     stop_time = 10e5, start_time = -2e5, save_time = 1e4, max_time = -1.0,
@@ -5,8 +23,8 @@ default_ip = (;
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 6,
-    comment = ""
+    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 60,
+    comment = "Mixed layer frontogenesis test"
 )
 
 # Some tests for central region size
@@ -28,12 +46,12 @@ size_test = (;
 # Some tests for domain resolution
 resolution_test = (;
     ips = [
-        (; default_ip..., βh = 4, Nx=1400, Nh=1024, Nz=96, comment="Resolution test x1400 z96"),
-        (; default_ip..., βh = 4, Nx=1400, Nh=1024, Nz=64, comment="Resolution test x1400 z64"),
-        (; default_ip..., βh = 4, Nx=1024, Nh=768, Nz=96, comment="Resolution test x1024 z96"),
-        (; default_ip..., βh = 4, Nx=1024, Nh=768, Nz=32, comment="Resolution test x1024 z32"),
-        (; default_ip..., βh = 4, Nx=800, Nh=600, Nz=64, comment="Resolution test x800 z64"),
-        (; default_ip..., βh = 4, Nx=800, Nh=600, Nz=32, comment="Resolution test x800 z32"),
+        (; default_ip..., βh = 3, Nx=1400, Nh=1024, Nz=96, comment="Resolution test x1400 z96"),
+        (; default_ip..., βh = 3, Nx=1400, Nh=1024, Nz=64, comment="Resolution test x1400 z64"),
+        (; default_ip..., βh = 3, Nx=1024, Nh=768, Nz=96, comment="Resolution test x1024 z96"),
+        (; default_ip..., βh = 3, Nx=1024, Nh=768, Nz=32, comment="Resolution test x1024 z32"),
+        (; default_ip..., βh = 3, Nx=800, Nh=600, Nz=64, comment="Resolution test x800 z64"),
+        (; default_ip..., βh = 3, Nx=800, Nh=600, Nz=32, comment="Resolution test x800 z32"),
     ],
     filenames = [
         "resolution-test-x1400-z96",
@@ -68,23 +86,23 @@ default_ip = (;
     Nx = 1400, Nh = 1024, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
     βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 60,
-    comment = "Cooling, depth initialisation"
+    comment = "Mixed layer frontogenesis"
 )
 
 ips = [
-    (; default_ip..., Nz=39, βH=0.06, βB=0.01, stop_time=0.0, start_time=-4.3e5),
     (; default_ip..., Nz=39, βH=0.06, βB=0.03, stop_time=0.0, start_time=-3e5),
     (; default_ip..., Nz=39, βH=0.06, βB=0.05, stop_time=0.0, start_time=-2.5e5),
+    (; default_ip..., Nz=39, βH=0.06, βB=0.07, stop_time=0.0, start_time=-2.2e5),
     (; default_ip..., Nz=39, βH=0.06, βB=0.1, stop_time=0.0, start_time=-2e5),
     (; default_ip..., Nz=39, βH=0.06, βB=0.2, stop_time=0.0, start_time=-1.6e5),
-    (; default_ip..., Nz=64, βH=0.1, βB=0.01, stop_time=0.0, start_time=-6.0e5),
     (; default_ip..., Nz=64, βH=0.1, βB=0.03, stop_time=0.0, start_time=-4.2e5),
     (; default_ip..., Nz=64, βH=0.1, βB=0.05, stop_time=0.0, start_time=-3.5e5),
+    (; default_ip..., Nz=64, βH=0.1, βB=0.07, stop_time=0.0, start_time=-3.1e5),
     (; default_ip..., Nz=64, βH=0.1, βB=0.1, stop_time=0.0, start_time=-2.8e5),
     (; default_ip..., Nz=64, βH=0.1, βB=0.2, stop_time=0.0, start_time=-2.2e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.01, stop_time=0.0, start_time=-7.5e5),
     (; default_ip..., Nz=90, βH=0.14, βB=0.03, stop_time=0.0, start_time=-5.2e5),
     (; default_ip..., Nz=90, βH=0.14, βB=0.05, stop_time=0.0, start_time=-4.4e5),
+    (; default_ip..., Nz=90, βH=0.14, βB=0.07, stop_time=0.0, start_time=-3.9e5),
     (; default_ip..., Nz=90, βH=0.14, βB=0.1, stop_time=0.0, start_time=-3.5e5),
     (; default_ip..., Nz=90, βH=0.14, βB=0.2, stop_time=0.0, start_time=-2.8e5),
 ]
@@ -132,6 +150,62 @@ cooling_depth_02 = (;
 cooling_depth_005 = (;
     ips = ips_005,
     filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_005)
+)
+
+# With wind
+ips_wind_init = [
+    (; ips[7]..., βτ = 0.01, θτ = 0)
+    (; ips[7]..., βτ = 0.01, θτ = π)
+    
+    (; ips[9]..., βτ = 0.01, θτ = 0)
+    (; ips[9]..., βτ = 0.01, θτ = π)
+    
+    (; ips[7]..., βτ = 0.01, θτ = π/2)
+    (; ips[7]..., βτ = 0.01, θτ = 3π/2)
+    
+    (; ips[9]..., βτ = 0.01, θτ = π/2)
+    (; ips[9]..., βτ = 0.01, θτ = 3π/2)
+]
+ips_wind = map(ip -> (; ip..., stop_time=10e5, βα=0.1), ips_wind_init)
+
+filenames_wind_init = map(ip->make_filename(ip; θτ=θτ_from_str(ip), βα="init"), ips_wind_init)
+filenames_wind = map(ip->make_filename(ip; θτ=θτ_from_str(ip)), ips_wind)
+
+wind_init = (; 
+    ips = ips_wind_init,
+    filenames = filenames_wind_init,
+    destfilenamess = destfilenamess = map(x->[x], filenames_wind)
+)
+wind = (;
+    ips = ips_wind,
+    filenames = filenames_wind
+)
+
+ips_hd_init = [
+    (; ips[7]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256) # Low cooling
+    (; ips[9]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256) # High cooling
+    (; ips[9]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256) # Along-front wind
+    (; ips[9]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256) # Across-front wind
+]
+
+ips_hd = map(ip -> (ip..., stop_time=10e5, βα=0.1), ips_hd_init)
+
+filenames_hd = [
+    "low-cooling",
+    "high-cooling",
+    "along-front-wind",
+    "across-front-wind",
+]
+
+highresolution_init = (;
+    ips = ips_hd_init,
+    filenames = map(x->x * "-init", filenames_hd),
+    destfilenamess = map(x->[x], filenames_hd)
+)
+
+highresolution = (;
+    ips = ips_hd,
+    filenames = filenames_hd
 )
 
 test_set = (;

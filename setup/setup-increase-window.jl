@@ -74,7 +74,7 @@ sets = [
 let set = test_set,
     setname = "test-set"
     save_script("$setname-WINDOW", set.filenames, 5, "0:30:00"; loc="jobs-analysis", job=false)
-    save_script("$setname-WINDOWWIDE", set.filenames, 50, "0:30:00"; loc="jobs-analysis", job=false)
+    save_script("$setname-WINDOWWIDE", set.filenames, 20, "0:30:00"; loc="jobs-analysis", job=false)
 end
 
 #=

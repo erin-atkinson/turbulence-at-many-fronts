@@ -29,7 +29,7 @@ Ri = Field(N² / S²)
 Rib = Field(N² / M²^2 * sp.f^2)
 shear = (; S², Ri, Rib)
 
-q = Field(PV(sp, u_bar, v_bar, w_bar, b_bar))
+q = Field(PV(u_bar, v_bar, w_bar, b_bar, sp))
 potential_vorticity = (; q)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))

@@ -39,6 +39,6 @@ betatau=0.0
 thetatau=0.0
 beta0=60
 
-comment="Cooling, depth initialisation"
+comment="Mixed layer frontogenesis"
 
 julia -t 8 -- src-simulation/simulation.jl $output_folder $stop_time $start_time $max_time $save_time $f $L $betax $betah $Nx $Nh $Ny $Nz $betal $betaH $betaalpha $betaB $betatau $thetatau $beta0 $comment

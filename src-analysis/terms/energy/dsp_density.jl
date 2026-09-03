@@ -13,9 +13,12 @@
     return αuu - αvv
 end
 
-"""
-    DSPDensity(u, v, u_prev, v_prev, U)
-Deformation shear production density due to a background U
+@doc raw"""
+    DSPDensity(clock, velocities, velocities_prev, sp)
+Deformation shear production density due to the strain flow
+```math
+\text{DSP} = \int \text{d}V \alpha (\overline{u}^2  - \overline{v}^2)
+```
 """
 function DSPDensity(clock, velocities, velocities_prev, sp)
     grid = velocities.u.grid

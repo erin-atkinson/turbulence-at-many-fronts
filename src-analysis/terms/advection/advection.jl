@@ -10,14 +10,11 @@ using Oceananigans.Advection: advective_momentum_flux_Uu,
                               advective_momentum_flux_Uw,
                               advective_momentum_flux_Vw,
                               advective_momentum_flux_Ww
+                              advective_tracer_flux_x,
+                              advective_tracer_flux_y,
+                              advective_tracer_flux_z
 
 using Oceananigans.Utils: SumOfArrays
-
-# These are just for a reminder
-# div_𝐯u, div_𝐯v, div_𝐯w, div_Uc,
-# advective_tracer_flux_x,
-# advective_tracer_flux_y,
-# advective_tracer_flux_z,
 
 @inline advective_momentum_flux_density_Uu(i, j, k, grid, advection, U, u) = @inbounds advective_momentum_flux_Uu(i, j, k, grid, advection, U, u) / Axᶜᶜᶜ(i, j, k, grid)
 @inline advective_momentum_flux_density_Vu(i, j, k, grid, advection, V, u) = @inbounds advective_momentum_flux_Vu(i, j, k, grid, advection, V, u) / Ayᶠᶠᶜ(i, j, k, grid)

@@ -100,7 +100,8 @@ function terms_STREAMFUNCTION(run_id, frames, filename;
     ax_kw = NamedTuple(),
     ax_z_kw = NamedTuple(),
     record_kw = NamedTuple(),
-    N_window = 1
+    N_window = 1,
+    normalize = false
     )
     foldername = joinpath(scratchpath, run_id)
     
@@ -117,23 +118,24 @@ function terms_STREAMFUNCTION(run_id, frames, filename;
     fts_b_bar = FieldTimeSeries(MEAN, "b_bar")
     
     fieldnames = (;
-        advection_self = "advection_self",
-        advection_background = "advection_background",
-        ageostrophic = "ageostrophic",
-        strain = "strain",
-        turbulence = "turbulence",
-        sponge = "sponge"
+        ageostrophic = "ageostrophic_density",
+        strain = "strain_density",
+        turbulence = "turbulence_density",
+        sponge = "sponge_density",
     )
 
     fts = NamedTuple(k => FieldTimeSeries(STREAMFUNCTION, v; backend=OnDisk()) for (k, v) in pairs(fieldnames))
 
     title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
-        L"\text{Terms in }\nabla^2 \psi\text{ balance}\quad t = %$t_hr \, \text{hr}"
+        L"\text{Terms in SCE balance}\quad t = %$t_hr \, \text{hr}"
     end
     
     b_bar = @lift nov(fts_b_bar[Time($t)][:, 1, :]) ./ sp.Δb
 
-    field_data = NamedTuple(k => @lift nov(v[Time($t)][:, 1, :]) ./ sp.f^2 for (k, v) in pairs(fts))
+    energy_unit = normalize ? sp.B / sp.f : 1/1037
+    power_unit = normalize ? sp.B : energy_unit / 1
+
+    field_data = NamedTuple(k => @lift nov(v[Time($t)][:, 1, :]) ./ power_unit for (k, v) in pairs(fts))
     
     fig = Figure(; 
         size=(1000, 600),
@@ -149,23 +151,17 @@ function terms_STREAMFUNCTION(run_id, frames, filename;
     )
 
     axes = (;
-        advection_self = Axis(fig[2, 1]; ax_kw..., title=STREAMFUNCTION_term_labels.advection_self),
-        advection_background = Axis(fig[2, 2]; ax_kw..., title=STREAMFUNCTION_term_labels.advection_background),
-        ageostrophic = Axis(fig[2, 3]; ax_kw..., title=STREAMFUNCTION_term_labels.ageostrophic),
-        strain = Axis(fig[3, 1]; ax_kw..., title=STREAMFUNCTION_term_labels.strain),
-        turbulence = Axis(fig[3, 2]; ax_kw..., title=STREAMFUNCTION_term_labels.turbulence),
-        sponge = Axis(fig[3, 3]; ax_kw..., title=STREAMFUNCTION_term_labels.sponge)
+        ageostrophic = Axis(fig[2, 1]; ax_kw..., title=STREAMFUNCTION_term_labels.ageostrophic),
+        strain = Axis(fig[2, 2]; ax_kw..., title=STREAMFUNCTION_term_labels.strain),
+        turbulence = Axis(fig[3, 1]; ax_kw..., title=STREAMFUNCTION_term_labels.turbulence),
+        sponge = Axis(fig[3, 2]; ax_kw..., title=STREAMFUNCTION_term_labels.sponge),
     )
 
-    hidexdecorations!(axes.advection_self; ticks=false)
-    hidexdecorations!(axes.advection_background; ticks=false)
     hidexdecorations!(axes.ageostrophic; ticks=false)
+    hidexdecorations!(axes.strain; ticks=false)
 
-    hideydecorations!(axes.advection_background; ticks=false)
-    hideydecorations!(axes.ageostrophic; ticks=false)
-    hideydecorations!(axes.turbulence; ticks=false)
+    hideydecorations!(axes.strain; ticks=false)
     hideydecorations!(axes.sponge; ticks=false)
-
     
     hts = NamedTuple(
         map(keys(axes)) do k
@@ -173,7 +169,7 @@ function terms_STREAMFUNCTION(run_id, frames, filename;
             zs = nov(znodes(fts[k]; with_halos=true)) ./ z_unit
             data = field_data[k]
             colormap = :balance
-            colorrange = (-10, 10)
+            colorrange = (-5, 5)
     
             k => heatmap!(axes[k], xs, zs, data; colormap, colorrange)
         end
@@ -188,8 +184,93 @@ function terms_STREAMFUNCTION(run_id, frames, filename;
 
         contour!(axes[k], xs, zs, data; levels, color)
     end
+    label = normalize ? L"\text{Term} / B" : L"\text{Term} / \text{kW} \, \text{km}^{-1}"
+    Colorbar(fig[2:3, 3], hts.strain; label)
 
-    Colorbar(fig[2:3, 4], hts.advection_self; label=L"\text{Term} / f^2")
+    #colgap!(fig.layout, 40)
+    prettyrecord(n, fig, filename, frames; record_kw...)
+
+    return fig
+end
+
+function state_STREAMFUNCTION(run_id, frames, filename;
+    fig_kw = NamedTuple(),
+    ax_kw = NamedTuple(),
+    ax_z_kw = NamedTuple(),
+    record_kw = NamedTuple(),
+    N_window = 1,
+    )
+    foldername = joinpath(scratchpath, run_id)
+    
+    suffix = N_window == 1 ? "" : "-$N_window"
+    STREAMFUNCTION = joinpath(foldername, "STREAMFUNCTION$suffix.jld2")
+    MEAN = joinpath(foldername, "MEAN$suffix.jld2")
+
+    sp = simulation_parameters(MEAN)
+    iterations, times = iterations_times(MEAN)
+    
+    n = Observable(frames[1])
+    t = @lift interp_time($n, times)
+    
+    fts_b_bar = FieldTimeSeries(MEAN, "b_bar")
+    fts_ψ = FieldTimeSeries(STREAMFUNCTION, "ψ")
+    fts_sce = FieldTimeSeries(STREAMFUNCTION, "sce_density")
+
+    title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
+        L"\text{Streamfunction and energy}\quad t = %$t_hr \, \text{hr}"
+    end
+    
+    b_bar = @lift nov(fts_b_bar[Time($t)][:, 1, :]) ./ sp.Δb
+    ψ = @lift nov(fts_ψ[Time($t)][:, 1, :]) ./ (sp.H * sp.L * sp.f)
+    sce = @lift nov(fts_sce[Time($t)][:, 1, :]) ./ (sp.L * sp.f)^2
+    
+    fig = Figure(; 
+        size=(600, 360),
+        fig_kw...
+    )
+
+    # Heatmap axis
+    ax = Axis(fig[1, 1];
+        xlabel = x_label,
+        ylabel = z_label,
+        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
+        xticks = [-1, 0, 1],
+        title
+    )
+    
+    # Heatmap
+    ht = begin
+        xs = nov(xnodes(fts_sce; with_halos=true)) ./ x_unit
+        zs = nov(znodes(fts_sce; with_halos=true)) ./ z_unit
+        data = sce
+        colormap = :amp
+        colorrange = (0, 0.3)
+
+        heatmap!(ax, xs, zs, data; colormap, colorrange)
+    end
+
+    # Buoyancy
+    begin
+        xs = nov(xnodes(fts_b_bar; with_halos=true)) ./ x_unit
+        zs = nov(znodes(fts_b_bar; with_halos=true)) ./ z_unit
+        data = b_bar
+        levels = b_levels(fts_b_bar, sp) ./ sp.Δb
+        color = (:black, 0.5)
+
+        contour!(ax, xs, zs, data; levels, color)
+    end
+
+    # Streamfunction
+    begin
+        xs = nov(xnodes(fts_ψ; with_halos=true)) ./ x_unit
+        zs = nov(znodes(fts_ψ; with_halos=true)) ./ z_unit
+        data = ψ
+        levels = range(-0.3, 0.3, 60)
+        color = (:blue, 0.5)
+
+        contour!(ax, xs, zs, data; levels, color)
+    end
+    Colorbar(fig[1, 2], ht; label=L"\text{SCE} / L^2f^2")
 
     #colgap!(fig.layout, 40)
     prettyrecord(n, fig, filename, frames; record_kw...)

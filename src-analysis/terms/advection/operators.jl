@@ -9,7 +9,6 @@ using Oceananigans.Fields: ZeroField
 @inline swap_loc(loc::Type{Center}) = Face
 @inline swap_loc(loc::Type{Nothing}) = Nothing
 
-
 for ξ in (:u, :v, :w), χ in (:U, :V, :W)
     advective_momentum_flux_density_χξ = Symbol(:advective_momentum_flux_density_, χ, ξ)
     χξ_func = Symbol(χ, ξ, :_func)

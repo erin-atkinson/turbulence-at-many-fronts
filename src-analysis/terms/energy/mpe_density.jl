@@ -1,5 +1,4 @@
 @inline function mpe_density_func(i, j, k, grid, b, h_ml)
-    
     x, y, z = node(i, j, k, grid, Center(), Center(), Center())
     
     return @inbounds -b[i, j, k] * (z + h_ml[i, j, k])

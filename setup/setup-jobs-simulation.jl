@@ -17,32 +17,18 @@ function check_completion(simname)
     end
     prev_time < 0 && return "$simname: Uninitialised (no checkpoint at t=0)"
     
-    !mapreduce(a->startswith(a, "OUTPUT"), |, filenames) && return "$simname: Initialised only (no output)"
+    !mapreduce(a->startswith(a, "AVERAGE"), |, filenames) && return "$simname: Initialised only (no output)"
     
-    iterations = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
+    iterations = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
         keys(file["timeseries/t"])
     end
-    ts = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
+    ts = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
         [file["timeseries/t/$iteration"] for iteration in keys(file["timeseries/t"])]
     end
-    sp = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
+    sp = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
         file["metadata/parameters"]
     end
     "$simname: Run until ft = $(sp.f * ts[end]), αt = $(sp.α * ts[end]), $(iterations[end]) $checkpointnames"
-end
-
-function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
-    strs = map([βH, βα, βB, βτ, θτ]) do β
-        replace(string(β), "."=>"_")
-    end
-    ext = ext == nothing ? "" : ".$ext"
-    return joinpath(pre, join(strs, "-") * ext)
-end
-
-function θτ_from_str(ip)
-    ip.βτ == 0 && return "C"
-    ip.θτ == 0 && return "N"
-    ip.θτ == π/2 && return "E"
 end
 
 function make_preamble(jobname, T)
@@ -187,17 +173,40 @@ for (ip, filename) in zip(cooling_depth_005.ips, cooling_depth_005.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
-#=
-println("Cooling only")
-for (ip, filename) in zip(cooling_only.ips, cooling_only.filenames)
+println()
+println("VARYING WIND: INITIALISATION")
+path = "jobs-simulation/wind-init"
+mkpath(path)
+
+for (ip, filename, copy_to) in zip(wind_init.ips, wind_init.filenames, wind_init.destfilenamess)
+    save_script(filename, T, ip, filename; loc=path, copy_to)
+end
+
+println()
+println("VARYING WIND")
+path = "jobs-simulation/wind"
+mkpath(path)
+
+for (ip, filename) in zip(wind.ips, wind.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
-println("Depth only")
-for (ip, filename) in zip(depth_only.ips, depth_only.filenames)
+println()
+println("HIGH RESOLUTION: INITIALISATION")
+path = "jobs-simulation/highresolution-init"
+mkpath(path)
+
+for (ip, filename, copy_to) in zip(highresolution_init.ips, highresolution_init.filenames, highresolution_init.destfilenamess)
+    save_script(filename, T, ip, filename; loc=path, copy_to)
+end
+
+println()
+println("HIGH RESOLUTION")
+path = "jobs-simulation/highresolution"
+mkpath(path)
+
+for (ip, filename) in zip(highresolution.ips, highresolution.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
-=#
-# Varying along-front winds
 
-# Varying across-front winds
+

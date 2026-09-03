@@ -1,16 +1,3 @@
-function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
-    strs = map([βH, βα, βB, βτ, θτ]) do β
-        replace(string(β), "."=>"_")
-    end
-    ext = isnothing(ext) ? "" : ".$ext"
-    return joinpath(pre, join(strs, "-") * ext)
-end
-
-function θτ_from_str(ip)
-    ip.βτ == 0 && return "C"
-    ip.θτ == 0 && return "N"
-    ip.θτ == π/2 && return "E"
-end
 
 function make_preamble(jobname, scriptname, T)
     """
@@ -71,30 +58,29 @@ setnames = [
     "cooling-depth-0_1",
     "cooling-depth-0_2",
     "cooling-depth-0_05",
-    "cooling-only",
-    "depth-only",
+    "wind"
 ]
 
 sets = [
     cooling_depth_01,
     cooling_depth_02,
     cooling_depth_005,
+    wind
 ]
 
 let set = test_set,
     setname = "test-set"
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-DECOMPOSITION", set.filenames, "DECOMPOSITION", "0:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    
-    save_script("$setname-ENERGY-5", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-5.jld2", job=false, outputfilename="ENERGY-5.jld2")
-    save_script("$setname-ENERGY-50", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-50.jld2", job=false, outputfilename="ENERGY-50.jld2")
-    save_script("$setname-MEAN-50", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE-50.jld2", job=false, outputfilename="MEAN-50.jld2")
-    
+    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
     save_script("$setname-STREAMFUNCTION", set.filenames, "STREAMFUNCTION", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false, outputfilename="STREAMFUNCTION.jld2")
-
-    #save_script("$setname-MEAN-5", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE-5.jld2", job=false, outputfilename="MEAN-5.jld2")
-    #save_script("$setname-MEAN-50", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE-50.jld2", job=false, outputfilename="MEAN-50.jld2")
+    
+    save_script("$setname-MEAN-20", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="MEAN-20.jld2")
+    save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="GRADIENTS-20.jld2")
+    save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="ENERGY-20.jld2")
+    save_script("$setname-PV-20", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="PV-20.jld2")
+    save_script("$setname-STREAMFUNCTION-20", set.filenames, "STREAMFUNCTION", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="STREAMFUNCTION-20.jld2")
 end
 
 #=

@@ -37,7 +37,7 @@ betaalpha=0.1
 betaB=0.03
 betatau=0.0
 thetatau=0.0
-beta0=6
+beta0=60
 
 comment="Outer test x800"
 

@@ -23,7 +23,7 @@ f=0.0001
 L=1000.0
 
 betax=20
-betah=4
+betah=3
 
 Nx=1400
 Nh=1024
@@ -37,7 +37,7 @@ betaalpha=0.1
 betaB=0.03
 betatau=0.0
 thetatau=0.0
-beta0=6
+beta0=60
 
 comment="Resolution test x1400 z64"
 
