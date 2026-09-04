@@ -1,3 +1,3 @@
 function Streamfunction(u)
-    return CumulativeIntegral(-u_bar; dims=3)
+    return CumulativeIntegral(-u; dims=3)
 end

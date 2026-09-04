@@ -44,14 +44,15 @@ end
 end
 
 # θ: angle relative to a down-front wind
-@inline function u_flux_func(x, t, sp) 
+# We only include wind in the central region
+@inline function u_flux_func(x, y, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
-    return sp.τ * turnon * sin(sp.θτ)
+    return -sp.τ * turnon * sin(sp.θτ) * exp(-x^2 / 4sp.L^2)
 end
 
-@inline function v_flux_func(x, t, sp) 
+@inline function v_flux_func(x, y, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
-    return sp.τ * turnon * cos(sp.θτ)
+    return -sp.τ * turnon * cos(sp.θτ) * exp(-x^2 / 4sp.L^2)
 end
 # ------------------------------------------------------------------------------
 

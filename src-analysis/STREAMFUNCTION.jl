@@ -37,10 +37,10 @@ turbulent_fluxes = (;
 )
 
 sce_density = Field(SCEDensity(ψ))
-turbulence_density = Field(TURBULENCEDensity(ψ, turbulent_fluxes))
-strain_density = Field(STRAINDensity(clock, ψ, sp))
+turbulence_density = Field(TURBULENCESCEDensity(ψ, turbulent_fluxes))
+strain_density = Field(STRAINSCEDensity(clock, ψ, sp))
 ageostrophic_density = Field(AGEOSTROPHICDensity(ψ, v_bar, b_bar, sp))
-sponge_density = Field(SPONGEDensity(ψ, sp))
+sponge_density = Field(SPONGESCEDensity(ψ, sp))
 
 sce_density_terms = (; 
     sce_density,

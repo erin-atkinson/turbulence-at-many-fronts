@@ -1,4 +1,4 @@
-@inline function turbulence_density_func(i, j, k, grid, ψ, turbulent_fluxes)
+@inline function turbulence_sce_density_func(i, j, k, grid, ψ, turbulent_fluxes)
     uu = turbulent_fluxes.uu
     uw = turbulent_fluxes.uw
     wu = turbulent_fluxes.wu
@@ -12,7 +12,7 @@
     return @inbounds ψ[i, j, k] * 𝔉ψ
 end
 
-function TURBULENCEDensity(ψ, turbulent_fluxes)
+function TURBULENCESCEDensity(ψ, turbulent_fluxes)
     grid = ψ.grid
     loc = locationornothing((Face, Center, Face), ψ)
     return KernelFunctionOperation{loc...}(turbulence_density_func, grid, ψ, turbulent_fluxes)

@@ -1,4 +1,4 @@
-@inline function strain_density_func(i, j, k, grid, clock, ψ, sp)
+@inline function strain_sce_density_func(i, j, k, grid, clock, ψ, sp)
     x, = Oceananigans.Grids.node(i, j, k, grid, Face(), nothing, nothing)
     t = clock.time
     
@@ -10,7 +10,7 @@
     return @inbounds -ψx * U * ∇²ψ
 end
 
-function STRAINDensity(clock, ψ, sp)
+function STRAINSCEDensity(clock, ψ, sp)
     grid = ψ.grid
     loc = locationornothing((Face, Center, Face), ψ)
     return KernelFunctionOperation{loc...}(strain_density_func, grid, clock, ψ, sp)
