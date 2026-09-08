@@ -13,7 +13,7 @@ function θτ_from_str(ip)
     ip.θτ ≈ π/2 && return "E" # Winds blow across front, opposite direction to secondary circulation
     ip.θτ ≈ 3π/2 && return "W" # Winds blow across front, same direction as secondary circulation
     println("no close angle for θτ=$(ip.θτ)")
-    return ip.θτ
+    return string(ip.θτ)
 end
 
 # Default
