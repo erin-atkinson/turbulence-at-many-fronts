@@ -1,6 +1,4 @@
 include("terms/terms.jl")
-include("terms/advection/advection.jl")
-include("terms/advection/operators.jl")
 
 fields = (:u, :v, :w, :uv, :wv)
 

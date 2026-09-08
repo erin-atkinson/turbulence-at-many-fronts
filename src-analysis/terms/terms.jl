@@ -29,6 +29,7 @@ include("advection/diffusion.jl")
 include("advection/operators.jl")
 
 # Mean potential energy
+include("energy/mld.jl")
 include("energy/mpe_density.jl")
 include("energy/bflux_density.jl")
 include("energy/mixed_density.jl")

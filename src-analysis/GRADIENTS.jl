@@ -1,6 +1,4 @@
 include("terms/terms.jl")
-include("terms/vorticity/vorticity.jl")
-include("terms/pv/q.jl")
 
 fields = (:u, :v, :w, :b)
 

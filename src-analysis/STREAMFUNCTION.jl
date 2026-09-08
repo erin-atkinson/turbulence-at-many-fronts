@@ -1,6 +1,4 @@
 include("terms/terms.jl")
-include("terms/advection/advection.jl")
-include("terms/advection/operators.jl")
 
 include("terms/streamfunction/streamfunction.jl")
 include("terms/streamfunction/sce.jl")

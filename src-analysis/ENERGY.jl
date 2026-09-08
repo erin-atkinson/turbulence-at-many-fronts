@@ -1,6 +1,4 @@
 include("terms/terms.jl")
-include("terms/advection/advection.jl")
-include("terms/advection/operators.jl")
 
 fields = (
     :u, :v, :w, :b,
@@ -48,14 +46,6 @@ turbulent_fluxes = (;
 dependency_fields = merge(dependency_fields, turbulent_fluxes)
 
 println("Kinetic energy terms...")
-include("terms/energy/dsp_density.jl")
-include("terms/energy/lsp_density.jl")
-include("terms/energy/vsp_density.jl")
-include("terms/energy/buoyancy_density.jl")
-include("terms/energy/mke_density.jl")
-include("terms/energy/sponge_mke_density.jl")
-include("terms/energy/strain_mke_density.jl")
-include("terms/energy/stress.jl")
 
 dsp_density = Field(DSPDensity(clock, velocities, velocities_prev, sp))
 lsp_density = Field(LSPDensity(velocities, velocities_prev, turbulent_fluxes))
@@ -106,12 +96,6 @@ dependency_fields = merge(dependency_fields, mke_production)
 @info mke_production
 
 println("Potential energy terms...")
-include("terms/energy/mld.jl")
-include("terms/energy/mpe_density.jl")
-include("terms/energy/mixed_density.jl")
-include("terms/energy/strain_mpe_density.jl")
-include("terms/energy/cooling.jl")
-include("terms/energy/bflux_density.jl")
 
 b_profile = Field(Average(b_bar; dims=1))
 b_prev_profile = Field(Average(b_prev_bar; dims=1))
