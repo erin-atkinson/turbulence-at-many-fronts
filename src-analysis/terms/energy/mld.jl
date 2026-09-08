@@ -20,9 +20,15 @@
     return -z
 end
 
-"""
+@doc raw"""
     MLD(b, N²_min)
-Mixed layer depth via first instance of some buoyancy frequency
+Return a kernel function operation that calculates the mixed layer depth based on the first occurence of some buoyancy frequency.
+
+See also [`MPEDensity`](@ref), [`COOLING`](@ref), [`MIXEDDensity`](@ref)
+
+```math
+N^2(x, y, -h_\text{ml}) = N^2_\text{min} \quad \text{where} \quad N^2 = \frac{\partial b}{\partial z}
+```
 """
 function MLD(b, N²_min)
     grid = b.grid

@@ -7,8 +7,16 @@
     return -b_avg * ∂h_ml∂t
 end
 
-"""
-    MIXEDDensity(clock, b, b_next, h_ml, h_ml_next)
+@doc raw"""
+    MIXEDDensity(clock, b, b_prev, h_ml, h_ml_prev)
+Return a kernel function operation that calculates the change of potential energy of the mixed layer due to a change in mixed layer depth
+
+This is a component of the mean potential energy equation:
+```math
+\frac{\text{d}}{\text{d}t}\text{MPE} = -\text{BUOYANCY} + \text{SPONGE}_\text{MPE} - \text{BFLUX} + \text{MIXED} + \text{COOLING} + \text{STRAIN}_\text{MPE}
+```
+
+See also [`MPEDensity`](@ref), [`MLD`](@ref), [`BUOYANCYDensity`](@ref), [`SPONGEMPEDensity`](@ref), [`BFLUXDensity`](@ref), [`COOLING`](@ref), [`STRAINMPEDensity`](@ref)
 """
 function MIXEDDensity(clock, b, b_prev, h_ml, h_ml_prev)
     grid = b.grid

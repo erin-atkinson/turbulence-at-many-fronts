@@ -6,10 +6,14 @@ end
 
 @doc raw"""
     Cooling(clock, h_ml, h_ml_prev, sp)
-Potential energy input by the surface cooling, referenced to the base of the mixed layer
+Return a kernel function operation that calculates potential energy input by the surface cooling, referenced to the base of the mixed layer
+
+This is a component of the mean potential energy equation:
 ```math
-\text{COOLING} = Bh
+\frac{\text{d}}{\text{d}t}\text{MPE} = -\text{BUOYANCY} + \text{SPONGE}_\text{MPE} - \text{BFLUX} + \text{MIXED} + \text{COOLING} + \text{STRAIN}_\text{MPE}
 ```
+
+See also [`MPEDensity`](@ref), [`MLD`](@ref), [`BUOYANCYDensity`](@ref), [`SPONGEMPEDensity`](@ref), [`BFLUXDensity`](@ref), [`MIXEDDensity`](@ref), [`STRAINMPEDensity`](@ref)
 """
 function COOLING(clock, h_ml, h_ml_prev, sp)
     grid = h_ml.grid

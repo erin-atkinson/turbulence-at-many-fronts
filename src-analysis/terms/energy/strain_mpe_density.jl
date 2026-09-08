@@ -8,8 +8,21 @@
     return U * ℑxᶜᵃᵃ(i, j, k, grid, ∂xᶠᶜᶜ, b) * (z + h_ml_avg)
 end
 
-"""
+@doc raw"""
     STRAINMPEDensity(clock, b, h_ml, h_ml_prev, sp)
+Return a kernel function operation that calculates the change in mean potential energy due to the strain flow
+
+The result is calculated as follows:
+```math
+\text{STRAIN}_\text{MPE} = \int \,\text{d}x\text{d}z \left [ U\frac{\partial \overline{b}}{\partial x} (z +{\color{red} h_{ml}})\right]
+```
+
+This is a component of the mean potential energy equation:
+```math
+\frac{\text{d}}{\text{d}t}\text{MPE} = -\text{BUOYANCY} + \text{SPONGE}_\text{MPE} - \text{BFLUX} + \text{MIXED} + \text{COOLING} + \text{STRAIN}_\text{MPE}
+```
+
+See also [`MPEDensity`](@ref), [`MLD`](@ref), [`BUOYANCYDensity`](@ref), [`SPONGEMPEDensity`](@ref), [`BFLUXDensity`](@ref), [`MIXEDDensity`](@ref), [`COOLING`](@ref)
 """
 function STRAINMPEDensity(clock, b, h_ml, h_ml_prev, sp)
     grid = b.grid

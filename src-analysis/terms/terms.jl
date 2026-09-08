@@ -9,9 +9,8 @@ using Oceananigans: location
 @inline fGg(i, j, k, grid, f, G, args...) = @inbounds f[i, j, k] * G(i, j, k, grid, args...)
 @inline FfGg(i, j, k, grid, F, f, G, args...) = @inbounds F(i, j, k, grid, f) * G(i, j, k, grid, args...)
 
-@inline f_avg(i, j, k, grid, f, f_next) = @inbounds (f[i, j, k] + f_next[i, j, k]) / 2
-
-@inline f_avg_Gg(i, j, k, grid, f, f_next, G, args...) = f_avg(i, j, k, grid, f, f_next) * G(i, j, k, grid, args...)
+@inline f_avg(i, j, k, grid, f, f_prev) = @inbounds (f[i, j, k] + f_prev[i, j, k]) / 2
+@inline f_avg_Gg(i, j, k, grid, f, f_prev, G, args...) = f_avg(i, j, k, grid, f, f_prev) * G(i, j, k, grid, args...)
 
 locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
@@ -23,3 +22,15 @@ include("constants.jl")
 # Vorticity and gradients
 include("gradients/vorticity.jl")
 include("gradients/richardson.jl")
+
+# Helpers for advection terms
+include("advection/advection.jl")
+include("advection/diffusion.jl")
+include("advection/operators.jl")
+
+# Mean potential energy
+include("energy/mpe_density.jl")
+include("energy/bflux_density.jl")
+include("energy/mixed_density.jl")
+include("energy/cooling.jl")
+include("energy/strain_mpe_density.jl")
