@@ -1,13 +1,3 @@
-@inline function αff_avg(i, j, k, grid, loc, t, u, u_prev, sp)
-    x, y, z = node(i, j, k, grid, loc...)
-
-    α = variable_strain_rate(t, sp) * strain_profile(x, sp)
-    u_avg  = a_avg(i, j, k, grid, u, u_prev)
-
-    return @inbounds α * u[i, j, k] * u_avg
-end
-
-
 @inline function strain_mke_density_func(i, j, k, grid, clock, velocities, velocities_prev, sp)
     t = clock.time
 

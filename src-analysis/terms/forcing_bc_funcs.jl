@@ -17,6 +17,8 @@ end
     return -σ * f(i, j, k, grid, args...)
 end
 
+@inline σff_avg(i, j, k, grid, loc, f, f_prev, sp) = f_avg_Gg(i, j, k, grid, f, f_prev, sponge_func, loc, f, sp)
+
 function SpongeLayer(field, sp)
     (ℓx, ℓy, ℓz) = location(field)
     grid = field.grid
@@ -60,5 +62,14 @@ end
 
 @inline function strain_profile(x, sp)
     return sech(x / 2sp.Lh)^2
+end
+
+@inline function αff_avg(i, j, k, grid, loc, t, f, f_prev, sp)
+    x, y, z = node(i, j, k, grid, loc...)
+
+    α = variable_strain_rate(t, sp) * strain_profile(x, sp)
+    f_avg  = a_avg(i, j, k, grid, f, f_prev)
+
+    return @inbounds α * f[i, j, k] * f_avg
 end
 # ------------------------------------------------------------------------------

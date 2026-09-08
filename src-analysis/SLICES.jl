@@ -27,7 +27,6 @@ for ξ in fields
     center_ξ = Symbol(:center_, ξ)
     @info "Slices $center_ξ"
 
-    
     @eval begin
         field = input_fields.$ξ
         (Lx, Ly, Lz) = location(field)

@@ -1,4 +1,3 @@
-
 @inline function sponge_sce_density_func(i, j, k, grid, ψ, sp)
     Suz = -∂zᶠᶜᶠ(i, j, k, grid, sponge_func, (Center(), nothing, Face()), ∂zᶠᶜᶜ, sp, ψ)
     Swx = ∂xᶠᶜᶠ(i, j, k, grid, sponge_func, (Face(), nothing, Center()), ∂xᶜᶜᶠ, sp, ψ)

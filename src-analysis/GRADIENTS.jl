@@ -11,23 +11,21 @@ for ξ in fields
     end
 end
 
-
-vorticity_x = Field(-∂z(v_bar))
-vorticity_y = Field(∂z(u_bar) - ∂x(w_bar))
-vorticity_z = Field(∂x(v_bar))
+vorticity_x = Field(VorticityX(u_bar, v_bar, w_bar))
+vorticity_y = Field(VorticityY(u_bar, v_bar, w_bar))
+vorticity_z = Field(VorticityZ(u_bar, v_bar, w_bar))
 vorticity = (; vorticity_x, vorticity_y, vorticity_z)
-
 
 M² = Field(∂x(b_bar))
 N² = Field(∂z(b_bar))
 buoyancy = (; M², N²)
 
 S² = Field(∂z(u_bar)^2 + ∂z(v_bar)^2)
-Ri = Field(N² / S²)
-Rib = Field(N² / M²^2 * sp.f^2)
+Ri = Field(Richardson(u_bar, v_bar, b_bar))
+Rib = Field(BalancedRichardson(b_bar, sp))
 shear = (; S², Ri, Rib)
 
-q = Field(PV(u_bar, v_bar, w_bar, b_bar, sp))
+q = Field(PotentialVorticity(u_bar, v_bar, w_bar, b_bar, sp))
 potential_vorticity = (; q)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))

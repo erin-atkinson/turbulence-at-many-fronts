@@ -26,7 +26,6 @@ function VorticityX(v, w)
     return KernelFunctionOperation{loc...}(vorticity_x_func, grid, v, w)
 end
 
-
 @doc raw"""
     VorticityY(v, w)
 Return a kernel function operation that calculates the vorticity in the y direction.
@@ -42,7 +41,6 @@ function VorticityY(u, w)
     loc = locationornothing((Face, Center, Face), u)
     return KernelFunctionOperation{loc...}(vorticity_y_func, grid, u, w)
 end
-
 
 @doc raw"""
     VorticityZ(v, w)

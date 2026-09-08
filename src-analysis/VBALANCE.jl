@@ -34,7 +34,6 @@ mixing = (; mixing_x, mixing_z)
 coriolis_y = Field(@at loc -1 * sp.f * u_bar)
 strain_y = Field(v_bar * ∂x(input_fields.U))
 sponge = Field(SpongeLayer(v_bar, sp))
-
 other = (; coriolis_y, strain_y, sponge)
 
 total = Field(-∂x(flux_density_x) - ∂z(flux_density_z) + mixing_x + mixing_z + advection_background + coriolis_y + strain_y + sponge)

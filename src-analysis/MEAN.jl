@@ -1,4 +1,3 @@
-# Get mean state using an along-front average
 include("terms/terms.jl")
 
 fields = (:u, :v, :w, :b, :p, :uu, :uv, :uw, :vu, :vv, :vw, :wu, :wv, :ww, :ub, :vb, :wb, :ke)
@@ -12,7 +11,7 @@ for ξ in fields
     end
 end
 
-ψ = Field(CumulativeIntegral(-u_bar; dims=3))
+ψ = Field(Streamfunction(u_bar))
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
 
