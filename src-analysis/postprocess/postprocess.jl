@@ -57,6 +57,7 @@ rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
 nextrawfields = NamedTuple(Symbol(k, :_prev) => deepcopy(fds[k][1]) for k in (:u, :v, :w, :b))
 
 # Setup background strain
+include("../terms/forcing_bc_funcs.jl")
 include("../terms/strainflow.jl")
 input_fields = merge(rawfields, nextrawfields, (; U, V, W))
 

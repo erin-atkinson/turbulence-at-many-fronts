@@ -18,6 +18,7 @@ end
 
 include("CoarseGraining.jl")
 include("constants.jl")
+include("slices.jl")
 
 # Vorticity and gradients
 include("gradients/vorticity.jl")
@@ -45,3 +46,5 @@ include("energy/sponge_mke_density.jl")
 include("energy/lsp_density.jl")
 include("energy/vsp_density.jl")
 include("energy/strain_mke_density.jl")
+
+include("forcing_bc_funcs.jl")
