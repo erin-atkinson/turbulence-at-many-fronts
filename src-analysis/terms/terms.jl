@@ -53,3 +53,11 @@ include("potential_vorticity/potential_vorticity.jl")
 include("potential_vorticity/flux.jl")
 include("potential_vorticity/background.jl")
 include("potential_vorticity/turbulence.jl")
+
+# Streamfunction energy
+include("streamfunction/streamfunction.jl")
+include("streamfunction/sce_density.jl")
+include("streamfunction/ageostrophic_density.jl")
+include("streamfunction/turbulence_sce_density.jl")
+include("streamfunction/sponge_sce_density.jl")
+include("streamfunction/strain_sce_density.jl")

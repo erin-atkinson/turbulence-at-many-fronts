@@ -1,12 +1,5 @@
 include("terms/terms.jl")
 
-include("terms/streamfunction/streamfunction.jl")
-include("terms/streamfunction/sce.jl")
-include("terms/streamfunction/ageostrophic.jl")
-include("terms/streamfunction/strain.jl")
-include("terms/streamfunction/turbulence.jl")
-include("terms/streamfunction/sponge.jl")
-
 fields = (:u, :v, :w, :b, :uu, :wu, :uw, :ww)
 
 mean_fields = NamedTuple()
