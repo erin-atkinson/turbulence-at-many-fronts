@@ -33,9 +33,21 @@ end
     return τu + τv
 end
 
-"""
+@doc raw"""
     STRESS(clock, velocities, velocities_prev, sp)
-Wind stress forcing
+Return a kernel function operation that calculates work done by the velocity boundary conditions on the mean kinetic energy
+
+The wind forcing is calcuated as
+```math
+\text{WIND} = \int \,\text{d}x \left [- \overline {\vec \tau}\cdot{\color{red} \overline{\vec u}(z=0)}\right]
+```
+
+This is a component of the mean kinetic energy equation:
+```math
+\frac{\text{d}}{\text{d}t}\text{MKE} = \text{DSP} + \text{WIND} + \text{BUOYANCY} + \text{SPONGE}_\text{MKE} - \text{LSP} - \text{VSP} + \text{STRAIN}_\text{MKE}
+```
+
+See also [`MKEDensity`](@ref), [`DSPDensity`](@ref), [`STRESS`](@ref), [`BUOYANCYDensity`](@ref), [`SPONGEMKEDensity`](@ref), [`LSPDensity`](@ref), [`VSPDensity`](@ref), [`STRAINMKEDensity`](@ref)
 """
 function STRESS(clock, velocities, velocities_prev, sp)
     grid = velocities.u.grid

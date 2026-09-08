@@ -34,3 +34,13 @@ include("energy/bflux_density.jl")
 include("energy/mixed_density.jl")
 include("energy/cooling.jl")
 include("energy/strain_mpe_density.jl")
+
+# Mean kinetic
+include("energy/mke_density.jl")
+include("energy/dsp_density.jl")
+include("energy/stress.jl")
+include("energy/buoyancy_density.jl")
+include("energy/sponge_mke_density.jl")
+include("energy/lsp_density.jl")
+include("energy/vsp_density.jl")
+include("energy/strain_mke_density.jl")

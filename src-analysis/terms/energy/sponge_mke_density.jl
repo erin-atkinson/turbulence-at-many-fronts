@@ -25,9 +25,21 @@ end
     return σuu + σvv + σww
 end
 
-"""
+@doc raw"""
     SPONGEMKEDensity(velocities, velocities_prev, sp)
-Sponge layer forcing
+Return a kernel function operation that calculates the work done by the sponge layer on the resolved flow
+
+This is calcuated as
+```math
+\text{SPONGE}_\text{MKE} = \int \,\text{d}x\text{d}z \left [ -\sigma \,\overline{\vec u}\cdot {\color{red} \overline{\vec u}}\right]
+```
+
+This is a component of the mean kinetic energy equation:
+```math
+\frac{\text{d}}{\text{d}t}\text{MKE} = \text{DSP} + \text{WIND} + \text{BUOYANCY} + \text{SPONGE}_\text{MKE} - \text{LSP} - \text{VSP} + \text{STRAIN}_\text{MKE}
+```
+
+See also [`MKEDensity`](@ref), [`DSPDensity`](@ref), [`STRESS`](@ref), [`BUOYANCYDensity`](@ref), [`LSPDensity`](@ref), [`VSPDensity`](@ref), [`STRAINMKEDensity`](@ref)
 """
 function SPONGEMKEDensity(velocities, velocities_prev, sp)
     grid = velocities.u.grid

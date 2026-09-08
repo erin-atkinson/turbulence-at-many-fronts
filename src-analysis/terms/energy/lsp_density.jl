@@ -23,9 +23,21 @@
     )
 end
 
-"""
+@doc raw"""
     LSPDensity(velocities, velocities_prev, turbulent_fluxes)
-Input coarse-grained velocities and fluxes for lateral shear production density
+Return a kernel function operation that calculates the production of turbulent kinetic energy from lateral mixing
+
+The lateral shear production is calcuated as
+```math
+\text{LSP} = \int \,\text{d}x\text{d}z \left [ \overline{u'\vec u'}\cdot {\color{red} \frac{\partial \overline{\vec u}}{\partial x}}\right]
+```
+
+This is a component of the mean kinetic energy equation:
+```math
+\frac{\text{d}}{\text{d}t}\text{MKE} = \text{DSP} + \text{WIND} + \text{BUOYANCY} + \text{SPONGE}_\text{MKE} - \text{LSP} - \text{VSP} + \text{STRAIN}_\text{MKE}
+```
+
+See also [`MKEDensity`](@ref), [`DSPDensity`](@ref), [`STRESS`](@ref), [`BUOYANCYDensity`](@ref), [`SPONGEMKEDensity`](@ref), [`VSPDensity`](@ref), [`STRAINMKEDensity`](@ref)
 """
 function LSPDensity(velocities, velocities_prev, turbulent_fluxes)
     grid = velocities.u.grid
