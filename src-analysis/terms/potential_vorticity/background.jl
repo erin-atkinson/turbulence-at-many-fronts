@@ -11,6 +11,16 @@
     return Uᶜᶠᶠ * qxᶜᶠᶠ
 end
 
+@doc raw"""
+    PVFluxBackground(mean_fields, U, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to the background flow in the gauge with no along-front PV flux
+
+```math
+J_b = Uq - \int_{-\infty}^x \text{d}x\,U_x(x', z, t)q(x', z, t)  = \int_{-\infty}^x \text{d}x\,U(x', z, t)\frac{\partial q(x', z, t)}{\partial x}
+```
+
+See also [`PotentialVorticity`](@ref)
+"""
 function PVFluxBackground(mean_fields, U, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Face, Center, Face), mean_fields.u)

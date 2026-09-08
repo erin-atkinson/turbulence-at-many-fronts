@@ -40,18 +40,48 @@ end
     return qᶠᶠᶜ * wᶠᶠᶜ
 end
 
+@doc raw"""
+    PVFluxX(mean_fields, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to advection in the x direction.
+
+```math
+\vec J \cdot \hat x \quad \text{where} \quad \vec{J} = \overline{\vec{u}} q
+```
+
+See also [`PotentialVorticity`](@ref), [`PVFluxY`](@ref), [`PVFluxZ`](@ref)
+"""
 function PVFluxX(mean_fields, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Center, Face, Face), mean_fields.u)
     return KernelFunctionOperation{loc...}(pv_flux_x_func, grid, sp, mean_fields)
 end
 
+@doc raw"""
+    PVFluxY(mean_fields, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to advection in the y direction.
+
+```math
+\vec J \cdot \hat y \quad \text{where} \quad \vec{J} = \overline{\vec{u}} q
+```
+
+See also [`PotentialVorticity`](@ref), [`PVFluxX`](@ref), [`PVFluxZ`](@ref)
+"""
 function PVFluxY(mean_fields, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Face, Center, Face), mean_fields.u)
     return KernelFunctionOperation{loc...}(pv_flux_y_func, grid, sp, mean_fields)
 end
 
+@doc raw"""
+    PVFluxZ(mean_fields, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to advection in the z direction.
+
+```math
+\vec J \cdot \hat z \quad \text{where} \quad \vec{J} = \overline{\vec{u}} q
+```
+
+See also [`PotentialVorticity`](@ref), [`PVFluxX`](@ref), [`PVFluxY`](@ref)
+"""
 function PVFluxZ(mean_fields, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Face, Face, Center), mean_fields.u)

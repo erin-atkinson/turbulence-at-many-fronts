@@ -1,13 +1,4 @@
 include("terms/terms.jl")
-include("terms/vorticity/vorticity.jl")
-
-include("terms/pv/q.jl")
-include("terms/pv/flux.jl")
-include("terms/pv/turbulence.jl")
-include("terms/pv/background.jl")
-
-include("terms/advection/advection.jl")
-include("terms/advection/operators.jl")
 
 fields = (
     :u, :v, :w, :b,

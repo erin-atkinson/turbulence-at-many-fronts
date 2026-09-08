@@ -40,18 +40,48 @@ end
     return -(𝔉uᶠᶠᶜ * byᶠᶠᶜ - 𝔉vᶠᶠᶜ * bxᶠᶠᶜ) - ηz * 𝔇ᶠᶠᶜ
 end
 
+@doc raw"""
+    TurbulentPVFluxX(mean_fields, turbulent_forcing, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to turbulence in the x direction.
+
+```math
+\vec{\mathscr{J}} \cdot \hat x \quad \text{where} \quad \vec{\mathscr{J}} = -\vec{\mathscr{F}}\times \nabla \overline{b}- (\nabla \times \overline{\vec{u]}} + f\hat z)\mathscr{D}
+```
+
+See also [`PotentialVorticity`](@ref), [`TurbulentPVFluxY`](@ref), [`TurbulentPVFluxZ`](@ref)
+"""
 function TurbulentPVFluxX(mean_fields, turbulent_forcing, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Center, Face, Face), mean_fields.u)
     return KernelFunctionOperation{loc...}(turbulent_pv_flux_x_func, grid, sp, mean_fields, turbulent_forcing)
 end
 
+@doc raw"""
+    TurbulentPVFluxY(mean_fields, turbulent_forcing, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to turbulence in the y direction.
+
+```math
+\vec{\mathscr{J}} \cdot \hat y \quad \text{where} \quad \vec{\mathscr{J}} = -\vec{\mathscr{F}}\times \nabla \overline{b}- (\nabla \times \overline{\vec{u]}} + f\hat z)\mathscr{D}
+```
+
+See also [`PotentialVorticity`](@ref), [`TurbulentPVFluxX`](@ref), [`TurbulentPVFluxZ`](@ref)
+"""
 function TurbulentPVFluxY(mean_fields, turbulent_forcing, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Face, Center, Face), mean_fields.u)
     return KernelFunctionOperation{loc...}(turbulent_pv_flux_y_func, grid, sp, mean_fields, turbulent_forcing)
 end
 
+@doc raw"""
+    TurbulentPVFluxZ(mean_fields, turbulent_forcing, sp)
+Return a kernel function operation that calculates the potential vorticity flux due to turbulence in the z direction.
+
+```math
+\vec{\mathscr{J}} \cdot \hat z \quad \text{where} \quad \vec{\mathscr{J}} = -\vec{\mathscr{F}}\times \nabla \overline{b}- (\nabla \times \overline{\vec{u]}} + f\hat z)\mathscr{D}
+```
+
+See also [`PotentialVorticity`](@ref), [`TurbulentPVFluxX`](@ref), [`TurbulentPVFluxY`](@ref)
+"""
 function TurbulentPVFluxZ(mean_fields, turbulent_forcing, sp)
     grid = mean_fields.u.grid
     loc = locationornothing((Face, Face, Center), mean_fields.u)
