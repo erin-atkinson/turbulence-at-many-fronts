@@ -17,17 +17,6 @@ end
     return -σ * f(i, j, k, grid, args...)
 end
 
-# Damp b towards the bottom value
-@inline function b_forcing_func(i, j, k, grid, b, sp)
-    (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
-    (z_bottom, ) = node(i, j, 1, grid, Nothing(), Nothing(), Center())
-
-    b = @inbounds b[i, j, k]
-    tb = @inbounds b[i, j, 1] + sp.N₀² * (z - z_bottom)
-    
-    return sp.σ * min(tb - b, 0) * sponge_layer_func(z, sp)
-end
-
 function SpongeLayer(field, sp)
     (ℓx, ℓy, ℓz) = location(field)
     grid = field.grid

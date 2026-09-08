@@ -8,17 +8,6 @@ using CUDA: @allowscalar
     s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
     return (1 - abs(s))^2
 end
-
-# Damp b towards the bottom value
-@inline function b_forcing_func(i, j, k, grid, clock, model_fields)
-    (x, y, z, ) = node(i, j, k, grid, Center(), Center(), Center())
-    (z_bottom, ) = node(i, j, 0, grid, Nothing(), Nothing(), Center())
-
-    b = @inbounds model_fields.b[i, j, k]
-    tb = @inbounds model_fields.b[i, j, 0] + sp.N₀² * (z - z_bottom)
-    
-    return sp.σ * min(tb - b, 0) * sponge_layer(x, y, z)
-end
 # ---------------------------------------
 
 # ---------------------------------------
@@ -84,7 +73,6 @@ w_forcing = (
 )
 b_forcing = (
     AdvectiveForcing(; u=U),
-#    Forcing(b_forcing_func; discrete_form=true),
     Forcing(αf_func; field_dependencies=(:b, )),
 )
 # ---------------------------------------
