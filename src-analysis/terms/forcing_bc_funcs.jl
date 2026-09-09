@@ -34,16 +34,47 @@ end
     return sp.B * turnon
 end
 
+@inline function b_flux_func(i, j, k, grid, clock, sp)
+    t = clock.time
+    return b_flux_func(t, sp)
+end
+
 # θ: angle relative to a down-front wind
 # We only include wind in the central region
-@inline function u_flux_func(x, y, t, sp) 
+@inline function u_flux_func(x, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
     return -sp.τ * turnon * sin(sp.θτ) * exp(-x^2 / 4sp.L^2)
 end
 
-@inline function v_flux_func(x, y, t, sp) 
+@inline function v_flux_func(x, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
     return -sp.τ * turnon * cos(sp.θτ) * exp(-x^2 / 4sp.L^2)
+end
+
+@inline function u_flux_func(i, j, k, grid, clock, sp)
+    x, y, z = node(i, j, k, grid, Face(), Center(), Center())
+    t = clock.time
+
+    return u_flux_func(x, t, sp) 
+end
+
+@inline function v_flux_func(i, j, k, grid, clock, sp)
+    x, y, z = node(i, j, k, grid, Center(), Face(), Center())
+    t = clock.time
+
+    return v_flux_func(x, t, sp) 
+end
+
+function UFlux(grid, clock, sp)
+    return KernelFunctionOperation{Face, Center, Center}(u_flux_func, grid, clock, sp)
+end
+
+function VFlux(grid, clock, sp)
+    return KernelFunctionOperation{Center, Face, Center}(v_flux_func, grid, clock, sp)
+end
+
+function BFlux(grid, clock, sp)
+    return KernelFunctionOperation{Center, Center, Center}(b_flux_func, grid, clock, sp)
 end
 # ------------------------------------------------------------------------------
 
