@@ -66,7 +66,9 @@ for ξ in balance_terms
     end
 end
 quadratic_total = Field(sum(quadratic))
-quadratic = (; quadratic..., quadratic_total)
+v² = Field(Integral(v * v))
+
+quadratic = (; quadratic..., quadratic_total, v²)
 
 dependency_fields = merge(dependency_fields, quadratic)
 output_fields = merge(output_fields, quadratic)
