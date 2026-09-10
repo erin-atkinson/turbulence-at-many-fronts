@@ -1,6 +1,6 @@
 using Oceananigans.Operators
 using Oceananigans.Grids: node
-using Oceananigans: location
+using Oceananigans: location, instantiated_location
 
 @inline along_front_mean(a) = Field(Average(a; dims=2))
 @inline afm(a) = along_front_mean(a)

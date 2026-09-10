@@ -65,16 +65,16 @@ end
     return v_flux_func(x, t, sp) 
 end
 
-function UFlux(grid, clock, sp)
-    return KernelFunctionOperation{Face, Center, Center}(u_flux_func, grid, clock, sp)
+function SurfaceFluxU(grid, clock, sp)
+    return KernelFunctionOperation{Face, Center, Nothing}(u_flux_func, grid, clock, sp)
 end
 
-function VFlux(grid, clock, sp)
-    return KernelFunctionOperation{Center, Face, Center}(v_flux_func, grid, clock, sp)
+function SurfaceFluxV(grid, clock, sp)
+    return KernelFunctionOperation{Center, Face, Nothing}(v_flux_func, grid, clock, sp)
 end
 
-function BFlux(grid, clock, sp)
-    return KernelFunctionOperation{Center, Center, Center}(b_flux_func, grid, clock, sp)
+function SurfaceFluxB(grid, clock, sp)
+    return KernelFunctionOperation{Center, Center, Nothing}(b_flux_func, grid, clock, sp)
 end
 # ------------------------------------------------------------------------------
 
