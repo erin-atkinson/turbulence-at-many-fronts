@@ -1,7 +1,5 @@
-#=
-The balance equations have quite a lot of repetition so it makes sense to combine them
-=#
-
+# balances.jl
+# The balance equations have quite a lot of repetition so it makes sense to combine them
 
 import Base.getindex
 
