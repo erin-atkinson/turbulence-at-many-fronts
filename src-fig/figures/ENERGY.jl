@@ -1,117 +1,50 @@
-MKE_term_labels = (;
-    dsp = L"\text{DSP}",
-    lsp = L"-\text{LSP}",
-    vsp = L"-\text{VSP}",
-    buoyancy = L"\text{BUOYANCY}",
-    sponge_mke = L"\text{SPONGE}_\text{MKE}",
-    strain_mke = L"\text{STRAIN}_\text{MKE}",
-    wind = L"\text{WIND}"
-)
+# ENERGY.jl
 
-MKE_terms = (;
-    dsp = "dsp",
-    lsp = "lsp",
-    vsp = "vsp",
-    buoyancy = "buoyancy",
-    sponge_mke = "sponge_mke",
-    strain_mke = "strain_mke",
-    wind = "wind"
-)
+@doc raw"""
+    energy_balance_check(run_id; N_window=1)
+Return a figure that verifies the energy balance.
 
-MKE_density_terms = (;
-    dsp = "dsp_density",
-    lsp = "lsp_density",
-    vsp = "vsp_density",
-    buoyancy = "buoyancy_density",
-    sponge_mke = "sponge_mke_density",
-    strain_mke = "strain_mke_density"
-)
+This function returns a figure that contains a timeseries for each term in the mean kinetic and potential energies
+```math
+\frac{\text{d}}{\text{d}t}\text{MKE} = \text{DSP} + \text{WIND} + \text{BUOYANCY} + \text{SPONGE}_\text{MKE} - \text{LSP} - \text{VSP} + \text{STRAIN}_\text{MKE}
+```
 
-MKE_signs = (;
-    dsp = 1,
-    lsp = -1,
-    vsp = -1,
-    buoyancy = 1,
-    sponge_mke = 1,
-    strain_mke = 1,
-    wind = 1,
-)
+```math
+\frac{\text{d}}{\text{d}t}\text{MPE} = -\text{BUOYANCY} + \text{SPONGE}_\text{MPE} - \text{BFLUX} + \text{MIXED} + \text{COOLING} + \text{STRAIN}_\text{MPE}
+```
+"""
+function energy_balance_check(run_id; N_window=1)
+    mkebalance = MKEBalance(run_id, N_window)
+    mpebalance = MPEBalance(run_id, N_window)
 
-MPE_term_labels = (;
-    buoyancy = L"-\text{BUOYANCY}",
-    bflux = L"-\text{BFLUX}",
-    cooling = L"\text{COOLING}",
-    strain_mpe = L"\text{STRAIN}_\text{MPE}",
-    mixed = L"\text{MIXED}",
-)
+    _, times = iterations_times(mkebalance)
 
-MPE_terms = (;
-    buoyancy = "buoyancy",
-    bflux = "bflux",
-    cooling = "cooling",
-    strain_mpe = "strain_mpe",
-    mixed = "mixed"
-)
+    tendency_unit = 1/1037
 
-MPE_signs = (;
-    buoyancy = -1,
-    bflux = -1,
-    cooling = 1,
-    strain_mpe = 1,
-    mixed = 1
-)
+    fig = Figure(; size=(figure_width, 300), fontsize)
 
-function check_ENERGY(run_id; N_window=1)
-    foldername = joinpath(scratchpath, run_id)
-    
-    suffix = N_window == 1 ? "" : "-$N_window"
-    MEAN = joinpath(foldername, "MEAN$(suffix).jld2")
-    ENERGY = joinpath(foldername, "ENERGY$(suffix).jld2")
-        
-    iterations, times = iterations_times(ENERGY)
-    sp = simulation_parameters(ENERGY)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(ENERGY)
-    Δt = times[2] - times[1]
-    fig = Figure(; size=(600, 600), fontsize=18)
-    
-    ax_mke = Axis(fig[1, 1]; 
+    ax = Axis(fig[1, 1]; 
         xlabel = t_label,
         ylabel = L"\text{kW} \, \text{km}^{-1}",
-        limits = (0, times[end] / t_unit, nothing, nothing)
+        limits = (0, times[end] / t_unit, nothing, nothing),
     )
 
-    ax_mpe = Axis(fig[2, 1]; 
+    lns = plot_balance!(ax, times ./ t_unit, mkebalance, tendency_unit)
+    plot_target!(ax, times ./ t_unit, mkebalance, tendency_unit)
+    plot_total!(ax, times ./ t_unit, mkebalance, tendency_unit)
+    make_legend!(fig[1, 2], lns, mkebalance; title=L"A") 
+    
+    ax = Axis(fig[2, 1]; 
         xlabel = t_label,
         ylabel = L"\text{kW} \, \text{km}^{-1}",
-        limits = (0, times[end] / t_unit, nothing, nothing)
+        limits = (0, times[end] / t_unit, nothing, nothing),
     )
 
-    energy_unit = 1/1037 #sp.L^2 * sp.f^2 * sp.L * sp.H
-    power_unit = energy_unit / 1
-    
-    mke = timeseries_of(ENERGY, "mke", iterations)
-    mpe = timeseries_of(ENERGY, "mpe", iterations)
-    
-    total_mke_actual = diff(mke) ./ Δt ./ power_unit
-    total_mpe_actual = diff(mpe) ./ Δt ./ power_unit
+    lns = plot_balance!(ax, times ./ t_unit, mpebalance, tendency_unit)
+    plot_target!(ax, times ./ t_unit, mpebalance, tendency_unit)
+    plot_total!(ax, times ./ t_unit, mpebalance, tendency_unit)
+    make_legend!(fig[2, 2], lns, mpebalance; title=L"A") 
 
-    mke_terms = NamedTuple(k => MKE_signs[k] * timeseries_of(ENERGY, MKE_terms[k], iterations) ./ power_unit for k in keys(MKE_terms))
-    mpe_terms = NamedTuple(k => MPE_signs[k] * timeseries_of(ENERGY, MPE_terms[k], iterations) ./ power_unit for k in keys(MPE_terms))
-
-    mke_lines = NamedTuple(k => lines!(ax_mke, times ./ t_unit, mke_terms[k]) for k in keys(mke_terms))
-    mpe_lines = NamedTuple(k => lines!(ax_mpe, times ./ t_unit, mpe_terms[k]) for k in keys(mpe_terms))
-
-    total_mke = sum(mke_terms)
-    total_mpe = sum(mpe_terms)
-    
-    lines!(ax_mke, times ./ t_unit, total_mke; color=:black)
-    lines!(ax_mke, times[2:end] ./ t_unit, total_mke_actual; color=:black, linestyle=:dash)
-    lines!(ax_mpe, times ./ t_unit, total_mpe; color=:black)
-    lines!(ax_mpe, times[2:end] ./ t_unit, total_mpe_actual; color=:black, linestyle=:dash)
-
-    Legend(fig[1, 2], [ln for ln in mke_lines], [ln for ln in MKE_term_labels])
-    Legend(fig[2, 2], [ln for ln in mpe_lines], [ln for ln in MPE_term_labels])
-    
     fig
 end
 

@@ -19,5 +19,8 @@ end
 
 function prettyrecord(observable, fig, filename, frame::Number; record_kw...)
     observable[] = frame
+    isnothing(filename) && return nothing
+    save(filename, fig; record_kw...)
     return nothing
 end
+

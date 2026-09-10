@@ -1,62 +1,47 @@
-UBALANCE_term_labels = (;
-    advection_x = L"\text{Across-front advection}",
-    advection_background = L"\text{Background advection}",
-    advection_z = L"\text{Vertical advection}",
-    mixing_x = L"\text{Across-front mixing}",
-    mixing_z = L"\text{Vertical mixing}",
-    coriolis_x = L"\text{Coriolis}",
-    strain_x = L"\text{Strain}",
-    pressure_x = L"\text{Pressure}",
-    sponge = L"\text{Sponge}"
-)
+# UBALANCE.jl
 
-function check_UBALANCE(run_id; N_window=1)
-    foldername = joinpath(scratchpath, run_id)
+@doc raw"""
+    u_balance_check(run_id; N_window=1)
+Return a figure that verifies the across-front velocity balance.
+
+This function returns a figure that contains a timeseries for each term in the quadratic balance for the across-front velocity
+```math
+\frac{\overline{\text{D}}_\alpha\overline u}{\text{D}t}\overline{u} = \left (f\overline v-\frac{\partial \overline{p}}{\partial x} -
+\frac{\partial U}{\partial x}\overline u+\mathscr{F}_u + \overline S_u + \tau_x\delta (z)\right ) \overline u
+```
+"""
+function u_balance_check(run_id; N_window=1)
+    balance = UBalance(run_id, N_window)
+
+    _, times = iterations_times(balance)
     
-    suffix = N_window == 1 ? "" : "-$N_window"
-    MEAN = joinpath(foldername, "MEAN$(suffix).jld2")
-    UBALANCE = joinpath(foldername, "UBALANCE$(suffix).jld2")
-        
-    iterations, times = iterations_times(UBALANCE)
-    sp = simulation_parameters(UBALANCE)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(UBALANCE)
-    
-    fig = Figure(; size=(1000, 300), fontsize=18)
-    ax_actual = Axis(fig[1, 1]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
+    tendency_unit = 0.01^2
+    fig = Figure(; size=(figure_width, 300), fontsize)
+    ax = Axis(fig[1, 1]; 
+        xlabel = t_label,
+        ylabel = L"A / \text{cm}^{2} \, \text{s}^{-3}",
+        limits = (0, times[end] / t_unit, nothing, nothing),
     )
-    
-    ax_total = Axis(fig[1 ,2]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_total; ticks=false)
-    
-    ax_difference = Axis(fig[1 ,3]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_difference; ticks=false)
-    
-    dudt_actual = (get_field(MEAN, "u_bar", iterations[end]) .- get_field(MEAN, "u_bar", iterations[end-1])) ./ (times[end] - times[end-1]) ./ (sp.f^2 * sp.L)
-    dudt_total = get_field(UBALANCE, "total", iterations[end]) ./ (sp.f^2 * sp.L)
-    dudt_difference = dudt_total .- dudt_actual
-    
-    colorrange = (-1, 1)
-    heatmap!(ax_actual, xsᶠ ./ x_unit, zsᶜ, dudt_actual; colormap=:balance, colorrange)
-    heatmap!(ax_total, xsᶠ ./ x_unit, zsᶜ, dudt_total; colormap=:balance, colorrange)
-    ht = heatmap!(ax_difference, xsᶠ ./ x_unit, zsᶜ, dudt_difference; colormap=:balance, colorrange)
-    
-    Colorbar(fig[2, 1:3], ht; vertical=false, flipaxis=false, label=L"A / f^2L_D")
+
+    lns = plot_balance!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_target!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_total!(ax, times ./ t_unit, balance, tendency_unit)
+
+    make_legend!(fig[1, 2], lns, balance; title=L"A") 
+
     fig
 end
+
+@doc raw"""
+    u_balance_profiles(run_id, il, ir; N_window=1)
+Return a figure that verifies the across-front velocity balance.
+
+This function returns a figure that contains a timeseries for each term in the quadratic balance for the across-front velocity
+```math
+\frac{\overline{\text{D}}_\alpha\overline u}{\text{D}t}\overline{u} = \left (f\overline v-\frac{\partial \overline{p}}{\partial x} -
+\frac{\partial U}{\partial x}\overline u+\mathscr{F}_u + \overline S_u + \tau_x\delta (z)\right ) \overline u
+```
+"""
 
 function terms_UBALANCE(run_id, frames, filename;
     fig_kw = NamedTuple(),

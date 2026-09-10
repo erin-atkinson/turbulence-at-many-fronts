@@ -1,59 +1,33 @@
-VBALANCE_term_labels = (;
-    advection_x = L"\text{Across-front advection}",
-    advection_background = L"\text{Background advection}",
-    advection_z = L"\text{Vertical advection}",
-    mixing_x = L"\text{Across-front mixing}",
-    mixing_z = L"\text{Vertical mixing}",
-    coriolis_y = L"\text{Coriolis}",
-    strain_y = L"\text{Strain}",
-    sponge = L"\text{Sponge}"
-)
+# VBALANCE.jl
 
-function check_VBALANCE(run_id; N_window=1)
-    foldername = joinpath(scratchpath, run_id)
+@doc raw"""
+    v_balance_check(run_id; N_window=1)
+Return a figure that verifies the along-front velocity balance.
+
+This function returns a figure that contains a timeseries for each term in the quadratic balance for the along-front velocity
+```math
+\frac{\overline{\text{D}}_\alpha\overline v}{\text{D}t}\overline{v} = \left (-f\overline u + \frac{\partial U}{\partial x}\overline v + \mathscr{F}_v + \overline S_v + \tau_y\delta (z)\right ) \overline v
+```
+"""
+function v_balance_check(run_id; N_window=1)
+    balance = VBalance(run_id, N_window)
+
+    _, times = iterations_times(balance)
     
-    suffix = N_window == 1 ? "" : "-$N_window"
-    MEAN = joinpath(foldername, "MEAN$(suffix).jld2")
-    VBALANCE = joinpath(foldername, "VBALANCE$(suffix).jld2")
-        
-    iterations, times = iterations_times(VBALANCE)
-    sp = simulation_parameters(VBALANCE)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(VBALANCE)
-    
-    fig = Figure(; size=(1000, 300), fontsize=18)
-    ax_actual = Axis(fig[1, 1]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
+    tendency_unit = 0.01^2
+    fig = Figure(; size=(figure_width, 300), fontsize)
+    ax = Axis(fig[1, 1]; 
+        xlabel = t_label,
+        ylabel = L"A / \text{cm}^{2} \, \text{s}^{-3}",
+        limits = (0, times[end] / t_unit, nothing, nothing),
     )
-    
-    ax_total = Axis(fig[1 ,2]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_total; ticks=false)
-    
-    ax_difference = Axis(fig[1 ,3]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_difference; ticks=false)
-    
-    dvdt_actual = (get_field(MEAN, "v_bar", iterations[end]) .- get_field(MEAN, "v_bar", iterations[end-1])) ./ (times[end] - times[end-1]) ./ (sp.f^2 * sp.L)
-    dvdt_total = get_field(VBALANCE, "total", iterations[end]) ./ (sp.f^2 * sp.L)
-    dvdt_difference = dvdt_total .- dvdt_actual
-    
-    colorrange = (-1, 1)
-    heatmap!(ax_actual, xsᶜ ./ x_unit, zsᶜ, dvdt_actual; colormap=:balance, colorrange)
-    heatmap!(ax_total, xsᶜ ./ x_unit, zsᶜ, dvdt_total; colormap=:balance, colorrange)
-    ht = heatmap!(ax_difference, xsᶜ ./ x_unit, zsᶜ, dvdt_difference; colormap=:balance, colorrange)
-    
-    Colorbar(fig[2, 1:3], ht; vertical=false, flipaxis=false, label=L"A / f^2L_D")
+
+    lns = plot_balance!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_target!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_total!(ax, times ./ t_unit, balance, tendency_unit)
+
+    make_legend!(fig[1, 2], lns, balance; title=L"A") 
+
     fig
 end
 

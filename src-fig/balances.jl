@@ -141,7 +141,7 @@ end
 termsigns(balance::AbstractBalance) = NamedTuple(k=>1 for k in terms(balance))
 
 @doc raw"""
-    alltimeseries(balance::AbstractBalance)
+    target(balance::AbstractBalance)
 Return a timeseries of the target tendency of a balance equation
 """
 function target(balance::AbstractBalance)

@@ -1,56 +1,33 @@
-BBALANCE_term_labels = (;
-    advection_x = L"\text{Across-front advection}",
-    advection_background = L"\text{Background advection}",
-    advection_z = L"\text{Vertical advection}",
-    mixing_x = L"\text{Across-front mixing}",
-    mixing_z = L"\text{Vertical mixing}"
-)
+# BBALANCE.jl
 
-function check_BBALANCE(run_id; N_window=1)
-    foldername = joinpath(scratchpath, run_id)
+@doc raw"""
+    b_balance_check(run_id; N_window=1)
+Return a figure that verifies the buoyancy balance.
+
+This function returns a figure that contains a timeseries for each term in the quadratic balance for the buoyancy
+```math
+\frac{\overline{\text{D}}_\alpha\overline b}{\text{D}t}\overline{b} = \left (\mathscr{D} -B\delta (z)\right ) \overline b
+```
+"""
+function b_balance_check(run_id; N_window=1)
+    balance = BBalance(run_id, N_window)
+
+    _, times = iterations_times(balance)
     
-    suffix = N_window == 1 ? "" : "-$N_window"
-    MEAN = joinpath(foldername, "MEAN$suffix.jld2")
-    BBALANCE = joinpath(foldername, "BBALANCE$suffix.jld2")
-        
-    iterations, times = iterations_times(BBALANCE)
-    sp = simulation_parameters(BBALANCE)
-    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(BBALANCE)
-    
-    fig = Figure(; size=(1000, 300), fontsize=18)
-    ax_actual = Axis(fig[1, 1]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
+    tendency_unit = 0.01^2
+    fig = Figure(; size=(figure_width, 300), fontsize)
+    ax = Axis(fig[1, 1]; 
+        xlabel = t_label,
+        ylabel = L"A / \text{cm}^{2} \, \text{s}^{-4}",
+        limits = (0, times[end] / t_unit, nothing, nothing),
     )
-    
-    ax_total = Axis(fig[1 ,2]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_total; ticks=false)
-    
-    ax_difference = Axis(fig[1 ,3]; 
-        xlabel = x_label,
-        ylabel = z_label,
-        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, 0),
-        xticks = [-1, 0, 1]
-    )
-    hideydecorations!(ax_difference; ticks=false)
-    
-    dbdt_actual = (get_field(MEAN, "b_bar", iterations[end]) .- get_field(MEAN, "b_bar", iterations[end-1])) ./ (times[end] - times[end-1]) ./ (sp.f * sp.Δb)
-    dbdt_total = get_field(BBALANCE, "total", iterations[end]) ./ (sp.f * sp.Δb)
-    dbdt_difference = dbdt_total .- dbdt_actual
-    
-    colorrange = (-1, 1)
-    heatmap!(ax_actual, xsᶜ ./ x_unit, zsᶜ, dbdt_actual; colormap=:balance, colorrange)
-    heatmap!(ax_total, xsᶜ ./ x_unit, zsᶜ, dbdt_total; colormap=:balance, colorrange)
-    ht = heatmap!(ax_difference, xsᶜ ./ x_unit, zsᶜ, dbdt_difference; colormap=:balance, colorrange)
-    
-    Colorbar(fig[2, 1:3], ht; vertical=false, flipaxis=false, label=L"A / f\Delta b")
+
+    lns = plot_balance!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_target!(ax, times ./ t_unit, balance, tendency_unit)
+    plot_total!(ax, times ./ t_unit, balance, tendency_unit)
+
+    make_legend!(fig[1, 2], lns, balance; title=L"A") 
+
     fig
 end
 

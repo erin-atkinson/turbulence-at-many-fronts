@@ -19,12 +19,18 @@ using Oceananigans.Units: Time
 # Constants used for plotting 
 scratchpath = "/home/atkin163/scratch/turbulence-at-many-fronts"
 
+function filepath(run_id, scriptname, N=1)
+    suffix = N == 1 ? ".jld2" : "-$N.jld2"
+    return joinpath(scratchpath, run_id, scriptname * suffix)
+end
+
 # Labels
 const u_bar_label = L"\overline{u} / \text{cm}\,\text{s}^{-1}"
 const tot_u_bar_label = L"(\overline{u} + U) / \text{cm}\,\text{s}^{-1}"
 const v_bar_label = L"\overline{v} / \text{cm}\,\text{s}^{-1}"
 const w_bar_label = L"\overline{w} / \text{mm}\,\text{s}^{-1}"
 const b_bar_label = L"\overline{b} / \text{m}\,\text{s}^{-2}" 
+const ψ_label = L"\psi / \text{cm}^2\,\text{s}^{-2}" 
 
 const x_label = L"x / \text{km}"
 const y_label = L"y / \text{km}"
@@ -34,6 +40,7 @@ const t_label = L"t / \text{hr}"
 const u_unit = 1e-2
 const v_unit = 1e-2
 const w_unit = 1e-3
+const ψ_unit = 1e-4
 
 const x_unit = 1e3
 const y_unit = 1e3
@@ -44,6 +51,12 @@ const t_unit = 3600
 const b_step = 1/6
 b_levels(fds::FieldDataset) = minimum(interior(fds.b_bar[end], :, 1, :)):(fds.metadata["parameters"].Δb * b_step):maximum(interior(fds.b_bar[1], :, 1, :))
 b_levels(fts, sp) = minimum(interior(fts[end], :, 1, :)):(sp.Δb * b_step):maximum(interior(fts[1], :, 1, :))
+
+# Standardize figure sizes for publications etc
+const fontsize = 18
+const figure_width = 1000
+
+transect_limits(sp) = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, zero(sp.Lz))
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
