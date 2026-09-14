@@ -15,7 +15,7 @@ function v_balance_check(run_id; N_window=1)
     _, times = iterations_times(balance)
     
     tendency_unit = 0.01^2
-    fig = Figure(; size=(figure_width, 300), fontsize)
+    fig = Figure(; size=(figure_width, 600), fontsize)
     ax = Axis(fig[1, 1]; 
         xlabel = t_label,
         ylabel = L"A / \text{cm}^{2} \, \text{s}^{-3}",
@@ -26,7 +26,7 @@ function v_balance_check(run_id; N_window=1)
     plot_target!(ax, times ./ t_unit, balance, tendency_unit)
     plot_total!(ax, times ./ t_unit, balance, tendency_unit)
 
-    make_legend!(fig[1, 2], lns, balance; title=L"A") 
+    make_legend!(fig[1, 2], lns, balance, L"A") 
 
     fig
 end

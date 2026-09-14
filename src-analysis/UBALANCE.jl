@@ -41,7 +41,8 @@ pressure = Field(-∂x(p_bar))
 strain = Field(-u_bar * ∂x(input_fields.U))
 sponge = Field(SpongeLayer(u_bar, sp))
 surface = Field(-SurfaceFluxU(grid, clock, sp))
-parcel = (; coriolis, pressure, strain, sponge, surface)
+ageostrophic = Field(pressure + coriolis)
+parcel = (; coriolis, pressure, strain, sponge, surface, ageostrophic)
 
 dependency_fields = merge(flux_density, advection, turbulent_flux_density, mixing, parcel)
 output_fields = dependency_fields
@@ -50,7 +51,8 @@ println("Quadratic balance equation")
 balance_terms = (
     :advection_x, :advection_background, :advection_z,
     :mixing_x, :mixing_z,
-    :coriolis, :pressure, :strain, :sponge, :surface
+    :coriolis, :pressure, :strain, :sponge, :surface,
+    :ageostrophic
 )
 
 u_avg = Field((u_bar + u_prev_bar) / 2)
@@ -66,7 +68,17 @@ for ξ in balance_terms
         quadratic = (; quadratic..., $quadratic_ξ)
     end
 end
-quadratic_total = Field(sum(quadratic))
+quadratic_total = Field(
+      quadratic_advection_x 
+    + quadratic_advection_background
+    + quadratic_advection_z
+    + quadratic_mixing_x
+    + quadratic_mixing_z
+    + quadratic_strain
+    + quadratic_sponge
+    + quadratic_surface
+    + quadratic_ageostrophic
+)
 u² = Field(Integral(u_bar * u_bar))
 
 quadratic = (; quadratic..., quadratic_total, u²)

@@ -82,7 +82,7 @@ dependency_fields = NamedTuple()
 temp_fields = NamedTuple()
 skip_update = ()
 cleanup() = nothing
-@info "Including $scriptname.jl"
+@info "$scriptname.jl -> $outputname from $filename in $foldername"
 include("../$scriptname.jl")
 
 output_fds = FieldDataset(times, output_fields; 

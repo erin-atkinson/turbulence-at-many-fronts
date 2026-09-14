@@ -85,7 +85,7 @@ MKE_term_signs = (;
     wind = 1,
 )
 
-MPE_terms = (;
+MPE_terms = (
     :buoyancy,
     :bflux,
     :cooling,
@@ -116,7 +116,7 @@ function terms(::AbstractBalance) end
 function termlabels(::AbstractBalance) end
 function targetterm(::AbstractBalance) end
 function totalterm(::AbstractBalance) end
-permittedterms(balance::AbstractBalance) = Tuple(terms..., targetterm(balance), totalterm(balance))
+permittedterms(balance::AbstractBalance) = (terms(balance)..., targetterm(balance), totalterm(balance))
 
 windowlength(balance::AbstractBalance) = balance.N
 filepath(balance::AbstractBalance, altname=nothing) = joinpath(scratchpath, balance.run_id, filename(balance, altname))
@@ -149,10 +149,10 @@ function target(balance::AbstractBalance)
     timeseries = balance[targetterm(balance)]
     result = similar(timeseries)
 
-    for i in axes(timeseries, 1)
-        result[i] = (timeseries[i] - timeseries[max(i, 1)]) / (times[i] - times[max(i, 1)])
+    for i in 2:length(times)
+        result[i] = (timeseries[i] - timeseries[i-1]) / (times[i] - times[i-1])
     end
-
+    
     return result
 end
 
@@ -184,7 +184,7 @@ struct MPEBalance <: AbstractBalance
 end
 
 scriptname(balance::MPEBalance) = "ENERGY"
-terms(::MKEBalance) = MPE_terms
+terms(::MPEBalance) = MPE_terms
 termlabels(::MPEBalance) = MPE_term_labels
 termsigns(::MPEBalance) = MPE_term_signs
 targetterm(::MPEBalance) = :mpe
@@ -242,7 +242,7 @@ function plot_balance!(ax, times, balance::AbstractBalance, unit=1; kwargs...)
     lns = NamedTuple(term => lines!(ax, times, balance[term] ./ unit; kwargs...) for term in terms(balance))
     return lns
 end
-plot_target!(ax, times, balance::AbstractBalance, unit=1.0; color=:black, linestyle=:dash, kwargs...) = lines!(ax, times, target(balance) ./ unit; color, linestyle, kwargs...)
-plot_total!(ax, times, balance::AbstractBalance, unit=1.0; color=:black, kwargs...) = lines!(ax, times, total(balance) ./ unit; color, linestyle, kwargs...)
+plot_target!(ax, times, balance::AbstractBalance, unit=1.0; color=:black, linestyle=:dash, kwargs...) = lines!(ax, times[2:end], target(balance)[2:end] ./ unit; color, linestyle, kwargs...)
+plot_total!(ax, times, balance::AbstractBalance, unit=1.0; color=(:black, 0.5), kwargs...) = lines!(ax, times, total(balance) ./ unit; color, kwargs...)
 
-make_legend!(gl, lns, balance; kwargs...) = Legend(gl, [lns...], termlabels(balance); kwargs...)
+make_legend!(gl, lns, balance, args...; kwargs...) = Legend(gl, [lns...], [termlabels(balance)...], args...; kwargs...)

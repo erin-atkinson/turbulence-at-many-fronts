@@ -121,3 +121,12 @@ include("record.jl")
 include("../setup/ensemble.jl")
 include("../src-analysis/terms/forcing_bc_funcs.jl")
 # -------------------------------------------------------------
+
+# -------------------------------------------------------------
+include("balances.jl")
+include("figures/UBALANCE.jl")
+include("figures/VBALANCE.jl")
+include("figures/BBALANCE.jl")
+include("figures/ENERGY.jl")
+# -------------------------------------------------------------
+
