@@ -67,7 +67,7 @@ for ξ in balance_terms
     end
 end
 quadratic_total = Field(sum(quadratic))
-u² = Field(Integral(u * u))
+u² = Field(Integral(u_bar * u_bar))
 
 quadratic = (; quadratic..., quadratic_total, u²)
 

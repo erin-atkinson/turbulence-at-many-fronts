@@ -74,13 +74,19 @@ let set = test_set,
     save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
     save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
     save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-STREAMFUNCTION", set.filenames, "STREAMFUNCTION", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false, outputfilename="STREAMFUNCTION.jld2")
+    save_script("$setname-STREAMFUNCTION", set.filenames, "STREAMFUNCTION", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
     
     save_script("$setname-MEAN-20", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="MEAN-20.jld2")
     save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="GRADIENTS-20.jld2")
     save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="ENERGY-20.jld2")
     save_script("$setname-PV-20", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="PV-20.jld2")
     save_script("$setname-STREAMFUNCTION-20", set.filenames, "STREAMFUNCTION", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="STREAMFUNCTION-20.jld2")
+    save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="UBALANCE-20.jld2")
+    save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="VBALANCE-20.jld2")
+    save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="BBALANCE-20.jld2")
 end
 
 #=
