@@ -208,14 +208,15 @@ highresolution = (;
     filenames = filenames_hd
 )
 
+test_inds = [6, 7, 9]
 test_set = (;
-    ips = cooling_depth_01.ips[7:9],
-    filenames = cooling_depth_01.filenames[7:9],
+    ips = cooling_depth_01.ips[test_inds],
+    filenames = cooling_depth_01.filenames[test_inds],
 )
 
 test_set_init = (;
-    ips = cooling_depth_init.ips[7:9],
-    filenames = cooling_depth_init.filenames[7:9],
+    ips = cooling_depth_init.ips[test_inds],
+    filenames = cooling_depth_init.filenames[test_inds],
 )
 
 #= I probably won't use these
