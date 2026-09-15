@@ -54,19 +54,32 @@ balance_terms = (
 
 v_avg = Field((v_bar + v_prev_bar) / 2)
 v_avg_surface = Field(ZSlice(v_avg, 0))
-dependency_fields = (; dependency_fields..., v_avg, v_avg_surface)
+quadratic_mask = Field(CentralRegionMask(v_bar, sp))
+
+dependency_fields = (; dependency_fields..., v_avg, v_avg_surface, quadratic_mask)
 quadratic = NamedTuple()
 
 for ξ in balance_terms
     quadratic_ξ = Symbol(:quadratic_, ξ)
     field = ξ == :surface ? :v_avg_surface : :v_avg
     @eval begin
-        $quadratic_ξ = Field(Integral($ξ * $field))
+        $quadratic_ξ = Field(Integral($ξ * $field * quadratic_mask))
         quadratic = (; quadratic..., $quadratic_ξ)
     end
 end
-quadratic_total = Field(sum(quadratic))
-v² = Field(Integral(v_bar * v_bar))
+
+quadratic_total = Field(
+      quadratic_advection_x
+    + quadratic_advection_background
+    + quadratic_advection_z
+    + quadratic_mixing_x
+    + quadratic_mixing_z
+    + quadratic_coriolis
+    + quadratic_strain
+    + quadratic_sponge
+    + quadratic_surface
+)
+v² = Field(Integral(v_bar * v_bar * quadratic_mask))
 
 quadratic = (; quadratic..., quadratic_total, v²)
 

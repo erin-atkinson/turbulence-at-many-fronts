@@ -6,7 +6,7 @@ import Base.getindex
 u_balance_terms = (
     :advection_x, :advection_background, :advection_z,
     :mixing_x, :mixing_z,
-    :coriolis, :pressure, :strain, :sponge, :surface
+    :ageostrophic, :strain, :sponge, :surface
 )
 
 u_balance_term_labels = (;
@@ -16,10 +16,11 @@ u_balance_term_labels = (;
     mixing_x = L"-\frac{\partial }{\partial x}\overline{u'u'}",
     mixing_z = L"-\frac{\partial }{\partial z}\overline{w'u'}",
     coriolis = L"f\overline{v}",
-    pressure = L"\frac{\partial \overline{p}}{\partial x}",
+    pressure = L"-\frac{\partial \overline{p}}{\partial x}",
     strain = L"-\frac{\partial U}{\partial x}\overline{u}",
     sponge = L"-S_u",
-    surface = L"\tau_x\delta (z)"
+    surface = L"\tau_x\delta (z)",
+    ageostrophic = L"f\overline{v} - \frac{\partial \overline{p}}{\partial x}"
 )
 
 v_balance_terms = (
@@ -245,4 +246,4 @@ end
 plot_target!(ax, times, balance::AbstractBalance, unit=1.0; color=:black, linestyle=:dash, kwargs...) = lines!(ax, times[2:end], target(balance)[2:end] ./ unit; color, linestyle, kwargs...)
 plot_total!(ax, times, balance::AbstractBalance, unit=1.0; color=(:black, 0.5), kwargs...) = lines!(ax, times, total(balance) ./ unit; color, kwargs...)
 
-make_legend!(gl, lns, balance, args...; kwargs...) = Legend(gl, [lns...], [termlabels(balance)...], args...; kwargs...)
+make_legend!(gl, lns, balance, args...; kwargs...) = Legend(gl, [lns...], [termlabels(balance)[field] for field in terms(balance)], args...; kwargs...)

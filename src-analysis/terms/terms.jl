@@ -1,5 +1,5 @@
 using Oceananigans.Operators
-using Oceananigans.Grids: node
+using Oceananigans.Grids: node, xnode, ynode, znode
 using Oceananigans: location, instantiated_location
 
 @inline along_front_mean(a) = Field(Average(a; dims=2))
@@ -14,6 +14,22 @@ using Oceananigans: location, instantiated_location
 
 locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
+end
+
+@inline central_region_mask(i, j, k, grid, ::Nothing, ℓy, ℓz, sp) = one(eltype(grid))
+@inline function central_region_mask(i, j, k, grid, ℓx, ℓy, ℓz, sp)
+    x = xnode(i, grid, ℓx)
+    abs(x) > sp.Lh / 2 && return zero(eltype(grid))
+    return one(eltype(grid))
+end
+
+function CentralRegionMask(field, sp)
+    grid = field.grid
+    
+    loc = location(field)
+    instantiated_loc = instantiated_location(field)
+    
+    return KernelFunctionOperation{loc...}(central_region_mask, grid, instantiated_loc..., sp)
 end
 
 include("CoarseGraining.jl")
