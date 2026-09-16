@@ -172,7 +172,7 @@ struct MKEBalance <: AbstractBalance
     N
 end
 
-scriptname(balance::MKEBalance) = "ENERGY"
+scriptname(::MKEBalance) = "ENERGY"
 terms(::MKEBalance) = MKE_terms
 termlabels(::MKEBalance) = MKE_term_labels
 termsigns(::MKEBalance) = MKE_term_signs
@@ -184,7 +184,7 @@ struct MPEBalance <: AbstractBalance
     N
 end
 
-scriptname(balance::MPEBalance) = "ENERGY"
+scriptname(::MPEBalance) = "ENERGY"
 terms(::MPEBalance) = MPE_terms
 termlabels(::MPEBalance) = MPE_term_labels
 termsigns(::MPEBalance) = MPE_term_signs
@@ -202,6 +202,10 @@ function Base.getindex(balance::QuadraticBalance, term::Symbol)
 end
 
 totalterm(::QuadraticBalance) = :quadratic_total
+densityterms(balance::QuadraticBalance) = NamedTuple(k => k for k in filter(x -> x != :surface, terms(balance)))
+density_fts(balance::QuadraticBalance) = NamedTuple(k => FieldTimeSeries(filepath(balance), v; backend=OnDisk()) for (k, v) in pairs(densityterms(balance)))
+make_fts_observables(func, fts, i, j, k, t; unit=1.0) = NamedTuple(k_ => @lift nov(func(v[Time($t)][i, j, k])) ./ unit for (k_, v) in pairs(fts))
+make_fts_observables(fts, i, j, k, t; kwargs...) = make_fts_observables(identity, fts, i, j, k, t; kwargs...)
 
 struct UBalance <: QuadraticBalance
     run_id
@@ -246,4 +250,4 @@ end
 plot_target!(ax, times, balance::AbstractBalance, unit=1.0; color=:black, linestyle=:dash, kwargs...) = lines!(ax, times[2:end], target(balance)[2:end] ./ unit; color, linestyle, kwargs...)
 plot_total!(ax, times, balance::AbstractBalance, unit=1.0; color=(:black, 0.5), kwargs...) = lines!(ax, times, total(balance) ./ unit; color, kwargs...)
 
-make_legend!(gl, lns, balance, args...; kwargs...) = Legend(gl, [lns...], [termlabels(balance)[field] for field in terms(balance)], args...; kwargs...)
+make_legend!(gl, lns, balance, args...; kwargs...) = Legend(gl, [lns...], [termlabels(balance)[field] for field in keys(lns)], args...; kwargs...)

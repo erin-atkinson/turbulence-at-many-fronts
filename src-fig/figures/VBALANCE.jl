@@ -31,6 +31,47 @@ function v_balance_check(run_id; N_window=1)
     fig
 end
 
+@doc raw"""
+    v_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-v_balance_profiles"))
+Return a figure containing the average tendency terms between two indices, this just averages them
+"""
+function v_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-v_balance_profiles"))
+    vbalance = vbalance(run_id, N_window)
+    fts = density_fts(vbalance)
+
+    sp = simulation_parameters(filepath(vbalance))
+    iterations, times = iterations_times(filepath(vbalance))
+
+    n = Observable(frames[1])
+    t = @lift interp_time($n, times)
+
+    tendency_unit = v_unit^2
+    field_observables = make_fts_observables(x->mean(x; dims=1)[1, :], fts, il:ir, 1, :, t; unit=tendency_unit)
+
+    title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
+        L"\text{Terms in }\overline{v}\text{ balance}\quad t = %$t_hr \, \text{hr}"
+    end
+
+    fig = Figure(; 
+        size = (figure_width, 600),
+        fontsize,
+    )
+    ax = Axis(fig[1, 1]; 
+        ylabel = z_label,
+        xlabel = L"A / \text{cm}^{2} \, \text{s}^{-3}",
+        limits = (nothing, nothing, -sp.Lz, 0),
+        title
+    )
+
+    lns = NamedTuple(k => lines!(ax, times, v) for (k, v) in pairs(field_observables))
+
+    make_legend!(fig[1, 2], lns, balance, L"A")
+
+    prettyrecord(n, fig, filename, frames; record_kw...)
+
+    fig
+end
+
 function terms_VBALANCE(run_id, frames, filename;
     fig_kw = NamedTuple(),
     ax_kw = NamedTuple(),

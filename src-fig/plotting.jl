@@ -18,6 +18,10 @@ using Oceananigans.Units: Time
 # -------------------------------------------------------------
 # Constants used for plotting 
 scratchpath = "/home/atkin163/scratch/turbulence-at-many-fronts"
+videopath = "figures/video"
+imagepath = "figures/image"
+mkpath(videopath)
+mkpath(imagepath)
 
 function filepath(run_id, scriptname, N=1)
     suffix = N == 1 ? ".jld2" : "-$N.jld2"

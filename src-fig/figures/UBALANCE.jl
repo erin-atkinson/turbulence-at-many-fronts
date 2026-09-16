@@ -15,7 +15,7 @@ function u_balance_check(run_id; N_window=1)
 
     _, times = iterations_times(balance)
     
-    tendency_unit = 0.01^2
+    tendency_unit = u_unit^2
     fig = Figure(; size=(figure_width, 600), fontsize)
     ax = Axis(fig[1, 1]; 
         xlabel = t_label,
@@ -33,15 +33,46 @@ function u_balance_check(run_id; N_window=1)
 end
 
 @doc raw"""
-    u_balance_profiles(run_id, il, ir; N_window=1)
-Return a figure that verifies the across-front velocity balance.
-
-This function returns a figure that contains a timeseries for each term in the quadratic balance for the across-front velocity
-```math
-\frac{\overline{\text{D}}_\alpha\overline u}{\text{D}t}\overline{u} = \left (f\overline v-\frac{\partial \overline{p}}{\partial x} -
-\frac{\partial U}{\partial x}\overline u+\mathscr{F}_u + \overline S_u + \tau_x\delta (z)\right ) \overline u
-```
+    u_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-u_balance_profiles"))
+Return a figure containing the average tendency terms between two indices, this just averages them
 """
+function u_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-u_balance_profiles"))
+    ubalance = UBalance(run_id, N_window)
+    fts = density_fts(ubalance)
+
+    sp = simulation_parameters(filepath(ubalance))
+    iterations, times = iterations_times(filepath(ubalance))
+
+    n = Observable(frames[1])
+    t = @lift interp_time($n, times)
+
+    tendency_unit = u_unit^2
+    field_observables = make_fts_observables(x->mean(x; dims=1)[1, :], fts, il:ir, 1, :, t; unit=tendency_unit)
+
+    title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
+        L"\text{Terms in }\overline{u}\text{ balance}\quad t = %$t_hr \, \text{hr}"
+    end
+
+    fig = Figure(; 
+        size = (figure_width, 600),
+        fontsize,
+    )
+    ax = Axis(fig[1, 1]; 
+        ylabel = z_label,
+        xlabel = L"A / \text{cm}^{2} \, \text{s}^{-3}",
+        limits = (nothing, nothing, -sp.Lz, 0),
+        title
+    )
+
+    lns = NamedTuple(k => lines!(ax, times, v) for (k, v) in pairs(field_observables))
+
+    make_legend!(fig[1, 2], lns, balance, L"A")
+
+    prettyrecord(n, fig, filename, frames; record_kw...)
+
+    fig
+end
+
 
 function terms_UBALANCE(run_id, frames, filename;
     fig_kw = NamedTuple(),

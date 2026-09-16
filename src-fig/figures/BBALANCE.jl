@@ -18,7 +18,7 @@ function b_balance_check(run_id; N_window=1)
     fig = Figure(; size=(figure_width, 600), fontsize)
     ax = Axis(fig[1, 1]; 
         xlabel = t_label,
-        ylabel = L"A / \text{cm}^{2} \, \text{s}^{-4}",
+        ylabel = L"A / \text{cm}^{2} \, \text{s}^{-5}",
         limits = (0, times[end] / t_unit, nothing, nothing),
     )
 
@@ -27,6 +27,47 @@ function b_balance_check(run_id; N_window=1)
     plot_total!(ax, times ./ t_unit, balance, tendency_unit)
 
     make_legend!(fig[1, 2], lns, balance, L"A") 
+
+    fig
+end
+
+@doc raw"""
+    b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-b_balance_profiles"))
+Return a figure containing the average tendency terms between two indices, this just averages them
+"""
+function b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-b_balance_profiles"))
+    bbalance = bbalance(run_id, N_window)
+    fts = density_fts(bbalance)
+
+    sp = simulation_parameters(filepath(bbalance))
+    iterations, times = iterations_times(filepath(bbalance))
+
+    n = Observable(frames[1])
+    t = @lift interp_time($n, times)
+
+    tendency_unit = b_unit^2
+    field_observables = make_fts_observables(x->mean(x; dims=1)[1, :], fts, il:ir, 1, :, t; unit=tendency_unit)
+
+    title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
+        L"\text{Terms in }\overline{b}\text{ balance}\quad t = %$t_hr \, \text{hr}"
+    end
+
+    fig = Figure(; 
+        size = (figure_width, 600),
+        fontsize,
+    )
+    ax = Axis(fig[1, 1]; 
+        ylabel = z_label,
+        xlabel = L"A / \text{cm}^{2} \, \text{s}^{-5}",
+        limits = (nothing, nothing, -sp.Lz, 0),
+        title
+    )
+
+    lns = NamedTuple(k => lines!(ax, times, v) for (k, v) in pairs(field_observables))
+
+    make_legend!(fig[1, 2], lns, balance, L"A")
+
+    prettyrecord(n, fig, filename, frames; record_kw...)
 
     fig
 end
