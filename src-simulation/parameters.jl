@@ -6,8 +6,7 @@ default_inputs = (;
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
     βℓ = 1, βH = 0.1,
-    βα = 0.1, βB = 0.0, βτ = 0.0, β₀ = 8, θτ = 0.0,
-    comment = ""
+    βα = 0.1, βB = 0.0, βτ = 0.0, β₀ = 8, θτ = 0.0
 )
 
 @inline function create_simulation_parameters(input_parameters=(; ))

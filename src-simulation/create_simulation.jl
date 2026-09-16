@@ -11,7 +11,7 @@ const sp = create_simulation_parameters(simulation_parameters)
 
 function init_jld2!(file, model)
     file["metadata/author"] = "Erin Atkinson"
-    file["metadata/comment"] = sp.comment
+    file["metadata/comment"] = comment
     file["metadata/parameters"] = sp
     return nothing
 end

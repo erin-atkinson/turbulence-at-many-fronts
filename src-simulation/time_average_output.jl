@@ -119,8 +119,8 @@ ke = KernelFunctionOperation{Center, Center, Center}(ke_func, grid, u, v, w)
 
 output_fields = (; u, v, w, b, uu, uv, uw, ub, vu, vv, vw, vb, wu, wv, ww, wb, p, ke)
 
-writing_times_pos = filter(t-> t > prev_time, 0:sp.save_time:sp.stop_time)
-writing_times_neg = filter(t-> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
+writing_times_pos = filter(t -> t > prev_time, 0:sp.save_time:sp.stop_time)
+writing_times_neg = filter(t -> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
 writing_times = [writing_times_neg; writing_times_pos]
 
 output_symbol = Symbol(:fields, prev_iteration)

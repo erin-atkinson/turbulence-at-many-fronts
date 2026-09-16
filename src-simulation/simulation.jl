@@ -34,6 +34,7 @@
         
         [21]: Comment
 =#
+println("simulation.jl")
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
 
@@ -73,8 +74,6 @@ simulation_parameters = let
     βτ = parse(Float64, ARGS[18])
     θτ = parse(Float64, ARGS[19])
     β₀ = parse(Float64, ARGS[20])
-
-    comment = join(ARGS[21:end], " ")
     
     (;
         stop_time, start_time, save_time, max_time,
@@ -82,9 +81,15 @@ simulation_parameters = let
         βx, βh,
         Nx, Nh, Ny, Nz,
         βℓ, βH,
-        βα, βB, βτ, θτ, β₀,
-        comment
+        βα, βB, βτ, θτ, β₀
     )
+end
+
+const comment = join(ARGS[21:end], " ")
+
+for (k, v) in pairs(simulation_parameters)
+    k_str = string(k)
+    println("$k_str: $v")
 end
 
 include("create_simulation.jl")
