@@ -110,6 +110,10 @@ end
     ξ = n - i
     return times[i] + ξ * (times[min(i+1, length(times))] - times[i])
 end
+
+fts_tuple(filename; fields...) = NamedTuple(k => FieldTimeSeries(filename, string(v); backend=OnDisk()) for (k, v) in pairs(fields))
+make_fts_observables(func, fts, i, j, k, t; unit=1.0) = NamedTuple(k_ => @lift nov(func(v[Time($t)][i, j, k])) ./ unit for (k_, v) in pairs(fts))
+make_fts_observables(fts, i, j, k, t; kwargs...) = make_fts_observables(identity, fts, i, j, k, t; kwargs...)
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------

@@ -204,8 +204,6 @@ end
 totalterm(::QuadraticBalance) = :quadratic_total
 densityterms(balance::QuadraticBalance) = NamedTuple(k => k for k in filter(x -> x != :surface, terms(balance)))
 density_fts(balance::QuadraticBalance) = NamedTuple(k => FieldTimeSeries(filepath(balance), v; backend=OnDisk()) for (k, v) in pairs(densityterms(balance)))
-make_fts_observables(func, fts, i, j, k, t; unit=1.0) = NamedTuple(k_ => @lift nov(func(v[Time($t)][i, j, k])) ./ unit for (k_, v) in pairs(fts))
-make_fts_observables(fts, i, j, k, t; kwargs...) = make_fts_observables(identity, fts, i, j, k, t; kwargs...)
 
 struct UBalance <: QuadraticBalance
     run_id

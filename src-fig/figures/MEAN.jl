@@ -1,13 +1,15 @@
 @doc raw"""
-    mean_fields(run_id, frames, filename=nothing;
+    mean_figure(run_id, frames;
         record_kw = NamedTuple(),
         N_window = 1
+        filename = joinpath(run_id, "$run_id-mean")
     )
 Create and animate a figure of along-front velocity, buoyancy and streamfunction
 """
-function mean_fields(run_id, frames, filename=nothing;
+function mean_figure(run_id, frames;
         record_kw = NamedTuple(),
-        N_window = 1
+        N_window = 1,
+        filename = joinpath(run_id, "$run_id-mean")
     )
     
     MEAN = filepath(run_id, "MEAN", N_window)
@@ -77,7 +79,7 @@ function mean_fields(run_id, frames, filename=nothing;
     end
 
     begin 
-        xs = nov(xnodes(fts_b_bar; with_halos=true)) ./ 1000
+        xs = nov(xnodes(fts_b_bar; with_halos=true)) ./ x_unit
         zs = nov(znodes(fts_b_bar; with_halos=true))
         data = b_bar
         levels = b_levels(fts_b_bar, sp) ./ sp.Δb
@@ -98,62 +100,80 @@ function mean_fields(run_id, frames, filename=nothing;
     return fig
 end
 
+function build_hovmoller(filename, field, frames, z)
+    println("Slicing $field from $filename at z=$z")
+    fts = FieldTimeSeries(filename, field)
+
+    times = fts.u_bar.times
+    t = interp_time(frames[1], times)
+
+    c = similar(fts[Time(t)])
+    c_slice = Field(ZSlice(c, z))
+
+    c_hovmoller = zeros(eltype(c_slice), length(frames), size(c_slice, 1))
+
+    for (n, frame) in enumerate(frames)
+        t = interp_time(frame, times)
+        set!(c, fts[Time(t)])
+
+        compute!(c_slice)
+        fill_halo_regions!(c_slice)
+
+        c_hovmoller[:, n] .= interior(c_slice, :, 1, 1)
+    end
+
+    return c_hovmoller
+end
+
 @doc raw"""
-    mean_fields(run_id, filename;
-        record_kw = NamedTuple(),
+    mean_hovmoller(run_id, frames, z;
         N_window = 1
+        filename = joinpath(imagepath, run_id, "$run_id-mean_hovmoller.png"),
+        background = true
     )
-Create a hovmoller plot of total across-front velocity, along-front velocity and vertical velocity 
+Create hovmoller plots of total across-front velocity, along-front velocity and vertical velocity with buoyancy contours
 """
-function mean_hovmoller(foldername, z;
+function mean_hovmoller(run_id, frames, z;
     fig_kw = NamedTuple(),
     ax_kw = NamedTuple(),
     background = true,
-    remove_mean = false,
-    N_window = 1
+    N_window = 1,
+    filename = joinpath(imagepath, run_id, "$run_id-mean_hovmoller.png")
     )
 
-    suffix = N_window == 1 ? "" : "-$N_window"
-    MEAN = joinpath(foldername, "MEAN$suffix.jld2")
+    MEAN = filepath(run_id, "MEAN", N_window)
 
-    fts_u_bar = FieldTimeSeries(MEAN, "u_bar")
-    fts_v_bar = FieldTimeSeries(MEAN, "v_bar")
-    fts_w_bar = FieldTimeSeries(MEAN, "w_bar")
-    fts_b_bar = FieldTimeSeries(MEAN, "b_bar")
-    
     sp = simulation_parameters(MEAN)
-    times = fts_u_bar.times
-    
-    n = Observable(frames[1])
-    t = @lift interp_time($n, times)
-    
-    title = let z_str = @sprintf "%.0f" z
-        L"\text{Mean fields}\quad z = %$z_stw \, \text{m}"
-    end
-    
-    U = @lift if background
-        [velocity_profile(x, sp) * variable_strain_rate($t, sp) for x in xnodes(fts_u_bar; with_halos=true), z in 1:1]
+    iterations, times = iteration_times(MEAN)
+    times = [interp_time(frame, times) for frame in frames]
+
+    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(MEAN)
+
+    U = if background
+        [velocity_profile(x, sp) * variable_strain_rate(t, sp) for x in xsᶠ, t in times]
     else
         0
     end
+
+    u_hovmoller = build_hovmoller(MEAN, "u_bar", frames, z) .+ U
+    v_hovmoller = build_hovmoller(MEAN, "v_bar", frames, z)
+    w_hovmoller = build_hovmoller(MEAN, "w_bar", frames, z)
+    b_hovmoller = build_hovmoller(MEAN, "b_bar", frames, z)
+
+    title = let z_str = @sprintf "%.0f" z
+        L"\text{Mean fields}\quad z = %$z_str \, \text{m}"
+    end
     
-    u_bar = @lift nov(fts_u_bar[Time($t)][:, 1, :] .+ $U) .* 100 
-    v_bar = @lift nov(fts_v_bar[Time($t)][:, 1, :]) .* 100
-    w_bar = @lift nov(fts_w_bar[Time($t)][:, 1, :]) .* 1000
-    b_bar = @lift nov(fts_b_bar[Time($t)][:, 1, :]) ./ sp.Δb
-    
-    fig = Figure(; 
-        size=(1000, 400),
-        fig_kw...
-    )
+    fig = Figure(; size=(figure_width, 600), fontsize, fig_kw...)
     Label(fig[1, 1:3], title)
     
     ax_kw = (;
-        xlabel = L"x / \text{km}",
-        ylabel = L"z / \text{m}",
-        limits = (-sp.Lh / 2000, sp.Lh / 2000, -sp.Lz, 0)
+        xlabel = x_label,
+        ylabel = t_label,
+        limits = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, times[1] / t_unit, times[end] / t_unit),
+        ax_kw...
     )
-
+    
     ax_u = Axis(fig[2, 1]; ax_kw...)
     ax_v = Axis(fig[2, 2]; ax_kw...)
     ax_w = Axis(fig[2, 3]; ax_kw...)
@@ -162,9 +182,9 @@ function mean_hovmoller(foldername, z;
     hideydecorations!(ax_w; ticks=false)
 
     ht_u = begin
-        xs = nov(xnodes(fts_u_bar; with_halos=true)) ./ 1000
-        zs = nov(znodes(fts_u_bar; with_halos=true))
-        data = u_bar
+        xs = xsᶠ ./ x_unit
+        zs = times ./ t_unit
+        data = u_hovmoller ./ u_unit
         colormap = :balance
         colorrange = (-10, 10)
 
@@ -172,19 +192,19 @@ function mean_hovmoller(foldername, z;
     end
 
     ht_v = begin
-        xs = nov(xnodes(fts_v_bar; with_halos=true)) ./ 1000
-        zs = nov(znodes(fts_v_bar; with_halos=true))
-        data = v_bar
+        xs = xsᶜ ./ x_unit
+        zs = times ./ t_unit
+        data = v_hovmoller ./ v_unit
         colormap = :balance
         colorrange = (-10, 10)
 
-        heatmap!(ax_v, xs, zs, data; colormap, colorrange)
+        heatmap!(ax_v, xs, times, data; colormap, colorrange)
     end
 
     ht_w = begin
-        xs = nov(xnodes(fts_w_bar; with_halos=true)) ./ 1000
-        zs = nov(znodes(fts_w_bar; with_halos=true))
-        data = w_bar
+        xs = xsᶜ ./ x_unit
+        zs = times ./ t_unit
+        data = w_hovmoller ./ w_unit
         colormap = :balance
         colorrange = (-10, 10)
 
@@ -192,10 +212,11 @@ function mean_hovmoller(foldername, z;
     end
 
     begin 
-        xs = nov(xnodes(fts_b_bar; with_halos=true)) ./ 1000
-        zs = nov(znodes(fts_b_bar; with_halos=true))
-        data = b_bar
-        levels = b_levels(fts_b_bar, sp) ./ sp.Δb
+        xs = xsᶜ ./ x_unit
+        zs = times ./ t_unit
+        data = b_hovmoller ./ sp.Δb
+
+        levels = minimum(data):(1/6):maximum(data)
         color = (:black, 0.5)
 
         contour!(ax_u, xs, zs, data; levels, color)
@@ -208,7 +229,7 @@ function mean_hovmoller(foldername, z;
     Colorbar(fig[3, 3], ht_w; flipaxis=false, vertical=false, label=w_bar_label)
 
     colgap!(fig.layout, 40)
-    prettyrecord(n, fig, filename, frames; record_kw...)
+    save(filename, fig; record_kw...)
 
     return fig
 end

@@ -32,10 +32,10 @@ function b_balance_check(run_id; N_window=1)
 end
 
 @doc raw"""
-    b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-b_balance_profiles"))
+    b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedTuple(), filename=joinpath(run_id, "$run_id-b_balance_profiles"))
 Return a figure containing the average tendency terms between two indices, this just averages them
 """
-function b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw, filename=joinpath(run_id, "$run_id-b_balance_profiles"))
+function b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedTuple(), filename=joinpath(run_id, "$run_id-b_balance_profiles"))
     bbalance = bbalance(run_id, N_window)
     fts = density_fts(bbalance)
 
