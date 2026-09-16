@@ -95,23 +95,24 @@ create_front_parameters(; ip...) = create_front_parameters(ip)
 
 @inline function front_initial_conditions(grid::RectilinearGrid, sp)
     # Use Oceananigans fields to setup the initial thermal wind properly
-    
+
     b = Field{Center, Center, Center}(grid)
-    set!(b, (x, y, z)->front_buoyancy(x, z, sp))
+    set!(b, (x, y, z) -> front_buoyancy(x, z, sp))
     fill_halo_regions!(b)
 
     # Compute the thermal wind shear
-    S_op = @at (Center, Face, Face) ∂x(b) / sp.f
-    S = compute!(Field(S_op))
+    S = Field{Center, Face, Face}(grid)
+    set!(S, (x, y, z) -> front_S(x, z, sp))
+    fill_halo_regions!(S)
 
     # Integrate
-    V_op = CumulativeIntegral(S; dims=3)
-    v = compute!(Field(V_op))
+    v = Field(CumulativeIntegral(S; dims=3))
+    compute!(v)
     fill_halo_regions!(v)
-    
-    # Random secondary circulation
+
+    # SC noise
     u(x, y, z) = 1e-14 * randn()
     w(x, y, z) = 1e-14 * randn()
-    
+
     return (; u, v, w, b)
 end
