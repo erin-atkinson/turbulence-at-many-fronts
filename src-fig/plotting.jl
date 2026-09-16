@@ -18,8 +18,8 @@ using Oceananigans.Units: Time
 # -------------------------------------------------------------
 # Constants used for plotting 
 scratchpath = "/home/atkin163/scratch/turbulence-at-many-fronts"
-videopath = "figures/video"
-imagepath = "figures/image"
+videopath = "/home/atkin163/turbulence-at-many-fronts/figures/video"
+imagepath = "/home/atkin163/turbulence-at-many-fronts/figures/image"
 mkpath(videopath)
 mkpath(imagepath)
 
