@@ -1,6 +1,7 @@
 using Oceananigans.Operators
 using Oceananigans.Grids: node, xnode, ynode, znode
 using Oceananigans: location, instantiated_location
+using Oceananigans: fill_halo_regions!
 
 @inline along_front_mean(a) = Field(Average(a; dims=2))
 @inline afm(a) = along_front_mean(a)

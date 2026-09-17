@@ -30,7 +30,10 @@ function mean_figure(run_id, frames;
     
     v_bar = @lift nov(fts_v_bar[Time($t)][:, 1, :]) ./ v_unit
     b_bar = @lift nov(fts_b_bar[Time($t)][:, 1, :]) ./ sp.Δb
-    ψ = @lift nov(fts_ψ[Time($t)][:, 1, :]) ./ ψ_unit
+    ψ = @lift nov(fts_ψ[Time($t)][:, 1, :]) ./ (sp.L * sp.H * sp.f)
+    
+    b_ml = @lift (maximum(interior(fts_b_bar[Time($t)], :, 1, sp.Nz - 10)) ./ sp.Δb) - 0.5
+    b_ref = @lift $b_bar .- $b_ml
     
     fig = Figure(; size=(figure_width, 400), fontsize)
     Label(fig[1, 1:3], title)
@@ -38,6 +41,7 @@ function mean_figure(run_id, frames;
     ax_kw = (;
         xlabel = x_label,
         ylabel = z_label,
+        xticks = [-1, 0, 1],
         limits = transect_limits(sp)
     )
 
@@ -61,21 +65,23 @@ function mean_figure(run_id, frames;
     ht_b = begin
         xs = nov(xnodes(fts_v_bar; with_halos=true)) ./ x_unit
         zs = nov(znodes(fts_v_bar; with_halos=true))
-        data = b_bar
-        colormap = :balance
-        colorrange = (-10, 10)
+        data = b_ref
+        colormap = b_colormap
+        levels = range(-0.5, 0.5, 7)
+        extendhigh = b_extendhigh
+        extendlow = b_extendlow
 
-        heatmap!(ax_b, xs, zs, data; colormap, colorrange)
+        contourf!(ax_b, xs, zs, data; levels, colormap, extendhigh, extendlow)
     end
 
     ht_ψ = begin
-        xs = nov(xnodes(fts_ψ_bar; with_halos=true)) ./ x_unit
-        zs = nov(znodes(fts_ψ_bar; with_halos=true))
+        xs = nov(xnodes(fts_ψ; with_halos=true)) ./ x_unit
+        zs = nov(znodes(fts_ψ; with_halos=true))
         data = ψ
         colormap = :balance
-        colorrange = (-10, 10)
+        levels = range(-0.2, 0.2, 20)
 
-        heatmap!(ax_ψ, xs, zs, data; colormap, colorrange)
+        contourf!(ax_ψ, xs, zs, data; colormap, levels)
     end
 
     begin 
@@ -85,14 +91,13 @@ function mean_figure(run_id, frames;
         levels = b_levels(fts_b_bar, sp) ./ sp.Δb
         color = (:black, 0.5)
 
-        contour!(ax_u, xs, zs, data; levels, color)
         contour!(ax_v, xs, zs, data; levels, color)
-        contour!(ax_w, xs, zs, data; levels, color)
+        contour!(ax_ψ, xs, zs, data; levels, color)
     end
 
     Colorbar(fig[3, 1], ht_v; flipaxis=false, vertical=false, label=v_bar_label)
-    Colorbar(fig[3, 2], ht_b; flipaxis=false, vertical=false, label=b_bar_label)
-    Colorbar(fig[3, 3], ht_ψ; flipaxis=false, vertical=false, label=ψ_label)
+    Colorbar(fig[3, 2], ht_b; flipaxis=false, vertical=false, label=L"(\overline{b} - b_\text{ml}) / \Delta b")
+    Colorbar(fig[3, 3], ht_ψ; flipaxis=false, vertical=false, label=L"\psi / L H f")
 
     colgap!(fig.layout, 40)
     prettyrecord(n, fig, filename, frames; record_kw...)
@@ -104,13 +109,13 @@ function build_hovmoller(filename, field, frames, z)
     println("Slicing $field from $filename at z=$z")
     fts = FieldTimeSeries(filename, field)
 
-    times = fts.u_bar.times
+    times = fts.times
     t = interp_time(frames[1], times)
 
     c = similar(fts[Time(t)])
     c_slice = Field(ZSlice(c, z))
 
-    c_hovmoller = zeros(eltype(c_slice), length(frames), size(c_slice, 1))
+    c_hovmoller = zeros(eltype(c_slice), size(c_slice, 1), length(frames))
 
     for (n, frame) in enumerate(frames)
         t = interp_time(frame, times)
@@ -138,13 +143,14 @@ function mean_hovmoller(run_id, frames, z;
     ax_kw = NamedTuple(),
     background = true,
     N_window = 1,
-    filename = joinpath(imagepath, run_id, "$run_id-mean_hovmoller.png")
+    filename = joinpath(imagepath, run_id, "$run_id-mean_hovmoller.png"),
+    save_kw = NamedTuple()
     )
 
     MEAN = filepath(run_id, "MEAN", N_window)
-
+    
     sp = simulation_parameters(MEAN)
-    iterations, times = iteration_times(MEAN)
+    iterations, times = iterations_times(MEAN)
     times = [interp_time(frame, times) for frame in frames]
 
     xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(MEAN)
@@ -198,7 +204,7 @@ function mean_hovmoller(run_id, frames, z;
         colormap = :balance
         colorrange = (-10, 10)
 
-        heatmap!(ax_v, xs, times, data; colormap, colorrange)
+        heatmap!(ax_v, xs, zs, data; colormap, colorrange)
     end
 
     ht_w = begin
@@ -229,7 +235,8 @@ function mean_hovmoller(run_id, frames, z;
     Colorbar(fig[3, 3], ht_w; flipaxis=false, vertical=false, label=w_bar_label)
 
     colgap!(fig.layout, 40)
-    save(filename, fig; record_kw...)
+    mkpath(splitdir(filename)[1])
+    save(filename, fig; save_kw...)
 
     return fig
 end

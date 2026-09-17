@@ -14,9 +14,9 @@ end
 @inline f(i, j, k, grid, weight, field) = @inbounds field[i, j, k] * weight
 @inline f(i, j, k, grid, weight, func::Function, args...) = func(i, j, k, grid, args...) * weight
 
-const XPeriodicGrid = AbstractGrid{<:Any, Periodic}
-const YPeriodicGrid = AbstractGrid{<:Any, <:Any, Periodic}
-const ZPeriodicGrid = AbstractGrid{<:Any, <:Any, <:Any, Periodic}
+XPeriodicGrid = AbstractGrid{<:Any, Periodic}
+YPeriodicGrid = AbstractGrid{<:Any, <:Any, Periodic}
+ZPeriodicGrid = AbstractGrid{<:Any, <:Any, <:Any, Periodic}
 
 @inline function ingrid(i, j, k, grid, ℓx, ℓy, ℓz)
     Nx = grid.Nx + (ℓx isa Face)

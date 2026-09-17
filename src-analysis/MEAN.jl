@@ -12,6 +12,7 @@ for ξ in fields
 end
 
 ψ = Field(Streamfunction(u_bar))
+mean_fields = (; mean_fields..., ψ)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
 

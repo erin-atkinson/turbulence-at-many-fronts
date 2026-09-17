@@ -62,6 +62,10 @@ const fontsize = 18
 const figure_width = 1000
 
 transect_limits(sp) = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, zero(sp.Lz))
+
+b_colormap = [reverse(to_colormap(:deep))[Int(floor(255 / 8 * i + 1))] for i in 1:6]
+b_extendhigh = reverse(to_colormap(:deep))[end]
+b_extendlow = reverse(to_colormap(:deep))[1]
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -128,7 +132,7 @@ include("time_average_of.jl")
 include("front_width.jl")
 include("record.jl")
 include("../setup/ensemble.jl")
-include("../src-analysis/terms/forcing_bc_funcs.jl")
+include("../src-analysis/terms/terms.jl")
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -137,5 +141,6 @@ include("figures/UBALANCE.jl")
 include("figures/VBALANCE.jl")
 include("figures/BBALANCE.jl")
 include("figures/ENERGY.jl")
+include("figures/PV.jl")
+include("figures/MEAN.jl")
 # -------------------------------------------------------------
-
