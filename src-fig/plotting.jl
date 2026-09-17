@@ -35,6 +35,7 @@ const v_bar_label = L"\overline{v} / \text{cm}\,\text{s}^{-1}"
 const w_bar_label = L"\overline{w} / \text{mm}\,\text{s}^{-1}"
 const b_bar_label = L"\overline{b} / \text{m}\,\text{s}^{-2}" 
 const ψ_label = L"\psi / \text{cm}^2\,\text{s}^{-2}" 
+const q_label = L"q / fN_0^2" 
 
 const x_label = L"x / \text{km}"
 const y_label = L"y / \text{km}"

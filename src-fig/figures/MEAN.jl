@@ -90,9 +90,9 @@ function mean_figure(run_id, frames;
         contour!(ax_w, xs, zs, data; levels, color)
     end
 
-    Colorbar(fig[3, 1], ht_u; flipaxis=false, vertical=false, label=background ? tot_u_bar_label : u_bar_label)
-    Colorbar(fig[3, 2], ht_v; flipaxis=false, vertical=false, label=v_bar_label)
-    Colorbar(fig[3, 3], ht_w; flipaxis=false, vertical=false, label=w_bar_label)
+    Colorbar(fig[3, 1], ht_v; flipaxis=false, vertical=false, label=v_bar_label)
+    Colorbar(fig[3, 2], ht_b; flipaxis=false, vertical=false, label=b_bar_label)
+    Colorbar(fig[3, 3], ht_ψ; flipaxis=false, vertical=false, label=ψ_label)
 
     colgap!(fig.layout, 40)
     prettyrecord(n, fig, filename, frames; record_kw...)

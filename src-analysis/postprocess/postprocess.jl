@@ -136,7 +136,7 @@ for (i, frame) in enumerate(frames)
     end
     
     set!(output_fds, iteration, t; output_fields...)
-    temp_fds != nothing && set!(temp_fds, iteration, t; temp_fields...)
+    !isnothing(temp_fds) && set!(temp_fds, iteration, t; temp_fields...)
 
     # Little bit of timekeeping for convenience
     tstr = if i < 11
