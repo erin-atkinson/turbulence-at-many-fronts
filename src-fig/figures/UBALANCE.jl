@@ -42,13 +42,14 @@ function u_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedT
 
     sp = simulation_parameters(filepath(ubalance))
     iterations, times = iterations_times(filepath(ubalance))
-
+    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(filepath(ubalance); with_halos=true)
+    
     n = Observable(frames[1])
     t = @lift interp_time($n, times)
 
     tendency_unit = u_unit^2
     field_observables = make_fts_observables(x->mean(x; dims=1)[1, :], fts, il:ir, 1, :, t; unit=tendency_unit)
-
+    
     title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
         L"\text{Terms in }\overline{u}\text{ balance}\quad t = %$t_hr \, \text{hr}"
     end
@@ -64,9 +65,9 @@ function u_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedT
         title
     )
 
-    lns = NamedTuple(k => lines!(ax, times, v) for (k, v) in pairs(field_observables))
+    lns = NamedTuple(k => lines!(ax, v, nov(zsᶜ)) for (k, v) in pairs(field_observables))
 
-    make_legend!(fig[1, 2], lns, balance, L"A")
+    make_legend!(fig[1, 2], lns, ubalance, L"A")
 
     prettyrecord(n, fig, filename, frames; record_kw...)
 

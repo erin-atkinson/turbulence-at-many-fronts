@@ -56,7 +56,7 @@ function make_body(ip, filename)
 
     stop_time=$(ip.stop_time)
     start_time=$(ip.start_time)
-    max_time=$(ip.max_time)
+    release_time=$(ip.release_time)
     save_time=$(ip.save_time)
     
     f=$(ip.f)
@@ -78,10 +78,13 @@ function make_body(ip, filename)
     betatau=$(ip.βτ)
     thetatau=$(ip.θτ)
     beta0=$(ip.β₀)
+    betath=$(ip.βₜₕ)
+
+    wall_time_limit=$(ip.wall_time_limit)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$start_time \$max_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$comment
+    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$start_time \$release_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$betath \$wall_time_limit \$comment
     """
 end
 
@@ -153,6 +156,13 @@ for (ip, filename, copy_to) in zip(cooling_depth_init.ips, cooling_depth_init.fi
     save_script(filename, T, ip, filename; loc=path, copy_to)
 end
 
+path = "jobs-simulation/cooling-only-init"
+mkpath(path)
+
+for (ip, filename, copy_to) in zip(cooling_only_init.ips, cooling_only_init.filenames, cooling_only_init.destfilenamess)
+    save_script(filename, T, ip, filename; loc=path, copy_to)
+end
+
 println()
 println("VARYING COOLING, DEPTH AND STRAIN")
 path = "jobs-simulation/cooling-depth"
@@ -170,6 +180,15 @@ end
 
 println("005")
 for (ip, filename) in zip(cooling_depth_005.ips, cooling_depth_005.filenames)
+    save_script(filename, T, ip, filename; loc=path)
+end
+
+println()
+println("COOLING ONLY")
+path = "jobs-simulation/cooling-only"
+mkpath(path)
+
+for (ip, filename) in zip(cooling_only.ips, cooling_only.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
@@ -195,6 +214,8 @@ println()
 println("HIGH RESOLUTION: INITIALISATION")
 path = "jobs-simulation/highresolution-init"
 mkpath(path)
+
+T = "12:00:00"
 
 for (ip, filename, copy_to) in zip(highresolution_init.ips, highresolution_init.filenames, highresolution_init.destfilenamess)
     save_script(filename, T, ip, filename; loc=path, copy_to)

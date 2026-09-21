@@ -9,7 +9,7 @@
 
         [02]: Simulation stop time in seconds
         [03]: Start time of simulation (negative for a cooling pre-initialisation)
-        [04]
+        [04]: Strain release time
         [05]: Save interval
 
         [06]: Coriolis parameter in 1/seconds
@@ -31,8 +31,10 @@
         [18]: Surface wind stress
         [19]: Surface wind stress angle (0: along front pi/2: across front)
         [20]: Deep deformation radius
+
+        [21]: Maximum wall time
         
-        [21]: Comment
+        [22]: Comment
 =#
 println("simulation.jl")
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
@@ -45,7 +47,7 @@ simulation_parameters = let
     # Simulation times
     stop_time = parse(Float64, ARGS[2])
     start_time = parse(Float64, ARGS[3])
-    max_time = parse(Float64, ARGS[4])
+    release_time = parse(Float64, ARGS[4])
     save_time = parse(Float64, ARGS[5])
 
     # Coriolis frequency
@@ -74,18 +76,21 @@ simulation_parameters = let
     βτ = parse(Float64, ARGS[18])
     θτ = parse(Float64, ARGS[19])
     β₀ = parse(Float64, ARGS[20])
+
+    wall_time_limit = parse(Float64, ARGS[21])
     
     (;
-        stop_time, start_time, save_time, max_time,
+        stop_time, start_time, save_time, release_time,
         f, L,
         βx, βh,
         Nx, Nh, Ny, Nz,
         βℓ, βH,
-        βα, βB, βτ, θτ, β₀
+        βα, βB, βτ, θτ, β₀,
+        wall_time_limit
     )
 end
 
-const comment = join(ARGS[21:end], " ")
+const comment = join(ARGS[22:end], " ")
 
 for (k, v) in pairs(simulation_parameters)
     k_str = string(k)

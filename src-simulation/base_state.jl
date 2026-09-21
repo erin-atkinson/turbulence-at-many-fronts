@@ -12,7 +12,7 @@ const f′′_max = maximum(s->-tanh(s) * sech(s)^2, range(-10, 10, 1000))
 @inline g′′(s) = exp(-s) / (1 + exp(-s))^2
 
 # Background stratification
-@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * g(-(z + sp.H) / (sp.λ * sp.H))
+@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * g(-(z + sp.H) / (sp.λ * sp.H)) - sp.Δbₜₕ * (1 + tanh(-(z + sp.H) / (sp.λ * sp.H))) / 2
 
 # Buoyancy
 @inline function front_buoyancy(x, z, sp)
@@ -31,6 +31,7 @@ end
           sp.a * (sp.Δb / sp.H) * f′(x₁) * g′(z₁)
         + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′′(z₁)
         + sp.N₀² * g′(-z₁)
+        + Δbₜₕ * sech(-(z + sp.H) / (sp.λ * sp.H))^2 / (2sp.λ * sp.H)
     )
 end
 
@@ -71,8 +72,6 @@ end
 end
 
 @inline function create_front_parameters(ip)
-    λ = 0.03
-
     # Buoyancy change of Ri = 1 front
     Δb = 2ip.L * ip.f^2 / ip.βH
 
@@ -82,14 +81,20 @@ end
     # MLD
     H = ip.βH * ip.L
 
-    # Deep water buoyancy frequency ratio
+    # Thermocline buoyancy step
+    Δbₜₕ = ip.βₜₕ * Δb
+
+    # Thermocline step width
+    λ = 0.01
+
+    # Deep water buoyancy frequency
     N₀² = (ip.β₀ * ip.f)^2
 
     Ro = maximum_Ro(ip)
     V = maximum_front_velocity(ip)
     a = 1/ip.βℓ^2
     
-    return (; λ, Δb, ℓ, H, N₀², Ro, V, a)
+    return (; λ, Δb, ℓ, H, N₀², Ro, V, a, Δbₜₕ)
 end
 create_front_parameters(; ip...) = create_front_parameters(ip)
 

@@ -81,7 +81,7 @@ prev_iteration = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
     jldopen(file->file[str].iteration, checkpoint_path)
 end
 
-simulation = Simulation(model; Δt, stop_time=sp.stop_time, wall_time_limit=3 * 3600)
+simulation = Simulation(model; Δt, sp.stop_time, sp.wall_time_limit)
 
 include("time_average_output.jl")
 #=

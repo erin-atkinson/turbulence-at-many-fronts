@@ -1,11 +1,11 @@
 # PV.jl
 
 
-function interpolate_fluxes!(u, v, xs, ys, Jx, Jy)
+function interpolate_fluxes!(u, v, xs, ys, Jx, Jy; scale=[1, 1])
 
-    for i in axes(xs, 1), j in axes(ys, 2)
-        u[i, j] = interpolate((xs[i], ys[j]), Jx)
-        v[i, j] = interpolate((xs[i], ys[j]), Jy)
+    for i in axes(xs, 1), j in axes(ys, 1)
+        u[i, j] = Oceananigans.Fields.interpolate((xs[i], ys[j]), Jx) * scale[1]
+        v[i, j] = Oceananigans.Fields.interpolate((xs[i], ys[j]), Jy) * scale[2]
     end
 
     return nothing
@@ -39,26 +39,26 @@ function potential_vorticity_figure(run_id, frames;
         L"\text{Potential vorticity} \quad t = %$t_hr \, \text{hr}"
     end
 
-    field_observables = make_fts_observables(fts, :, j, :, t; unit = sp.f * sp.N₀²)
+    field_observables = make_fts_observables(fts, :, 1, :, t; unit = sp.f * sp.N₀²)
 
     # Prepare fluxes
     xs_flux = range(-sp.Lh/2, sp.Lh/2, 32)
-    zs_flux = range(-sp.Lz, 0, 16)
+    zs_flux = range(-sp.Lz, -10, 16)
     u_advective = Observable([0.0 for x in xs_flux, z in zs_flux])
     w_advective = Observable([0.0 for x in xs_flux, z in zs_flux])
     u_diffusive = Observable([0.0 for x in xs_flux, z in zs_flux])
     w_diffusive = Observable([0.0 for x in xs_flux, z in zs_flux])
 
-    on(n) do
-        interpolate_fluxes!(u_advective, w_advective, xs_flux, zs_flux, Jx[], Jz[])
-        interpolate_fluxes!(u_diffusive, w_diffusive, xs_flux, zs_flux, 𝔍x[], 𝔍z[])
+    on(t) do t
+        scale = [1e12 ./ x_unit, 1e12] ./ (sp.f * sp.N₀²)
+        interpolate_fluxes!(u_advective[], w_advective[], xs_flux, zs_flux, fts.Jx[Time(t)], fts.Jz[Time(t)]; scale)
+        interpolate_fluxes!(u_diffusive[], w_diffusive[], xs_flux, zs_flux, fts.𝔍x[Time(t)], fts.𝔍z[Time(t)]; scale)
 
         notify(u_advective)
         notify(w_advective)
         notify(u_diffusive)
         notify(w_diffusive)
     end
-
 
     fig = Figure(; size=(figure_width, 400), fontsize)
     Label(fig[1, 1:3], title)

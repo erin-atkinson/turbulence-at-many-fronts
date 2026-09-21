@@ -1,5 +1,5 @@
-function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
-    strs = map([βH, βα, βB, βτ, θτ]) do β
+function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ, βₜₕ=sp.βₜₕ)
+    strs = map([βH, βα, βB, βτ, θτ, βₜₕ]) do β
         replace(string(β), "."=>"_")
     end
     ext = isnothing(ext) ? "" : ".$ext"
@@ -18,13 +18,14 @@ end
 
 # Default
 default_ip = (;
-    stop_time = 10e5, start_time = -2e5, save_time = 1e4, max_time = -1.0,
+    stop_time = 10e5, start_time = -2e5, save_time = 1e4, release_time = -1.0,
     f = 1e-4, L = 1e3,
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 60,
-    comment = "Mixed layer frontogenesis test"
+    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 40, βₜₕ = 5,
+    comment = "Mixed layer frontogenesis test",
+    wall_time_limit = 3 * 3600,
 )
 
 # Some tests for central region size
@@ -80,13 +81,14 @@ outer_test = (;
 )
 
 default_ip = (;
-    stop_time = 10e5, start_time = -2e5, save_time = 1e4, max_time = -1.0,
+    stop_time = 10e5, start_time = -2e5, save_time = 1e4, release_time = -1.0,
     f = 1e-4, L = 1e3,
     βx = 20, βh = 3,
     Nx = 1400, Nh = 1024, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
     βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 60,
-    comment = "Mixed layer frontogenesis"
+    comment = "Mixed layer frontogenesis",
+    wall_time_limit = 3 * 3600,
 )
 
 ips = [
@@ -182,10 +184,10 @@ wind = (;
 )
 
 ips_hd_init = [
-    (; ips[7]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256) # Low cooling
-    (; ips[9]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256) # High cooling
-    (; ips[9]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256) # Along-front wind
-    (; ips[9]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256) # Across-front wind
+    (; ips[7]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Low cooling
+    (; ips[9]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # High cooling
+    (; ips[9]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Along-front wind
+    (; ips[9]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Across-front wind
 ]
 
 ips_hd = map(ip -> (ip..., stop_time=10e5, βα=0.1), ips_hd_init)
@@ -219,7 +221,6 @@ test_set_init = (;
     filenames = cooling_depth_init.filenames[test_inds],
 )
 
-#= I probably won't use these
 # Cooling only
 ips = [
     (; default_ip..., Nz=64, βH=0.1, βB=0.01, stop_time=0.0, start_time=-6.0e5),
@@ -239,6 +240,23 @@ ips = [
     (; default_ip..., Nz=64, βH=0.1, βB=0.15, stop_time=0.0, start_time=-2.4e5), 
     (; default_ip..., Nz=64, βH=0.1, βB=0.2, stop_time=0.0, start_time=-2.2e5),
 ]
+
+filenames = map(ips) do ip
+    make_filename(ip; θτ=θτ_from_str(ip), βα="init")
+end
+
+destfilenamess = map(ips) do ip
+    [
+        make_filename(ip; θτ=θτ_from_str(ip), βα=0.1), 
+    ]
+end
+
+cooling_only_init = (;
+    ips,
+    filenames,
+    destfilenamess
+)
+
 ips = map(ips) do ip
     (; ip..., stop_time=10e5, βα=0.1)
 end
@@ -251,28 +269,3 @@ cooling_only = (;
     ips,
     filenames,
 )
-
-# Depth only
-ips = [
-    (; default_ip..., Nz=39, βH=0.06, βB=0.03, stop_time=0.0, start_time=-3e5),
-    (; default_ip..., Nz=51, βH=0.08, βB=0.03, stop_time=0.0, start_time=-3.6e5), 
-    (; default_ip..., Nz=58, βH=0.09, βB=0.03, stop_time=0.0, start_time=-3.9e5), 
-    (; default_ip..., Nz=64, βH=0.1, βB=0.03, stop_time=0.0, start_time=-4.2e5),
-    (; default_ip..., Nz=77, βH=0.12, βB=0.03, stop_time=0.0, start_time=-4.7e5), 
-    (; default_ip..., Nz=83, βH=0.13, βB=0.03, stop_time=0.0, start_time=-5.0e5),
-    (; default_ip..., Nz=90, βH=0.14, βB=0.03, stop_time=0.0, start_time=-5.2e5)
-]
-
-ips = map(ips) do ip
-    (; ip..., stop_time=10e5, βα=0.1)
-end
-
-filenames = map(ips) do ip
-    make_filename(ip; θτ=θτ_from_str(ip))
-end
-
-depth_only = (;
-    ips,
-    filenames,
-)
-=#

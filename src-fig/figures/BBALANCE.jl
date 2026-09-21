@@ -36,16 +36,17 @@ end
 Return a figure containing the average tendency terms between two indices, this just averages them
 """
 function b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedTuple(), filename=joinpath(run_id, "$run_id-b_balance_profiles"))
-    bbalance = bbalance(run_id, N_window)
+    bbalance = BBalance(run_id, N_window)
     fts = density_fts(bbalance)
 
     sp = simulation_parameters(filepath(bbalance))
     iterations, times = iterations_times(filepath(bbalance))
-
+    xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ = grid_nodes(filepath(bbalance); with_halos=true)
+    
     n = Observable(frames[1])
     t = @lift interp_time($n, times)
 
-    tendency_unit = b_unit^2
+    tendency_unit = (sp.B / sp.H)
     field_observables = make_fts_observables(x->mean(x; dims=1)[1, :], fts, il:ir, 1, :, t; unit=tendency_unit)
 
     title = @lift let t_hr = @sprintf "%.0f" ($t / 3600)
@@ -58,14 +59,14 @@ function b_balance_profiles(run_id, il, ir, frames; N_window=1, record_kw=NamedT
     )
     ax = Axis(fig[1, 1]; 
         ylabel = z_label,
-        xlabel = L"A / \text{cm}^{2} \, \text{s}^{-5}",
-        limits = (nothing, nothing, -sp.Lz, 0),
+        xlabel = L"A / BH^{-1}",
+        limits = (-2, 2, -sp.Lz, 0),
         title
     )
 
-    lns = NamedTuple(k => lines!(ax, times, v) for (k, v) in pairs(field_observables))
+    lns = NamedTuple(k => lines!(ax, v, nov(zsᶜ)) for (k, v) in pairs(field_observables))
 
-    make_legend!(fig[1, 2], lns, balance, L"A")
+    make_legend!(fig[1, 2], lns, bbalance, L"A")
 
     prettyrecord(n, fig, filename, frames; record_kw...)
 

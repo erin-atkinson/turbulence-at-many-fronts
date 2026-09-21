@@ -3,19 +3,19 @@
 # ---------------------------------------
 # Cooling turns on slowly
 @inline function b_flux_func(x, y, t, sp) 
-    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 10)
     return sp.B * turnon
 end
 
 # θ: angle relative to a down-front wind
 # We only include wind in the central region
 @inline function u_flux_func(x, y, t, sp) 
-    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 10)
     return -sp.τ * turnon * sin(sp.θτ) * exp(-x^2 / 4sp.L^2)
 end
 
 @inline function v_flux_func(x, y, t, sp) 
-    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 20)
+    turnon = 1 - exp(-sp.f*(t - sp.start_time) / 10)
     return -sp.τ * turnon * cos(sp.θτ) * exp(-x^2 / 4sp.L^2)
 end
 # ---------------------------------------

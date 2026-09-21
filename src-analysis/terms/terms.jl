@@ -44,7 +44,6 @@ include("gradients/richardson.jl")
 
 # Helpers for advection terms
 include("advection/advection.jl")
-include("advection/diffusion.jl")
 include("advection/operators.jl")
 
 # Mean potential energy

@@ -45,6 +45,7 @@ const t_label = L"t / \text{hr}"
 const u_unit = 1e-2
 const v_unit = 1e-2
 const w_unit = 1e-3
+const b_unit = 1e-2
 const ψ_unit = 1e-4
 
 const x_unit = 1e3

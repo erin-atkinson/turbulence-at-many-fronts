@@ -48,11 +48,11 @@ b_balance_terms = (
 )
 
 b_balance_term_labels = (;
-    advection_x = L"-\overline{u}\frac{\partial \overline{v}}{\partial x}",
-    advection_background = L"-U\frac{\partial \overline{v}}{\partial x}",
-    advection_z = L"-w\frac{\partial \overline{v}}{\partial z}",
-    mixing_x = L"-\frac{\partial }{\partial x}\overline{u'v'}",
-    mixing_z = L"-\frac{\partial }{\partial z}\overline{w'v'}",
+    advection_x = L"-\overline{u}\frac{\partial \overline{b}}{\partial x}",
+    advection_background = L"-U\frac{\partial \overline{b}}{\partial x}",
+    advection_z = L"-w\frac{\partial \overline{b}}{\partial z}",
+    mixing_x = L"-\frac{\partial }{\partial x}\overline{u'b'}",
+    mixing_z = L"-\frac{\partial }{\partial z}\overline{w'b'}",
     surface = L"-B\delta (z)"
 )
 
@@ -203,7 +203,7 @@ end
 
 totalterm(::QuadraticBalance) = :quadratic_total
 densityterms(balance::QuadraticBalance) = NamedTuple(k => k for k in filter(x -> x != :surface, terms(balance)))
-density_fts(balance::QuadraticBalance) = NamedTuple(k => FieldTimeSeries(filepath(balance), v; backend=OnDisk()) for (k, v) in pairs(densityterms(balance)))
+density_fts(balance::QuadraticBalance) = NamedTuple(k => FieldTimeSeries(filepath(balance), string(v); backend=OnDisk()) for (k, v) in pairs(densityterms(balance)))
 
 struct UBalance <: QuadraticBalance
     run_id
