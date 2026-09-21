@@ -210,7 +210,7 @@ highresolution = (;
     filenames = filenames_hd
 )
 
-test_inds = [6, 7, 9]
+test_inds = [7, 8, 9]
 test_set = (;
     ips = cooling_depth_01.ips[test_inds],
     filenames = cooling_depth_01.filenames[test_inds],
