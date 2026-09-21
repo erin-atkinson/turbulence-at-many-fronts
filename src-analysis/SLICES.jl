@@ -5,11 +5,13 @@ include("terms/slices.jl")
 fields = (:u, :v, :w, :b)
 dependency_fields = NamedTuple()
 
-# x = Lh/2, x = -Lh/2
+# x = Lh/2, x = -Lh/2, x=-0.9L, x=0
 for ξ in fields
     left_ξ = Symbol(:left_, ξ)
     right_ξ = Symbol(:right_, ξ)
-    @info "Slices $left_ξ and $right_ξ"
+    arrest_ξ = Symbol(:arrest_, ξ)
+    along_ξ = Symbol(:along_, ξ)
+    @info "Slices $left_ξ, $right_ξ, $arrest_ξ and $along_ξ"
 
     @eval begin
         field = input_fields.$ξ
@@ -17,8 +19,10 @@ for ξ in fields
 
         $left_ξ = Field(KernelFunctionOperation{Nothing, Ly, Lz}(x_slice_func, grid, field, -sp.Lh/2, (Lx(), Ly(), Lz())))
         $right_ξ = Field(KernelFunctionOperation{Nothing, Ly, Lz}(x_slice_func, grid, field, sp.Lh/2, (Lx(), Ly(), Lz())))
+        $arrest_ξ = Field(KernelFunctionOperation{Nothing, Ly, Lz}(x_slice_func, grid, field, -0.9sp.L, (Lx(), Ly(), Lz())))
+        $along_ξ = Field(KernelFunctionOperation{Nothing, Ly, Lz}(x_slice_func, grid, field, 0.0, (Lx(), Ly(), Lz())))
 
-        dependency_fields = merge(dependency_fields, (; $left_ξ, $right_ξ))
+        dependency_fields = merge(dependency_fields, (; $left_ξ, $right_ξ, $arrest_ξ, $along_ξ))
     end
 end
 
@@ -37,7 +41,6 @@ for ξ in fields
     end
 end
 
-eval(qute)
 # z = -0.05H, -0.25H, -0.5H, -0.75H, -0.95H
 for ξ in fields
     z005_ξ = Symbol(:z005_, ξ)
@@ -57,7 +60,7 @@ for ξ in fields
         $z075_ξ = Field(KernelFunctionOperation{Lx, Ly, Nothing}(z_slice_func, grid, field, -0.75sp.H, (Lx(), Ly(), Lz())))
         $z095_ξ = Field(KernelFunctionOperation{Lx, Ly, Nothing}(z_slice_func, grid, field, -0.95sp.H, (Lx(), Ly(), Lz())))
 
-        dependency_fields = merge(dependency_fields, (; $z005_ξ, $z025_ξ, $z050_ξ, $z075_ξ, $z095_ξ, ))
+        dependency_fields = merge(dependency_fields, (; $z005_ξ, $z025_ξ, $z050_ξ, $z075_ξ, $z095_ξ))
     end
 end
 

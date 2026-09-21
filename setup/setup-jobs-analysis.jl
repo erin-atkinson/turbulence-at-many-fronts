@@ -58,59 +58,63 @@ setnames = [
     "cooling-depth-0_1",
     "cooling-depth-0_2",
     "cooling-depth-0_05",
-    "wind"
+    "cooling-only",
+    "wind",
+    "high-resolution"
 ]
 
 sets = [
     cooling_depth_01,
     cooling_depth_02,
     cooling_depth_005,
-    wind
+    cooling_only,
+    wind,
+    highresolution,
 ]
 
 let set = test_set,
     setname = "test-set"
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-STREAMFUNCTION", set.filenames, "STREAMFUNCTION", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
-    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2", job=false)
+    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-SLICES", set.filenames, "SLICES", "2:30:00"; loc="jobs-analysis", filename="OUTPUT.jld2", job=false)
     
-    save_script("$setname-MEAN-20", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="MEAN-20.jld2")
-    save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="GRADIENTS-20.jld2")
-    save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="ENERGY-20.jld2")
-    save_script("$setname-PV-20", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="PV-20.jld2")
-    save_script("$setname-STREAMFUNCTION-20", set.filenames, "STREAMFUNCTION", "0:00:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="STREAMFUNCTION-20.jld2")
-    save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="UBALANCE-20.jld2")
-    save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="VBALANCE-20.jld2")
-    save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="AVERAGE-20.jld2", job=false, outputfilename="BBALANCE-20.jld2")
+    save_script("$setname-MEAN-20", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="MEAN-20.jld2")
+    save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="GRADIENTS-20.jld2")
+    save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="ENERGY-20.jld2")
+    save_script("$setname-PV-20", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="PV-20.jld2")
+    save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="UBALANCE-20.jld2")
+    save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="VBALANCE-20.jld2")
+    save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", job=false, outputfilename="BBALANCE-20.jld2")
 end
 
-#=
-map(sets, setnames) do set, setname
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
-    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
+for (set, setname) in zip(sets, setnames)
+    save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-PV", set.filenames, "PV", "2:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2")
+    save_script("$setname-SLICES", set.filenames, "SLICES", "2:30:00"; loc="jobs-analysis", filename="OUTPUT.jld2")
     
-    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
-    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
-    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
-    
-    #save_script("$setname-UBALANCE-5", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="UBALANCE-5.jld2")
-    #save_script("$setname-VBALANCE-5", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="VBALANCE-5.jld2")
-    #save_script("$setname-BBALANCE-5", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="BBALANCE-5.jld2")
-
-    save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="AVERAGE.jld2")
-    #save_script("$setname-ENERGY-5", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="ENERGY-5.jld2")
-
-    #save_script("$setname-GRADIENTS-5", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="GRADIENTS-5.jld2")
-
-    #save_script("$setname-SURFACE", set.filenames, "SURFACE", "0:30:00"; loc="jobs-analysis", filename="OUTPUT-20.jld2")
-    
-    #save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
-    #save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
-    #save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")
+    save_script("$setname-MEAN-20", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="MEAN-20.jld2")
+    save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="GRADIENTS-20.jld2")
+    save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "2:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="ENERGY-20.jld2")
+    save_script("$setname-PV-20", set.filenames, "PV", "2:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="PV-20.jld2")
+    save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="UBALANCE-20.jld2")
+    save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="VBALANCE-20.jld2")
+    save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="TIMEAVERAGE-20.jld2", outputfilename="BBALANCE-20.jld2")
 end
-=#
+
+let set = highresolution_init,
+    setname = "high-resolution-init"
+    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+end

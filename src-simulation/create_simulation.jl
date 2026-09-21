@@ -84,26 +84,13 @@ end
 simulation = Simulation(model; Δt, sp.stop_time, sp.wall_time_limit)
 
 include("time_average_output.jl")
-#=
-function init_checkpoint(simulation, output_folder)
-    !(time(simulation) ≈ 0.0) && return nothing
-    parent_path, run_id = splitdir(output_folder)
-    println("Checkpointing initialization")
-    init_path = joinpath(parent_path, "initialized")
-    mkpath(init_path)
-    
-    Oceananigans.OutputWriters.checkpoint(simulation; filepath=joinpath(init_path, "$run_id.jld2"))
-    return nothing
-end
 
-simulation.callbacks[:init_checkpoint] = Callback(init_checkpoint, SpecifiedTimes([0.0]); parameters=output_folder)
-=#
 # Variable time step
 wizard = TimeStepWizard(; cfl=0.5, max_Δt=5e-2/sp.f)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 # Compute the advection
-simulation.callbacks[:advection] = Callback(calculate_U_callback, IterationInterval(1); parameters=sp)
+simulation.callbacks[:advection] = Callback(calculate_strain_callback, IterationInterval(1); parameters=sp)
 
 # Output progress
 const prev_t = [0.0]

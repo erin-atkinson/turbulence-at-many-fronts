@@ -14,10 +14,10 @@ end
 # ---------------------------------------
 # Strain turns on slowly starting at t=0
 @inline function variable_strain_rate(t, α, f, release_time)
-    turnon = max(1-exp(-f * t / 15), 0)
+    turnon = max(1-exp(-f * t / 10), 0)
     release_time <= 0 && return α * turnon
     
-    turnoff = max(1-exp(-f * (t - release_time) / 15), 0)
+    turnoff = max(1-exp(-f * (t - release_time) / 10), 0)
     return α * (turnon - turnoff)
 end
 
@@ -40,8 +40,8 @@ const strain_profile_array = Field{Center, Nothing, Nothing}(grid)
     vp_func(x) = velocity_profile(x, sp.Lh)
     sp_func(x) = strain_profile(x, sp.Lh)
     
-    velocity_profile_array.data.parent[:, 1, 1] .= vp.(grid.xᶠᵃᵃ.parent)
-    strain_profile_array.data.parent[:, 1, 1] .= sp.(grid.xᶜᵃᵃ.parent)
+    velocity_profile_array.data.parent[:, 1, 1] .= vp_func.(grid.xᶠᵃᵃ.parent)
+    strain_profile_array.data.parent[:, 1, 1] .= sp_func.(grid.xᶜᵃᵃ.parent)
 end
 
 # U is calculated directly to avoid issues with the boundary conditions

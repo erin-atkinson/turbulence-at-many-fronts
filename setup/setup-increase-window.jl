@@ -32,7 +32,7 @@ end
 function make_body(foldername, N_window; job=true)
     endstr = job ? "&" : ""
     """
-    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/AVERAGE.jld2 $N_window $endstr
+    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/TIMEAVERAGE.jld2 $N_window $endstr
     """
 end
 
@@ -61,25 +61,24 @@ setnames = [
     "cooling-depth-0_2",
     "cooling-depth-0_05",
     "cooling-only",
-    "depth-only",
-    "test_set"
+    "wind",
+    "high-resolution",
 ]
 
 sets = [
     cooling_depth_01,
     cooling_depth_02,
     cooling_depth_005,
+    cooling_only,
+    wind,
+    highresolution,
 ]
 
 let set = test_set,
     setname = "test-set"
-    save_script("$setname-WINDOW", set.filenames, 5, "0:30:00"; loc="jobs-analysis", job=false)
-    save_script("$setname-WINDOWWIDE", set.filenames, 20, "0:30:00"; loc="jobs-analysis", job=false)
+    save_script("$setname-WINDOW", set.filenames, 20, "0:30:00"; loc="jobs-analysis", job=false)
 end
 
-#=
-map(sets, setnames) do set, setname
-    save_script("$setname-WINDOW", set.filenames, 5, "0:30:00"; loc="jobs-analysis")
-    save_script("$setname-WINDOWWIDE", set.filenames, 50, "0:30:00"; loc="jobs-analysis")
+for (set, setname) in zip(sets, setnames)
+    save_script("$setname-WINDOW", set.filenames, 20, "0:30:00"; loc="jobs-analysis")
 end
-=#

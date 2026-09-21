@@ -212,7 +212,7 @@ end
 
 println()
 println("HIGH RESOLUTION: INITIALISATION")
-path = "jobs-simulation/highresolution-init"
+path = "jobs-simulation/high-resolution-init"
 mkpath(path)
 
 T = "12:00:00"
@@ -223,11 +223,9 @@ end
 
 println()
 println("HIGH RESOLUTION")
-path = "jobs-simulation/highresolution"
+path = "jobs-simulation/high-resolution"
 mkpath(path)
 
 for (ip, filename) in zip(highresolution.ips, highresolution.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
-
-

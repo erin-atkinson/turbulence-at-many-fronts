@@ -128,7 +128,7 @@ snapshot_symbol = Symbol(:snapshot, prev_iteration)
 checkpointer_symbol = Symbol(:checkpointer, prev_iteration)
 
 simulation.output_writers[output_symbol] = JLD2Writer(model, output_fields; 
-    filename = "$output_folder/AVERAGE.jld2", 
+    filename = "$output_folder/TIMEAVERAGE.jld2", 
     schedule = AveragedSpecifiedTimes(writing_times, sp.save_time),
     overwrite_existing = false,
     with_halos = true,

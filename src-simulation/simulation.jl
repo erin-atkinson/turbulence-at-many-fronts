@@ -31,10 +31,11 @@
         [18]: Surface wind stress
         [19]: Surface wind stress angle (0: along front pi/2: across front)
         [20]: Deep deformation radius
+        [21]: Thermocline buoyancy step
 
-        [21]: Maximum wall time
+        [22]: Maximum wall time
         
-        [22]: Comment
+        [23]: Comment
 =#
 println("simulation.jl")
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
@@ -76,8 +77,9 @@ simulation_parameters = let
     βτ = parse(Float64, ARGS[18])
     θτ = parse(Float64, ARGS[19])
     β₀ = parse(Float64, ARGS[20])
+    βₜₕ = parse(Float64, ARGS[21])
 
-    wall_time_limit = parse(Float64, ARGS[21])
+    wall_time_limit = parse(Float64, ARGS[22])
     
     (;
         stop_time, start_time, save_time, release_time,
@@ -85,12 +87,12 @@ simulation_parameters = let
         βx, βh,
         Nx, Nh, Ny, Nz,
         βℓ, βH,
-        βα, βB, βτ, θτ, β₀,
+        βα, βB, βτ, θτ, β₀, βₜₕ,
         wall_time_limit
     )
 end
 
-const comment = join(ARGS[22:end], " ")
+const comment = join(ARGS[23:end], " ")
 
 for (k, v) in pairs(simulation_parameters)
     k_str = string(k)
