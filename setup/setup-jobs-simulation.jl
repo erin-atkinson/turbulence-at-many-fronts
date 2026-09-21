@@ -78,7 +78,7 @@ function make_body(ip, filename)
     betatau=$(ip.βτ)
     thetatau=$(ip.θτ)
     beta0=$(ip.β₀)
-    betath=$(ip.βₜₕ)
+    betath=$(ip.βth)
 
     wall_time_limit=$(ip.wall_time_limit)
     

@@ -1,5 +1,5 @@
-function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ, βₜₕ=sp.βₜₕ)
-    strs = map([βH, βα, βB, βτ, θτ, βₜₕ]) do β
+function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ, βth=sp.βth)
+    strs = map([βH, βα, βB, βτ, θτ, βth]) do β
         replace(string(β), "."=>"_")
     end
     ext = isnothing(ext) ? "" : ".$ext"
@@ -23,7 +23,7 @@ default_ip = (;
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 40, βₜₕ = 5,
+    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 40, βth = 5,
     comment = "Mixed layer frontogenesis test",
     wall_time_limit = 3 * 3600,
 )
@@ -86,7 +86,7 @@ default_ip = (;
     βx = 20, βh = 3,
     Nx = 1400, Nh = 1024, Ny = 128, Nz = 64,
     βℓ = 6, βH = 0.1,
-    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 40, βₜₕ = 5,
+    βα = 0.1, βB = 0.03, βτ = 0.00, θτ = 0.0, β₀ = 40, βth = 5,
     comment = "Mixed layer frontogenesis",
     wall_time_limit = 3 * 3600,
 )

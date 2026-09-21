@@ -12,7 +12,7 @@ const f′′_max = maximum(s->-tanh(s) * sech(s)^2, range(-10, 10, 1000))
 @inline g′′(s) = exp(-s) / (1 + exp(-s))^2
 
 # Background stratification
-@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * g(-(z + sp.H) / (sp.λ * sp.H)) - sp.Δbₜₕ * (1 + tanh(-(z + sp.H) / (sp.λ * sp.H))) / 2
+@inline b∞(z, sp) = -sp.λ * sp.H * sp.N₀² * g(-(z + sp.H) / (sp.λ * sp.H)) - sp.Δbth * (1 + tanh(-(z + sp.H) / (sp.λ * sp.H))) / 2
 
 # Buoyancy
 @inline function front_buoyancy(x, z, sp)
@@ -31,7 +31,7 @@ end
           sp.a * (sp.Δb / sp.H) * f′(x₁) * g′(z₁)
         + (sp.Δb / (sp.λ * sp.H)) * f(x₁) * g′′(z₁)
         + sp.N₀² * g′(-z₁)
-        + Δbₜₕ * sech(-(z + sp.H) / (sp.λ * sp.H))^2 / (2sp.λ * sp.H)
+        + Δbth * sech(-(z + sp.H) / (sp.λ * sp.H))^2 / (2sp.λ * sp.H)
     )
 end
 
@@ -82,7 +82,7 @@ end
     H = ip.βH * ip.L
 
     # Thermocline buoyancy step
-    Δbₜₕ = ip.βₜₕ * Δb
+    Δbth = ip.βth * Δb
 
     # Thermocline step width
     λ = 0.01
@@ -94,7 +94,7 @@ end
     V = maximum_front_velocity(ip)
     a = 1/ip.βℓ^2
     
-    return (; λ, Δb, ℓ, H, N₀², Ro, V, a, Δbₜₕ)
+    return (; λ, Δb, ℓ, H, N₀², Ro, V, a, Δbth)
 end
 create_front_parameters(; ip...) = create_front_parameters(ip)
 

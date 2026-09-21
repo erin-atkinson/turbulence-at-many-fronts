@@ -56,11 +56,11 @@ end
     return nothing
 end
 
-@inline αf_func(i, j, k, grid, field) = @inbounds strain_profile_array[i, j, k] * central_α[i, j, k] * field[i, j, k]
+@inline αf_func(i, j, k, grid, field, strain_profile_array, central_α) = @inbounds strain_profile_array[i, j, k] * central_α[i, j, k] * field[i, j, k]
 
-@inline v_forcing_func(i, j, k, grid, clock, v) = -2αf_func(i, j, k, grid, v)
-@inline w_forcing_func(i, j, k, grid, clock, w) = -αf_func(i, j, k, grid, w)
-@inline b_forcing_func(i, j, k, grid, clock, b) = -αf_func(i, j, k, grid, b)
+@inline v_forcing_func(i, j, k, grid, clock, model_fields, p) = -2αf_func(i, j, k, grid, model_fields.v, p.strain_profile_array, p.central_α)
+@inline w_forcing_func(i, j, k, grid, clock, model_fields, p) = -αf_func(i, j, k, grid, model_fields.w, p.strain_profile_array, p.central_α)
+@inline b_forcing_func(i, j, k, grid, clock, model_fields, p) = -αf_func(i, j, k, grid, model_fields.b, p.strain_profile_array, p.central_α)
 # ---------------------------------------
 
 # ---------------------------------------
@@ -72,16 +72,16 @@ u_forcing = (
 v_forcing = (
     AdvectiveForcing(; u=U),
     Relaxation(; rate=sp.σ, mask=sponge_layer, target=0),
-    Forcing(v_forcing_func; discrete_form=true, field_dependencies=(:v, )),
+    Forcing(v_forcing_func; discrete_form=true, parameters=(; strain_profile_array, central_α)),
 )
 w_forcing = (
     AdvectiveForcing(; u=U),
     Relaxation(; rate=sp.σ, mask=sponge_layer, target=0),
-    Forcing(w_forcing_func; discrete_form=true, field_dependencies=(:w, )),
+    Forcing(w_forcing_func; discrete_form=true, parameters=(; strain_profile_array, central_α)),
 )
 b_forcing = (
     AdvectiveForcing(; u=U),
-    Forcing(b_forcing_func; discrete_form=true, field_dependencies=(:b, )),
+    Forcing(b_forcing_func; discrete_form=true, parameters=(; strain_profile_array, central_α)),
 )
 # ---------------------------------------
 

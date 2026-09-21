@@ -77,7 +77,7 @@ simulation_parameters = let
     βτ = parse(Float64, ARGS[18])
     θτ = parse(Float64, ARGS[19])
     β₀ = parse(Float64, ARGS[20])
-    βₜₕ = parse(Float64, ARGS[21])
+    βth = parse(Float64, ARGS[21])
 
     wall_time_limit = parse(Float64, ARGS[22])
     
@@ -87,7 +87,7 @@ simulation_parameters = let
         βx, βh,
         Nx, Nh, Ny, Nz,
         βℓ, βH,
-        βα, βB, βτ, θτ, β₀, βₜₕ,
+        βα, βB, βτ, θτ, β₀, βth,
         wall_time_limit
     )
 end

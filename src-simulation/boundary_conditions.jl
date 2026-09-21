@@ -40,6 +40,5 @@ w_bcs=FieldBoundaryConditions(;
 )
 # ---------------------------------------
 
-
 boundary_conditions = (; u=u_bcs, v=v_bcs, b=b_bcs, w=w_bcs)
 @info "Created boundary conditions"
