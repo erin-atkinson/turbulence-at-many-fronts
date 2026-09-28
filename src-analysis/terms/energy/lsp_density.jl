@@ -12,9 +12,9 @@
     uv = turbulent_fluxes.uv
     uw = turbulent_fluxes.uw
 
-    uuux = ∂xᶜᶜᶜ(i, j, k, grid, fGg, uu, a_avg, u, u_prev)
-    uvvx = ℑxyᶜᶜᵃ(i, j, k, grid, fGg, uv, ∂xᶠᶠᶜ, a_avg, v, v_prev)
-    uwwx = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, uw, ∂xᶠᶜᶠ, a_avg, w, w_prev)
+    uuux = ∂xᶜᶜᶜ(i, j, k, grid, fGg, uu, f_avg, u, u_prev)
+    uvvx = ℑxyᶜᶜᵃ(i, j, k, grid, fGg, uv, ∂xᶠᶠᶜ, f_avg, v, v_prev)
+    uwwx = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, uw, ∂xᶠᶜᶠ, f_avg, w, w_prev)
     
     return -(
           uuux

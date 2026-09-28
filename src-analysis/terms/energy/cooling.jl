@@ -1,7 +1,7 @@
 function cooling_func(i, j, k, grid, clock, h_ml, h_ml_prev, sp)
     t = clock.time
     B = b_flux_func(t, sp)
-    return @inbounds a_avg(i, j, k, grid, h_ml, h_ml_prev) * B * sp.Lx 
+    return @inbounds f_avg(i, j, k, grid, h_ml, h_ml_prev) * B * sp.Lx 
 end
 
 @doc raw"""

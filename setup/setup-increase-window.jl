@@ -32,7 +32,7 @@ end
 function make_body(foldername, N_window; job=true)
     endstr = job ? "&" : ""
     """
-    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/TIMEAVERAGE.jld2 $N_window $endstr
+    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/MEAN.jld2 $N_window $endstr
     """
 end
 

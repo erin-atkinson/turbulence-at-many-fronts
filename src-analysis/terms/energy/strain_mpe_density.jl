@@ -3,7 +3,7 @@
     x, y, z = node(i, j, k, grid, Center(), Center(), Center())
     U = variable_strain_rate(t, sp) * velocity_profile(x, sp)
 
-    h_ml_avg = a_avg(i, j, k, grid, h_ml, h_ml_prev)
+    h_ml_avg = f_avg(i, j, k, grid, h_ml, h_ml_prev)
     
     return U * ℑxᶜᵃᵃ(i, j, k, grid, ∂xᶠᶜᶜ, b) * (z + h_ml_avg)
 end

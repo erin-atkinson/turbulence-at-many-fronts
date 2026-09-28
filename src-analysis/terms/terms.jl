@@ -42,12 +42,14 @@ include("forcing_bc_funcs.jl")
 include("gradients/vorticity.jl")
 include("gradients/richardson.jl")
 
+include("mixed_layer/buoyancy_based_mixed_layer.jl")
+include("mixed_layer/mixed_layer_integral.jl")
+
 # Helpers for advection terms
 include("advection/advection.jl")
 include("advection/operators.jl")
 
 # Mean potential energy
-include("energy/mld.jl")
 include("energy/mpe_density.jl")
 include("energy/bflux_density.jl")
 include("energy/mixed_density.jl")

@@ -12,9 +12,9 @@
     wv = turbulent_fluxes.wv
     ww = turbulent_fluxes.ww
 
-    wuuz = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, wu, ∂zᶠᶜᶠ, a_avg, u, u_prev)
-    wvvz = ℑyzᵃᶜᶜ(i, j, k, grid, fGg, wv, ∂zᶜᶠᶠ, a_avg, v, v_prev)
-    wwwz = ∂zᶜᶜᶜ(i, j, k, grid, fGg, ww, a_avg, w, w_prev)
+    wuuz = ℑxzᶜᵃᶜ(i, j, k, grid, fGg, wu, ∂zᶠᶜᶠ, f_avg, u, u_prev)
+    wvvz = ℑyzᵃᶜᶜ(i, j, k, grid, fGg, wv, ∂zᶜᶠᶠ, f_avg, v, v_prev)
+    wwwz = ∂zᶜᶜᶜ(i, j, k, grid, fGg, ww, f_avg, w, w_prev)
     
     return -(
           wuuz

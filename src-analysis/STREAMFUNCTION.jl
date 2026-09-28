@@ -2,25 +2,20 @@ include("terms/terms.jl")
 
 fields = (:u, :v, :w, :b, :uu, :wu, :uw, :ww)
 
-mean_fields = NamedTuple()
 for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    @eval begin
-        $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (; mean_fields..., $ξ_bar)
-    end
+    @eval $ξ = input_fields.$ξ
 end
 
 # Streamfunction
-ψ = Field(Streamfunction(u_bar))
+ψ = Field(Streamfunction(u))
 streamfunction = (; ψ)
 
 println("Turbulent fluxes")
-u′u′ = Field(uu_bar - UuFlux(centered, u_bar, u_bar))
-u′w′ = Field(uw_bar - UwFlux(centered, u_bar, w_bar))
+u′u′ = Field(uu - UuFlux(centered, u, u))
+u′w′ = Field(uw - UwFlux(centered, u, w))
 
-w′u′ = Field(wu_bar - WuFlux(centered, w_bar, u_bar))
-w′w′ = Field(ww_bar - WwFlux(centered, w_bar, w_bar))
+w′u′ = Field(wu - WuFlux(centered, w, u))
+w′w′ = Field(ww - WwFlux(centered, w, w))
 
 turbulent_fluxes = (;
     uu = u′u′, uw = u′w′,
@@ -30,7 +25,7 @@ turbulent_fluxes = (;
 sce_density = Field(SCEDensity(ψ))
 turbulence_density = Field(TURBULENCESCEDensity(ψ, turbulent_fluxes))
 strain_density = Field(STRAINSCEDensity(clock, ψ, sp))
-ageostrophic_density = Field(AGEOSTROPHICDensity(ψ, v_bar, b_bar, sp))
+ageostrophic_density = Field(AGEOSTROPHICDensity(ψ, v, b, sp))
 sponge_density = Field(SPONGESCEDensity(ψ, sp))
 
 sce_density_terms = (; 

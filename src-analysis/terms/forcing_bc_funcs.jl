@@ -1,8 +1,9 @@
 # Sponge layer -----------------------------------------------------------------
 # Quadratic damping mask
 @inline function sponge_layer_func(z, sp)
-    s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
-    return sp.σ * (1 - abs(s))^2
+    H_sponge = sp.H + (sp.Lz - sp.H) / 2
+    s = min((z+sp.Lz) / (sp.Lz - H_sponge), 1)
+    return (1 - abs(s))^2
 end
 
 @inline function sponge_func(i, j, k, grid, loc, field, sp)
@@ -81,9 +82,9 @@ end
 # Background flow --------------------------------------------------------------
 @inline function variable_strain_rate(t, sp)
     turnon = max(1-exp(-sp.f * t / 15), 0)
-    sp.max_time <= 0 && return sp.α * turnon
+    sp.release_time <= 0 && return sp.α * turnon
     
-    turnoff = max(1-exp(-sp.f * (t - sp.max_time) / 15), 0)
+    turnoff = max(1-exp(-sp.f * (t - sp.release_time) / 15), 0)
     return sp.α * (turnon - turnoff)
 end
 
@@ -99,8 +100,7 @@ end
     x, y, z = node(i, j, k, grid, loc...)
 
     α = variable_strain_rate(t, sp) * strain_profile(x, sp)
-    f_avg  = a_avg(i, j, k, grid, f, f_prev)
 
-    return @inbounds α * f[i, j, k] * f_avg
+    return @inbounds α * f[i, j, k] * f_avg(i, j, k, grid, f, f_prev)
 end
 # ------------------------------------------------------------------------------

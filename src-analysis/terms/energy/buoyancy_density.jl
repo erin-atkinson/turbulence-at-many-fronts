@@ -1,5 +1,5 @@
 @inline function buoyancy_density_func(i, j, k, grid, w, w_prev, b)
-    return @inbounds ℑzᵃᵃᶜ(i, j, k, grid, a_avg, w, w_prev) * b[i, j, k]
+    return @inbounds ℑzᵃᵃᶜ(i, j, k, grid, f_avg, w, w_prev) * b[i, j, k]
 end
 
 @doc raw"""

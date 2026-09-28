@@ -2,32 +2,27 @@ include("terms/terms.jl")
 
 fields = (:u, :v, :w, :uv, :wv, :v_prev)
 
-mean_fields = NamedTuple()
 for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    @eval begin
-        $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (; mean_fields..., $ξ_bar)
-    end
+    @eval $ξ = input_fields.$ξ
 end
 
 loc = (Center(), Nothing(), Center())
 
 println("Mean flux densities")
-flux_density_x = Field(UvFlux(centered, u_bar, v_bar))
-flux_density_background = Field(UvFlux(centered, input_fields.U, v_bar))
-flux_density_z = Field(WvFlux(centered, w_bar, v_bar))
+flux_density_x = Field(UvFlux(centered, u, v))
+flux_density_background = Field(UvFlux(centered, input_fields.U, v))
+flux_density_z = Field(WvFlux(centered, w, v))
 flux_density = (; flux_density_x, flux_density_background, flux_density_z)
 
 println("Mean advection")
-advection_x = Field(@at loc -u_bar * ∂x(v_bar))
-advection_background = Field(@at loc -input_fields.U * ∂x(v_bar))
-advection_z = Field(@at loc -w_bar * ∂z(v_bar))
+advection_x = Field(@at loc -u * ∂x(v))
+advection_background = Field(@at loc -input_fields.U * ∂x(v))
+advection_z = Field(@at loc -w * ∂z(v))
 advection = (; advection_x, advection_background, advection_z)
 
 println("Turbulent flux densities")
-turbulent_flux_density_x = Field(uv_bar - flux_density_x)
-turbulent_flux_density_z = Field(wv_bar - flux_density_z)
+turbulent_flux_density_x = Field(uv - flux_density_x)
+turbulent_flux_density_z = Field(wv - flux_density_z)
 turbulent_flux_density = (; turbulent_flux_density_x, turbulent_flux_density_z)
 
 println("Derivatives of turbulent flux densities")
@@ -36,9 +31,9 @@ mixing_z = Field(-∂z(turbulent_flux_density_z))
 mixing = (; mixing_x, mixing_z)
 
 println("Tendency for a fluid parcel")
-coriolis = Field(@at loc -1 * sp.f * u_bar)
-strain = Field(v_bar * ∂x(input_fields.U))
-sponge = Field(SpongeLayer(v_bar, sp))
+coriolis = Field(@at loc -1 * sp.f * u)
+strain = Field(v * ∂x(input_fields.U))
+sponge = Field(SpongeLayer(v, sp))
 surface = Field(-SurfaceFluxV(grid, clock, sp))
 parcel = (; coriolis, strain, sponge, surface)
 
@@ -52,9 +47,9 @@ balance_terms = (
     :coriolis, :strain, :sponge, :surface
 )
 
-v_avg = Field((v_bar + v_prev_bar) / 2)
+v_avg = Field((v + v_prev) / 2)
 v_avg_surface = Field(ZSlice(v_avg, 0))
-quadratic_mask = Field(CentralRegionMask(v_bar, sp))
+quadratic_mask = Field(CentralRegionMask(v, sp))
 
 dependency_fields = (; dependency_fields..., v_avg, v_avg_surface, quadratic_mask)
 quadratic = NamedTuple()
@@ -79,7 +74,7 @@ quadratic_total = Field(
     + quadratic_sponge
     + quadratic_surface
 )
-v² = Field(Integral(v_bar * v_bar * quadratic_mask))
+v² = Field(Integral(v * v * quadratic_mask))
 
 quadratic = (; quadratic..., quadratic_total, v²)
 

@@ -17,15 +17,15 @@ function check_completion(simname)
     end
     prev_time < 0 && return "$simname: Uninitialised (no checkpoint at t=0)"
     
-    !mapreduce(a->startswith(a, "AVERAGE"), |, filenames) && return "$simname: Initialised only (no output)"
+    !mapreduce(a->startswith(a, "OUTPUT"), |, filenames) && return "$simname: Initialised only (no output)"
     
-    iterations = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
+    iterations = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         keys(file["timeseries/t"])
     end
-    ts = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
+    ts = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         [file["timeseries/t/$iteration"] for iteration in keys(file["timeseries/t"])]
     end
-    sp = jldopen(joinpath(foldername, "AVERAGE.jld2")) do file
+    sp = jldopen(joinpath(foldername, "OUTPUT.jld2")) do file
         file["metadata/parameters"]
     end
     "$simname: Run until ft = $(sp.f * ts[end]), αt = $(sp.α * ts[end]), $(iterations[end]) $checkpointnames"

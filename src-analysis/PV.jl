@@ -8,32 +8,25 @@ fields = (
     :ub, :vb, :wb,
 )
 
-mean_fields = NamedTuple()
-model_fields = NamedTuple()
 for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    @eval begin
-        $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (; mean_fields..., $ξ_bar)
-    end
+    @eval $ξ = input_fields.$ξ
 end
-dependency_fields = mean_fields
 
 println("Turbulent fluxes")
-u′u′ = Field(uu_bar - UuFlux(centered, u_bar, u_bar))
-u′v′ = Field(uv_bar - UvFlux(centered, u_bar, v_bar))
-u′w′ = Field(uw_bar - UwFlux(centered, u_bar, w_bar))
-u′b′ = Field(ub_bar - UcFlux(centered, u_bar, b_bar))
+u′u′ = Field(uu - UuFlux(centered, u, u))
+u′v′ = Field(uv - UvFlux(centered, u, v))
+u′w′ = Field(uw - UwFlux(centered, u, w))
+u′b′ = Field(ub - UcFlux(centered, u, b))
 
-v′u′ = Field(vu_bar - VuFlux(centered, v_bar, u_bar))
-v′v′ = Field(vv_bar - VvFlux(centered, v_bar, v_bar))
-v′w′ = Field(vw_bar - VwFlux(centered, v_bar, w_bar))
-v′b′ = Field(vb_bar - VcFlux(centered, v_bar, b_bar))
+v′u′ = Field(vu - VuFlux(centered, v, u))
+v′v′ = Field(vv - VvFlux(centered, v, v))
+v′w′ = Field(vw - VwFlux(centered, v, w))
+v′b′ = Field(vb - VcFlux(centered, v, b))
 
-w′u′ = Field(wu_bar - WuFlux(centered, w_bar, u_bar))
-w′v′ = Field(wv_bar - WvFlux(centered, w_bar, v_bar))
-w′w′ = Field(ww_bar - WwFlux(centered, w_bar, w_bar))
-w′b′ = Field(wb_bar - WcFlux(centered, w_bar, b_bar))
+w′u′ = Field(wu - WuFlux(centered, w, u))
+w′v′ = Field(wv - WvFlux(centered, w, v))
+w′w′ = Field(ww - WwFlux(centered, w, w))
+w′b′ = Field(wb - WcFlux(centered, w, b))
 
 turbulent_fluxes = (;
     uu = u′u′, uv = u′v′, uw = u′w′, ub = u′b′,
@@ -52,10 +45,10 @@ turbulent_forcing = (; 𝔉u, 𝔉v, 𝔉w, 𝔇)
 dependency_fields = merge(dependency_fields, turbulent_forcing)
 
 println("Potential vorticity")
-q_mean_fields = (; u=u_bar, v=v_bar, w=w_bar, b=b_bar)
+q_mean_fields = (; u=u, v=v, w=w, b=b)
 q_turbulent_forcing = (; u=𝔉u, v=𝔉v, w=𝔉w, b=𝔇)
 
-q = Field(PV(u_bar, v_bar, w_bar, b_bar, sp))
+q = Field(PV(u, v, w, b, sp))
 
 Jx = Field(PVFluxX(q_mean_fields, sp))
 Jy = Field(PVFluxY(q_mean_fields, sp))

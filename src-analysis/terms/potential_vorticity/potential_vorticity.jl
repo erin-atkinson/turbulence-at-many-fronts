@@ -22,5 +22,5 @@ q = (\nabla \times \overline{\vec{u}} + f\hat z) \cdot \nabla \overline{b}
 function PotentialVorticity(u, v, w, b, sp)
     grid = u.grid
     loc = locationornothing((Face, Face, Face), u)
-    return KernelFunctionOperation{loc...}(q_func, grid, sp, u, v, w, b)
+    return KernelFunctionOperation{loc...}(potential_vorticity_func, grid, sp, u, v, w, b)
 end

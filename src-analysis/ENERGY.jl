@@ -8,54 +8,47 @@ fields = (
     :ke
 )
 
-mean_fields = NamedTuple()
 for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    @eval begin
-        $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (; mean_fields..., $ξ_bar)
-    end
+    @eval $ξ = input_fields.$ξ
 end
 
-velocities = (; u=u_bar, v=v_bar, w=w_bar)
-velocities_prev = (; u=u_prev_bar, v=v_prev_bar, w=w_prev_bar)
-
-dependency_fields = mean_fields
+velocities = (; u=u, v=v, w=w)
+velocities_prev = (; u=u_prev, v=v_prev, w=w_prev)
 
 println("Turbulent fluxes")
-u′u′ = Field(uu_bar - UuFlux(centered, u_bar, u_bar))
-u′v′ = Field(uv_bar - UvFlux(centered, u_bar, v_bar))
-u′w′ = Field(uw_bar - UwFlux(centered, u_bar, w_bar))
-u′b′ = Field(ub_bar - UcFlux(centered, u_bar, b_bar))
+u′u′ = Field(uu - UuFlux(centered, u, u))
+u′v′ = Field(uv - UvFlux(centered, u, v))
+u′w′ = Field(uw - UwFlux(centered, u, w))
+u′b′ = Field(ub - UcFlux(centered, u, b))
 
-v′u′ = Field(vu_bar - VuFlux(centered, v_bar, u_bar))
-v′v′ = Field(vv_bar - VvFlux(centered, v_bar, v_bar))
-v′w′ = Field(vw_bar - VwFlux(centered, v_bar, w_bar))
-v′b′ = Field(vb_bar - VcFlux(centered, v_bar, b_bar))
+v′u′ = Field(vu - VuFlux(centered, v, u))
+v′v′ = Field(vv - VvFlux(centered, v, v))
+v′w′ = Field(vw - VwFlux(centered, v, w))
+v′b′ = Field(vb - VcFlux(centered, v, b))
 
-w′u′ = Field(wu_bar - WuFlux(centered, w_bar, u_bar))
-w′v′ = Field(wv_bar - WvFlux(centered, w_bar, v_bar))
-w′w′ = Field(ww_bar - WwFlux(centered, w_bar, w_bar))
-w′b′ = Field(wb_bar - WcFlux(centered, w_bar, b_bar))
+w′u′ = Field(wu - WuFlux(centered, w, u))
+w′v′ = Field(wv - WvFlux(centered, w, v))
+w′w′ = Field(ww - WwFlux(centered, w, w))
+w′b′ = Field(wb - WcFlux(centered, w, b))
 
 turbulent_fluxes = (;
     uu = u′u′, uv = u′v′, uw = u′w′, ub = u′b′,
     vu = v′u′, vv = v′v′, vw = v′w′, vb = v′b′,
     wu = w′u′, wv = w′v′, ww = w′w′, wb = w′b′,
 )
-dependency_fields = merge(dependency_fields, turbulent_fluxes)
+dependency_fields = turbulent_fluxes
 
 println("Kinetic energy terms...")
 
 dsp_density = Field(DSPDensity(clock, velocities, velocities_prev, sp))
 lsp_density = Field(LSPDensity(velocities, velocities_prev, turbulent_fluxes))
 vsp_density = Field(VSPDensity(velocities, velocities_prev, turbulent_fluxes))
-buoyancy_density = Field(BUOYANCYDensity(w_bar, w_prev_bar, b_bar))
+buoyancy_density = Field(BUOYANCYDensity(w, w_prev, b))
 mke_density = Field(MKEDensity(velocities))
 sponge_mke_density = Field(SPONGEMKEDensity(velocities, velocities_prev, sp))
 strain_mke_density = Field(STRAINMKEDensity(clock, velocities, velocities_prev, sp))
 stress = Field(STRESS(clock, velocities, velocities_prev, sp))
-tke_density = Field(ke_bar - mke_density)
+tke_density = Field(ke - mke_density)
 
 mke_production_density = (;
     dsp_density,
@@ -97,18 +90,18 @@ dependency_fields = merge(dependency_fields, mke_production)
 
 println("Potential energy terms...")
 
-b_profile = Field(Average(b_bar; dims=1))
-b_prev_profile = Field(Average(b_prev_bar; dims=1))
+b_profile = Field(Average(b; dims=1))
+b_prev_profile = Field(Average(b_prev; dims=1))
 
-h_ml = Field(MLD(b_profile, 2sp.Δb / sp.H))
-h_ml_prev = Field(MLD(b_prev_profile, 2sp.Δb / sp.H))
+h_ml = Field(BuoyancyBasedMixedLayer(b_profile, sp.Δb))
+h_ml_prev = Field(BuoyancyBasedMixedLayer(b_prev_profile, sp.Δb))
 
 mixed_layer = (; b_profile, b_prev_profile, h_ml, h_ml_prev)
 dependency_fields = merge(dependency_fields, mixed_layer)
 
-mpe_density = Field(MPEDensity(b_bar, h_ml))
-mixed_density = Field(MIXEDDensity(clock, b_bar, b_prev_bar, h_ml, h_ml_prev))
-strain_mpe_density = Field(STRAINMPEDensity(clock, b_bar, h_ml, h_ml_prev, sp))
+mpe_density = Field(MPEDensity(b, h_ml))
+mixed_density = Field(MIXEDDensity(clock, b, b_prev, h_ml, h_ml_prev))
+strain_mpe_density = Field(STRAINMPEDensity(clock, b, h_ml, h_ml_prev, sp))
 bflux_density = Field(BFLUXDensity(w′b′))
 
 mpe_production_density = (;
