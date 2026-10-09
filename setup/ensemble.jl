@@ -7,11 +7,12 @@ function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp
 end
 
 function θτ_from_str(ip)
+    θτ = mod(ip.θτ, 2π)
     ip.βτ == 0 && return "C"
-    ip.θτ ≈ 0 && return "N" # Winds blow along front, same direction as jet
-    ip.θτ ≈ π && return "S" # Winds blow along front, opposite direction to jet
-    ip.θτ ≈ π/2 && return "E" # Winds blow across front, opposite direction to secondary circulation
-    ip.θτ ≈ 3π/2 && return "W" # Winds blow across front, same direction as secondary circulation
+    θτ ≈ 0 && return "N" # Winds blow along front, same direction as jet
+    θτ ≈ π && return "S" # Winds blow along front, opposite direction to jet
+    θτ ≈ π/2 && return "E" # Winds blow across front, opposite direction to secondary circulation
+    θτ ≈ 3π/2 && return "W" # Winds blow across front, same direction as secondary circulation
     println("no close angle for θτ=$(ip.θτ)")
     return string(ip.θτ)
 end

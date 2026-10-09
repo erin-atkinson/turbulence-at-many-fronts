@@ -1,16 +1,3 @@
-using Oceananigans
-using JLD2
-using Printf
-
-using Oceananigans.Fields: compute_at!
-using Oceananigans.OutputWriters: saveproperty!
-using Oceananigans: fill_halo_regions!
-
-include("update_clock.jl")
-include("update_fields.jl")
-
-t0 = time()
-
 # Simulation output file
 RAW = ARGS[1]
 foldername = dirname(RAW)
@@ -33,6 +20,24 @@ TEMP = joinpath(buffer, "temp_$outputname")
 
 # Final output folder
 PROCESSED = joinpath(foldername, outputname)
+
+if isfile(PROCESSED)
+    @info "$PROCESSED exists, skipping (delete if update is necessary)"
+    exit()
+end
+
+using Oceananigans
+using JLD2
+using Printf
+
+using Oceananigans.Fields: compute_at!
+using Oceananigans.OutputWriters: saveproperty!
+using Oceananigans: fill_halo_regions!
+
+include("update_clock.jl")
+include("update_fields.jl")
+
+t0 = time()
 
 # Read simulation state
 fds = FieldDataset(RAW; backend=OnDisk())

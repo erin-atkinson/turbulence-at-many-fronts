@@ -32,7 +32,7 @@ end
 function make_body(foldername, N_window; job=true)
     endstr = job ? "&" : ""
     """
-    julia -t 24 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/MEAN.jld2 $N_window $endstr
+    julia -t 4 -- src-analysis/postprocess/increase_window.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/MEAN.jld2 $N_window $endstr
     """
 end
 
@@ -80,5 +80,5 @@ let set = test_set,
 end
 
 for (set, setname) in zip(sets, setnames)
-    save_script("$setname-WINDOW", set.filenames, 20, "0:30:00"; loc="jobs-analysis")
+    save_script("$setname-WINDOW", set.filenames, 20, "0:30:00"; loc="jobs-analysis", job=false)
 end

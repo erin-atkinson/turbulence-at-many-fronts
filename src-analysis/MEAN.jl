@@ -19,9 +19,8 @@ for ξ in fields
 end
 
 ψ = Field(Streamfunction(u_bar))
-H = Field(BuoyancyBasedMixedLayer(b_bar, sp.Δb))
 
-mean_fields = (; mean_fields..., ψ, H)
+mean_fields = (; mean_fields..., ψ)
 
 skip_update = filter(a->a ∉ fields, keys(input_fields))
 

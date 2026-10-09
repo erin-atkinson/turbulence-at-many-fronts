@@ -13,6 +13,9 @@ using ImageFiltering: imfilter, Kernel.gaussian
 using OffsetArrays: no_offset_view
 using Printf
 using Oceananigans.Units: Time
+
+using CurveFit
+using CommonSolve: solve, solve!
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -64,7 +67,7 @@ const figure_width = 1000
 
 transect_limits(sp) = (-sp.Lh / 2x_unit, sp.Lh / 2x_unit, -sp.Lz / z_unit, zero(sp.Lz))
 
-b_colormap = [reverse(to_colormap(:deep))[Int(floor(255 / 8 * i + 1))] for i in 1:6]
+b_colormap = [reverse(to_colormap(:deep))[Int(floor(255 / 8 * i + 1))] for i in 1:7]
 b_extendhigh = reverse(to_colormap(:deep))[end]
 b_extendlow = reverse(to_colormap(:deep))[1]
 # -------------------------------------------------------------

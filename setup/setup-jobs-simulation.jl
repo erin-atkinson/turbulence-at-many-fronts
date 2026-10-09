@@ -76,7 +76,7 @@ function make_body(ip, filename)
     betaalpha=$(ip.βα)
     betaB=$(ip.βB)
     betatau=$(ip.βτ)
-    thetatau=$(ip.θτ)
+    thetatau=$(float(ip.θτ))
     beta0=$(ip.β₀)
     betath=$(ip.βth)
 
