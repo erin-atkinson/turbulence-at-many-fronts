@@ -1,14 +1,14 @@
-@inline function dSdx_func(i, j, k, grid, mld, mld_ref)
+@inline function dSdx_func(i, j, k, grid, mld)
     h = @inbounds mld[i, j, k]
     
-    return sqrt(mld_ref / h)
+    return sqrt(1 / h) / 2
 end
 
-function SCoordinate(mld, mld_ref)
+function SCoordinate(mld)
     grid = mld.grid
     loc = location(mld)
     
-    return CumulativeIntegral(KernelFunctionOperation{loc...}(dSdx_func, grid, mld, mld_ref); dims=1)
+    return CumulativeIntegral(KernelFunctionOperation{loc...}(dSdx_func, grid, mld); dims=1)
 end
 
 @inline function s_func(i, j, k, grid, S, x₁)
@@ -35,61 +35,91 @@ function isvalidbounds(data_points, bounds)
     return i_linear >= i_ttw
 end
 
-@inline function buildbounds(data_points, i_linear=5, i_ttw=length(data_points.x)-4)
+function updatebounds(data_points, bounds, i_linear=5, i_ttw=length(data_points.x)-4)
     x = data_points.x
-    s = data_points.s
     b = data_points.b
+    s = data_points.s
+    h = data_points.h
     
-    b₀ = b[1]
-    b₁ = b[end]
-    s₀ = s[1]
-    s₁ = s[end]
-    x₀ = x[1]
-    x₁ = x[end]
-
     x_linear = x[i_linear]
+    b_linear = b[i_linear]
+    s_linear = s[i_linear]
+    h_linear = h[i_linear]
     x_ttw = x[i_ttw]
-
-    return (; b₀, b₁, s₀, s₁, x₀, x₁, i_linear, i_ttw, x_linear, x_ttw)
+    b_ttw = b[i_ttw]
+    s_ttw = s[i_ttw]
+    h_ttw = h[i_ttw]
+    
+    new_bounds = (; 
+        i_linear, i_ttw, 
+        x_linear, x_ttw,
+        b_linear, b_ttw,
+        s_linear, s_ttw,
+        h_linear, h_ttw,
+    )
+    
+    return merge(bounds, new_bounds)
 end
+
 """
     front_fit_coordinates(b, h, sp)
 Prepare data for fitting 
 """
-function front_fit_coordinates(b, h, sp)
+function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2))
     grid = h.grid
 
-    # We cut out the middle 90% of the front
-    b_left = Oceananigans.interpolate(-sp.Lh/2, b)
-    b_right = Oceananigans.interpolate(sp.Lh/2, b)
-    b₀ = b_left + 0.05 * (b_right - b_left)
-    b₁ = b_right
+    # Edges of the frontal region
+    b_left = Oceananigans.interpolate(front_region[1], b)
+    b_right = Oceananigans.interpolate(front_region[2], b)
+    Δb = b_right - b_left
 
+    # Arrays
     x_data = xnodes(b)
-    i_left = findfirst(x -> x >= -sp.Lh/2, x_data)
-    i_right = findlast(x -> x <= sp.Lh/2, x_data)
-
     b_data = interior(b, :, 1, 1)[:]
+    h_data = interior(h, :, 1, 1)[:]
     
+    i_left = findfirst(x -> x >= front_region[1], x_data)
+    i_right = findlast(x -> x <= front_region[2], x_data)
+    
+    # Position of minimum buoyancy
+    i_min = argmin(b_data)
+    x_min = x_data[i_min]
+    b_min = b_data[i_min]
+    h_min = h_data[i_min]
+    
+    # We cut out the bottom, top 10% for the fit
+    b₀ = b_left + 0.1 * (b_right - b_left)
+    b₁ = b_left + 0.9 * (b_right - b_left)
     i₀ = findfirst(ib -> ib[2] >= b₀ && ib[1] >= i_left, collect(enumerate(b_data)))
     i₁ = findlast(ib -> ib[2] <= b₁ && ib[1] <= i_right, collect(enumerate(b_data)))
-    x₀ =  xnodes(b)[i₀]
-    x₁ = xnodes(b)[i₁]
+
+    x_data = x_data[i₀:i₁]
+    b_data = b_data[i₀:i₁]
+    h_data = h_data[i₀:i₁]
     
-    h₁ = Oceananigans.interpolate(x₁, h)
+    x₀ = x_data[1]
+    x₁ = x_data[end]
+    b₀ = b_data[1]
+    b₁ = b_data[end]
+    h₀ = h_data[1]
+    h₁ = h_data[end]
     
-    S = Field(SCoordinate(h, h₁))
+    S = Field(SCoordinate(h))
     fill_halo_regions!(S)
     
-    s = Field(sCoordinate(S, xnodes(b)[i₁]))
+    s = Field(sCoordinate(S, x₁))
     fill_halo_regions!(s)
 
-    s_data = interior(s, i₀:i₁, 1, 1)[:]
-    b_data = b_data[i₀:i₁]
-    x_data = xnodes(b)[i₀:i₁]
+    s_data = interior(s, :, 1, 1)[:]
+    s_min = s_data[i_min]
     
-    data_points = (; x=x_data, s=s_data, b=b_data)
-    bounds = buildbounds(data_points)
+    s_data = s_data[i₀:i₁]
+    s₀ = s_data[1]
+    s₁ = s_data[end]
+    
+    data_points = (; x=x_data, s=s_data, b=b_data, h=h_data)
+    bounds = (; x₀, x₁, s₀, s₁, b₀, b₁, h₀, h₁, x_min, s_min, b_min, h_min, Δb, b_left, b_right)
+    bounds = updatebounds(data_points, bounds)
     
     return data_points, bounds
 end
@@ -117,8 +147,9 @@ function ttw_weight_func(x, bounds)
     return (x - x_linear) / abs(x_ttw - x_linear)
 end
 
-x_fit_func(x, bounds, coeffs) = coeffs.Γa * (x - bounds.x₀) + coeffs.b₀
-s_fit_func(s, bounds, coeffs) = coeffs.b₁ + coeffs.Γs * s + coeffs.As * s^2
+x_fit_func(x, bounds, coeffs) = coeffs.Γa * (x - bounds.x_min) + coeffs.b_min
+χ_fit_func(χ, bounds, coeffs) = coeffs.b_ref - coeffs.A²f² * χ^2
+s_fit_func(s, bounds, coeffs) = χ_fit_func(s - coeffs.χ₁, bounds, coeffs)
 
 function front_fit_func(x, s, bounds, coeffs)
     linear_weight = linear_weight_func(x, bounds)
@@ -180,10 +211,10 @@ function linear_solution(data_points, bounds)
     prob = CurveFitProblem(x, b)
     sol = solve(prob, LinearCurveFitAlgorithm())
     
-    b₀ = sol(bounds.x₀)
+    b_min = sol(bounds.x_min)
     Γa = sol.u[1]
     
-    return (; b₀, Γa)
+    return (; b_min, Γa)
 end
 
 """
@@ -197,12 +228,16 @@ function ttw_solution(data_points, bounds)
     
     prob = CurveFitProblem(s, b)
     sol = solve(prob, PolynomialFitAlgorithm(2))
+
+    a₀ = sol.u[1]
+    a₁ = sol.u[2]
+    a₂ = sol.u[3]
     
-    b₁ = sol.u[1]
-    Γs = sol.u[2]
-    As = sol.u[3]
+    χ₁ = -a₁ / 2a₂
+    A²f² = -a₂
+    b_ref = a₀ + A²f² * χ₁^2
     
-    return (; b₁, Γs, As)
+    return (; χ₁, A²f², b_ref)
 end
 
 """
@@ -219,7 +254,7 @@ function get_front_fit(data_points, bounds)
     return coeffs
 end
 
-function objective_func(data_points, bounds, coeffs, λ1, λ2)
+function objective_func(data_points, bounds, coeffs, λ_linear, λ_transition, λ_ttw)
     b₀ = bounds.b₀
     b₁ = bounds.b₁
     x₀ = bounds.x₀
@@ -228,10 +263,12 @@ function objective_func(data_points, bounds, coeffs, λ1, λ2)
     x_ttw = bounds.x_ttw
     
     mse_front = front_fit_error(data_points, bounds, coeffs) / (b₁ - b₀)^2
-    transition_reg = λ1 * (x_ttw - x_linear)^2 / (x₁ - x₀)^2
-    linear_reg = λ2 * (x_ttw - x₁)^2 / (x₁ - x₀)^2
     
-    return mse_front + transition_reg + linear_reg
+    linear_reg = λ_linear * (x_linear - x₀)^2 / (x₁ - x₀)^2
+    transition_reg = λ_transition * (x_ttw - x_linear)^2 / (x₁ - x₀)^2
+    ttw_reg = λ_ttw * (x₁ - x_ttw)^2 / (x₁ - x₀)^2
+    
+    return mse_front + transition_reg + linear_reg + ttw_reg
 end
 
 function maybegetobjective!(objective_cache, data_points, bounds, λ1, λ2)
@@ -258,7 +295,7 @@ i.e. we optimise the fit, and regularise via looking for the smallest linear reg
 
 Looking globally isn't that big of a deal
 """
-function get_best_front_fit(data_points, bounds, λ1, λ2)
+function get_best_front_fit(data_points, bounds, λ_linear, λ_transition, λ_ttw)
     N = length(data_points.x)
     objective_cache = zeros(eltype(data_points.x), N, N)
     
@@ -267,9 +304,9 @@ function get_best_front_fit(data_points, bounds, λ1, λ2)
     
     for i_linear in 5:(N-4), i_ttw in (i_linear+1):(N-4)
         #i_ttw = i_linear + 2
-        bounds = buildbounds(data_points, i_linear, i_ttw)
+        bounds = updatebounds(data_points, bounds, i_linear, i_ttw)
         coeffs = get_front_fit(data_points, bounds)
-        obj = objective_func(data_points, bounds, coeffs, λ1, λ2)
+        obj = objective_func(data_points, bounds, coeffs, λ_linear, λ_transition, λ_ttw)
     
         if obj < obj_min
             obj_min = obj
@@ -278,7 +315,7 @@ function get_best_front_fit(data_points, bounds, λ1, λ2)
         end
     end
 
-    bounds = buildbounds(data_points, minimiser[1], minimiser[2])
+    bounds = updatebounds(data_points, bounds, minimiser[1], minimiser[2])
     coeffs = get_front_fit(data_points, bounds)
     
     return bounds, coeffs

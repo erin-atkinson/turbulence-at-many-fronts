@@ -2,6 +2,8 @@ using Oceananigans.Operators
 using Oceananigans.Grids: node, xnode, ynode, znode
 using Oceananigans: location, instantiated_location
 using Oceananigans: fill_halo_regions!
+using CurveFit
+using CommonSolve: solve
 
 @inline along_front_mean(a) = Field(Average(a; dims=2))
 @inline afm(a) = along_front_mean(a)
@@ -43,6 +45,7 @@ include("gradients/vorticity.jl")
 include("gradients/richardson.jl")
 
 include("mixed_layer/buoyancy_based_mixed_layer.jl")
+include("mixed_layer/flux_based_mixed_layer.jl")
 include("mixed_layer/mixed_layer_integral.jl")
 
 # Helpers for advection terms

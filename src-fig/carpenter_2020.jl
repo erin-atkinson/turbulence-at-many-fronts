@@ -90,7 +90,7 @@ function carpenter2020buoyancy(nav_file, ctd_file)
     )
     
     field = Field{Center, Nothing, Center}(grid)
-    set!(field, bs)
+    set!(field, reverse(bs; dims=1)) # match our simulations
     fill_halo_regions!(field)
 
     # Just from paper and by eye
@@ -99,7 +99,7 @@ function carpenter2020buoyancy(nav_file, ctd_file)
     f = 1.2e-4
     L = sqrt(Δb * H) / f
     
-    sp = (; Δb, f, H, L, x₀, Lz)
+    sp = (; Δb, f, H, L, Lz)
     
     return field, sp
 end

@@ -35,7 +35,7 @@ for ξ in (:u, :v, :w, :c), χ in (:U, :V, :W)
     χξ_func = Symbol(χ, ξ, :_func)
     χξFlux = Symbol(χ, ξ, :Flux)
     @eval begin
-        function $χξFlux(advection, U, u; background=ZeroField(eltype(grid)))
+        function $χξFlux(advection, U, u; background=ZeroField(eltype(U.grid)))
             grid = U.grid
             U_loc = location(U)
             u_loc = location(u)
