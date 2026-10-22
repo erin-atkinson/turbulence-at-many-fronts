@@ -1,7 +1,7 @@
 @inline function dSdx_func(i, j, k, grid, mld)
     h = @inbounds mld[i, j, k]
     
-    return sqrt(1 / h) / 2
+    return sqrt(1 / h) / 4
 end
 
 function SCoordinate(mld)
@@ -65,7 +65,7 @@ end
     front_fit_coordinates(b, h, sp)
 Prepare data for fitting 
 """
-function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2))
+function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2), cutoff=0.1)
     grid = h.grid
 
     # Edges of the frontal region
@@ -88,8 +88,8 @@ function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2))
     h_min = h_data[i_min]
     
     # We cut out the bottom, top 10% for the fit
-    b₀ = b_left + 0.1 * (b_right - b_left)
-    b₁ = b_left + 0.9 * (b_right - b_left)
+    b₀ = b_left + cutoff * (b_right - b_left)
+    b₁ = b_left + (1 - cutoff) * (b_right - b_left)
     i₀ = findfirst(ib -> ib[2] >= b₀ && ib[1] >= i_left, collect(enumerate(b_data)))
     i₁ = findlast(ib -> ib[2] <= b₁ && ib[1] <= i_right, collect(enumerate(b_data)))
 
@@ -149,7 +149,7 @@ end
 
 x_fit_func(x, bounds, coeffs) = coeffs.Γa * (x - bounds.x_min) + coeffs.b_min
 χ_fit_func(χ, bounds, coeffs) = coeffs.b_ref - coeffs.A²f² * χ^2
-s_fit_func(s, bounds, coeffs) = χ_fit_func(s - coeffs.χ₁, bounds, coeffs)
+s_fit_func(s, bounds, coeffs) = χ_fit_func(s + coeffs.χ₁, bounds, coeffs)
 
 function front_fit_func(x, s, bounds, coeffs)
     linear_weight = linear_weight_func(x, bounds)
@@ -233,7 +233,7 @@ function ttw_solution(data_points, bounds)
     a₁ = sol.u[2]
     a₂ = sol.u[3]
     
-    χ₁ = -a₁ / 2a₂
+    χ₁ = a₁ / 2a₂
     A²f² = -a₂
     b_ref = a₀ + A²f² * χ₁^2
     

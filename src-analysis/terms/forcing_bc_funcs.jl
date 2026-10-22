@@ -8,13 +8,13 @@ end
 
 @inline function sponge_func(i, j, k, grid, loc, field, sp)
     z = znode(i, j, k, grid, loc...)
-    σ = sponge_layer_func(z, sp)
+    σ = sponge_layer_func(z, sp) * sp.σ
     return @inbounds -σ * field[i, j, k]
 end
 
 @inline function sponge_func(i, j, k, grid, loc, f, sp, args...)
     z = znode(i, j, k, grid, loc...)
-    σ = sponge_layer_func(z, sp)
+    σ = sponge_layer_func(z, sp) * sp.σ
     return -σ * f(i, j, k, grid, args...)
 end
 
