@@ -100,24 +100,30 @@ function ke_func(i, j, k, grid, u, v, w)
     return (u² + v² + w²) / 2
 end
 
-uu = KernelFunctionOperation{Center, Center, Center}(uu_func, grid, advection, centered, u, U)
-uv = KernelFunctionOperation{Face, Face, Center}(uv_func, grid, advection, centered, u, U, v)
-uw = KernelFunctionOperation{Face, Center, Face}(uw_func, grid, advection, centered, u, U, w)
-ub = KernelFunctionOperation{Face, Center, Center}(ub_func, grid, advection, centered, u, U, b)
+uu = Average(KernelFunctionOperation{Center, Center, Center}(uu_func, grid, advection, centered, u, U); dims=2)
+uv = Average(KernelFunctionOperation{Face, Face, Center}(uv_func, grid, advection, centered, u, U, v); dims=2)
+uw = Average(KernelFunctionOperation{Face, Center, Face}(uw_func, grid, advection, centered, u, U, w); dims=2)
+ub = Average(KernelFunctionOperation{Face, Center, Center}(ub_func, grid, advection, centered, u, U, b); dims=2)
 
-vu = KernelFunctionOperation{Face, Face, Center}(vu_func, grid, advection, u, v)
-vv = KernelFunctionOperation{Center, Center, Center}(vv_func, grid, advection, v)
-vw = KernelFunctionOperation{Center, Face, Face}(vw_func, grid, advection, v, w)
-vb = KernelFunctionOperation{Center, Face, Center}(vb_func, grid, advection, v, b)
+vu = Average(KernelFunctionOperation{Face, Face, Center}(vu_func, grid, advection, u, v); dims=2)
+vv = Average(KernelFunctionOperation{Center, Center, Center}(vv_func, grid, advection, v); dims=2)
+vw = Average(KernelFunctionOperation{Center, Face, Face}(vw_func, grid, advection, v, w); dims=2)
+vb = Average(KernelFunctionOperation{Center, Face, Center}(vb_func, grid, advection, v, b); dims=2)
 
-wu = KernelFunctionOperation{Face, Center, Face}(wu_func, grid, advection, u, w)
-wv = KernelFunctionOperation{Center, Face, Face}(wv_func, grid, advection, v, w)
-ww = KernelFunctionOperation{Center, Center, Center}(ww_func, grid, advection, w)
-wb = KernelFunctionOperation{Center, Center, Face}(wb_func, grid, advection, w, b)
+wu = Average(KernelFunctionOperation{Face, Center, Face}(wu_func, grid, advection, u, w); dims=2)
+wv = Average(KernelFunctionOperation{Center, Face, Face}(wv_func, grid, advection, v, w); dims=2)
+ww = Average(KernelFunctionOperation{Center, Center, Center}(ww_func, grid, advection, w); dims=2)
+wb = Average(KernelFunctionOperation{Center, Center, Face}(wb_func, grid, advection, w, b); dims=2)
 
-ke = KernelFunctionOperation{Center, Center, Center}(ke_func, grid, u, v, w)
+ke = Average(KernelFunctionOperation{Center, Center, Center}(ke_func, grid, u, v, w); dims=2)
 
-output_fields = (; u, v, w, b, uu, uv, uw, ub, vu, vv, vw, vb, wu, wv, ww, wb, p, ke)
+u_avg = Average(u; dims=2)
+v_avg = Average(v; dims=2)
+w_avg = Average(w; dims=2)
+b_avg = Average(b; dims=2)
+p_avg = Average(p; dims=2)
+
+output_fields = (; u=u_avg, v=v_avg, w=w_avg, b=b_avg, uu, uv, uw, ub, vu, vv, vw, vb, wu, wv, ww, wb, p=p_avg, ke)
 
 writing_times_pos = filter(t -> t > prev_time, 0:sp.save_time:sp.stop_time)
 writing_times_neg = filter(t -> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
@@ -128,7 +134,7 @@ snapshot_symbol = Symbol(:snapshot, prev_iteration)
 checkpointer_symbol = Symbol(:checkpointer, prev_iteration)
 
 simulation.output_writers[output_symbol] = JLD2Writer(model, output_fields; 
-    filename = "$output_folder/TIMEAVERAGE.jld2", 
+    filename = "$output_folder/MEAN.jld2", 
     schedule = AveragedSpecifiedTimes(writing_times, sp.save_time),
     overwrite_existing = false,
     with_halos = true,

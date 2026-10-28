@@ -89,7 +89,7 @@ sets = [
 
 let set = test_set,
     setname = "test-set"
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    #save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
     save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
@@ -108,7 +108,7 @@ let set = test_set,
 end
 
 for (set, setname) in zip(sets, setnames)
-    save_script("$setname-MEAN", set.filenames, "MEAN", "1:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    #save_script("$setname-MEAN", set.filenames, "MEAN", "1:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
     save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "1:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-PV", set.filenames, "PV", "2:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
@@ -124,12 +124,4 @@ for (set, setname) in zip(sets, setnames)
     save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="UBALANCE-20.jld2", job=false)
     save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="VBALANCE-20.jld2", job=false)
     save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="BBALANCE-20.jld2", job=false)
-end
-
-let set = highresolution_init,
-    setname = "high-resolution-init"
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
-    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
-    save_script("$setname-ENERGY", set.filenames, "ENERGY", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
-    save_script("$setname-PV", set.filenames, "PV", "0:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
 end
