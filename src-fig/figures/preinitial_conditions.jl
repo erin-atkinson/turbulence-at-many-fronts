@@ -2,19 +2,14 @@ using Oceananigans
 include("../../src-simulation/grid_faces.jl")
 include("../../src-simulation/base_state.jl")
 
-@inline function σ(z, sp)
-    s = min((z+sp.Lz) / (sp.Lz-sp.H), 1)
-    return sp.σ * (1 - abs(s))^2
-end
-
 function preinitial_conditions(sp)
     # Pre-initial conditions
     xs, _, _ = get_grid_faces(sp)
     zs = range(-sp.Lz, 0, sp.Nz)
 
-    vs = [approximate_front_velocity(x, z, sp) for x in xs, z in zs]
+    vs = [100 * approximate_front_velocity(x, z, sp) for x in xs, z in zs]
     bs = [front_buoyancy(x, z, sp) for x in xs, z in zs]
-    σs = [σ(z, sp) for x in xs, z in zs] .* 3600
+    σs = [sp.σ * sponge_layer_func(z, sp) for x in xs, z in zs] .* 3600
 
     b_levels = minimum(bs):(sp.Δb / 6):maximum(bs)
     
@@ -31,12 +26,12 @@ function preinitial_conditions(sp)
     σ_color = to_colormap(:tempo)[200]
     σ_colormap = [RGBA(σ_color.r, σ_color.g, σ_color.b, 0), σ_color]
 
-    ct = contourf!(ax, xs ./ 1000, zs, vs; levels=range(0, sp.V, 5), colormap=to_colormap(:amp)[1:200])
+    ct = contourf!(ax, xs ./ 1000, zs, vs; levels=range(0, 100sp.V, 5), colormap=to_colormap(:amp)[1:200])
     contour!(ax, xs ./ 1000, zs, bs; levels=b_levels, color=(:black, 0.5))
     lines!(ax, [-sp.Lh/2000, -sp.Lh/2000, sp.Lh/2000, sp.Lh/2000, -sp.Lh/2000], [0, -sp.H, -sp.H, 0, 0]; color=:magenta, linestyle=:dashdot)
     ht = heatmap!(ax, xs ./ 1000, zs, σs; colormap=σ_colormap)
     
-    Colorbar(fig[1, 2], ct; label=L"v / \text{m}\,\text{s}^{-1}")
+    Colorbar(fig[1, 2], ct; label=L"v / \text{cm}\,\text{s}^{-1}")
     Colorbar(fig[1, 3], ht; label=L"\sigma / \text{hr}^{-1}")
     fig
 end

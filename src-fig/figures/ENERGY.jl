@@ -13,7 +13,7 @@ This function returns a figure that contains a timeseries for each term in the m
 \frac{\text{d}}{\text{d}t}\text{MPE} = -\text{BUOYANCY} + \text{SPONGE}_\text{MPE} - \text{BFLUX} + \text{MIXED} + \text{COOLING} + \text{STRAIN}_\text{MPE}
 ```
 """
-function energy_balance_check(run_id; N_window=1)
+function energy_balance_check(run_id; N_window=1, fig_kw=NamedTuple(), title="", hidex=true)
     mkebalance = MKEBalance(run_id, N_window)
     mpebalance = MPEBalance(run_id, N_window)
 
@@ -21,19 +21,20 @@ function energy_balance_check(run_id; N_window=1)
 
     tendency_unit = 1/1037
 
-    fig = Figure(; size=(figure_width, 900), fontsize)
+    fig = Figure(; size=(figure_width, 900), fontsize, fig_kw...)
 
     ax = Axis(fig[1, 1]; 
         xlabel = t_label,
         ylabel = L"\text{kW} \, \text{km}^{-1}",
         limits = (0, times[end] / t_unit, nothing, nothing),
+        title,
     )
-    hidexdecorations!(ax; ticks=false)
+    hidex && hidexdecorations!(ax; ticks=false, grid=false)
     
     lns = plot_balance!(ax, times ./ t_unit, mkebalance, tendency_unit)
     plot_target!(ax, times ./ t_unit, mkebalance, tendency_unit)
     plot_total!(ax, times ./ t_unit, mkebalance, tendency_unit)
-    make_legend!(fig[1, 2], lns, mkebalance, L"A") 
+    make_legend!(fig[1, 2], lns, mkebalance) 
     
     ax = Axis(fig[2, 1]; 
         xlabel = t_label,
@@ -44,7 +45,7 @@ function energy_balance_check(run_id; N_window=1)
     lns = plot_balance!(ax, times ./ t_unit, mpebalance, tendency_unit)
     plot_target!(ax, times ./ t_unit, mpebalance, tendency_unit)
     plot_total!(ax, times ./ t_unit, mpebalance, tendency_unit)
-    make_legend!(fig[2, 2], lns, mpebalance, L"A") 
+    make_legend!(fig[2, 2], lns, mpebalance) 
 
     fig
 end

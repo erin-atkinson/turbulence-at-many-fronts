@@ -173,13 +173,18 @@ for (ip, filename) in zip(cooling_depth_01.ips, cooling_depth_01.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
-println("02")
-for (ip, filename) in zip(cooling_depth_02.ips, cooling_depth_02.filenames)
+println("03")
+for (ip, filename) in zip(cooling_depth_03.ips, cooling_depth_03.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 
-println("005")
-for (ip, filename) in zip(cooling_depth_005.ips, cooling_depth_005.filenames)
+println("05")
+for (ip, filename) in zip(cooling_depth_05.ips, cooling_depth_05.filenames)
+    save_script(filename, T, ip, filename; loc=path)
+end
+
+println("07")
+for (ip, filename) in zip(cooling_depth_07.ips, cooling_depth_07.filenames)
     save_script(filename, T, ip, filename; loc=path)
 end
 

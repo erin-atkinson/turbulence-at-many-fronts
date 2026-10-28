@@ -38,7 +38,9 @@ function carpenter2020buoyancy(nav_file, ctd_file)
         b_ctd[pos_index] = (ρ_ref-ρ_ctd[ctd_index]) / ρ_ref * 9.81
     end
     println()
-    Nx, Nz = 512, 128
+    
+    # Grid spacing at dive depth
+    Nx, Nz = 1024, 128
     
     xs_face = range(minimum(x_ctd), maximum(x_ctd), Nx+1)
     zs_face = range(minimum(z_ctd) - 5, 0, Nz+1)
@@ -58,9 +60,9 @@ function carpenter2020buoyancy(nav_file, ctd_file)
         i = convert(typeof(i_ctd), 1 + (x - xs_center[1]) ÷ Δx)
         j = convert(typeof(i_ctd), 1 + (z - zs_center[1]) ÷ Δz)
         maximum_depth[i] = max(maximum_depth[i], -z)
-        for Δi in -4:4, Δj in -4:4
+        for Δi in -8:8, Δj in -4:4
             if (1 <= i+Δi <= Nx) && (1 <= j+Δj <= Nz)
-                δx = (x - xs_center[i+Δi]) / Δx
+                δx = (x - xs_center[i+Δi]) / 2Δx # Respect stated resolution
                 δz = (z - zs_center[j+Δj]) / Δz
                 w = exp(-(δx^2 + δz^2) / 2)
                 
@@ -152,7 +154,7 @@ function carpenter2020preprocess(carpenter_buoyancy, maximum_depth)
     b_surface = Field(ZSlice(b, 0.0))
     b_min = minimum(b_surface)
     b_max = maximum(b_surface)
-    sp = (sp..., Δb = b_max - b_min)
+    sp = (sp..., Δb = b_max - b_min, f=1.2e-4)
     
     return b, b_surface, sp
 end

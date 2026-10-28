@@ -22,9 +22,8 @@ end
 
 function sCoordinate(S, x₁)
     grid = S.grid
-    loc = location(S)
     
-    return KernelFunctionOperation{loc...}(s_func, grid, S, x₁)
+    return KernelFunctionOperation{Center, Nothing, Nothing}(s_func, grid, S, x₁)
 end
 
 function isvalidbounds(data_points, bounds)
@@ -65,7 +64,7 @@ end
     front_fit_coordinates(b, h, sp)
 Prepare data for fitting 
 """
-function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2), cutoff=0.1)
+function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2), cutoff=(0.1, 0.0))
     grid = h.grid
 
     # Edges of the frontal region
@@ -87,12 +86,18 @@ function front_fit_coordinates(b, h, sp; front_region=(-sp.Lh/2, sp.Lh/2), cutof
     b_min = b_data[i_min]
     h_min = h_data[i_min]
     
-    # We cut out the bottom, top 10% for the fit
-    b₀ = b_left + cutoff * (b_right - b_left)
-    b₁ = b_left + (1 - cutoff) * (b_right - b_left)
-    i₀ = findfirst(ib -> ib[2] >= b₀ && ib[1] >= i_left, collect(enumerate(b_data)))
-    i₁ = findlast(ib -> ib[2] <= b₁ && ib[1] <= i_right, collect(enumerate(b_data)))
-
+    # We cut out the bottom
+    if isnothing(cutoff)
+        b₀ = b_left
+        b₁ = b_right
+        i₀ = i_left
+        i₁ = i_right
+    else
+        b₀ = b_left + cutoff[1] * (b_right - b_left)
+        b₁ = b_right - cutoff[2] * (b_right - b_left)
+        i₀ = findfirst(ib -> ib[2] >= b₀ && ib[1] >= i_left, collect(enumerate(b_data)))
+        i₁ = findlast(ib -> ib[2] <= b₁ && ib[1] <= i_right, collect(enumerate(b_data)))
+    end
     x_data = x_data[i₀:i₁]
     b_data = b_data[i₀:i₁]
     h_data = h_data[i₀:i₁]

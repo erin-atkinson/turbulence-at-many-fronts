@@ -117,8 +117,9 @@ end
 destfilenamess = map(ips) do ip
     [
         make_filename(ip; θτ=θτ_from_str(ip), βα=0.1), 
-        make_filename(ip; θτ=θτ_from_str(ip), βα=0.2), 
-        make_filename(ip; θτ=θτ_from_str(ip), βα=0.05)
+        make_filename(ip; θτ=θτ_from_str(ip), βα=0.3), 
+        make_filename(ip; θτ=θτ_from_str(ip), βα=0.5),
+        make_filename(ip; θτ=θτ_from_str(ip), βα=0.7)
     ]
 end
 
@@ -132,12 +133,16 @@ ips_01 = map(ips) do ip
     (; ip..., stop_time=10e5, βα=0.1)
 end
 
-ips_02 = map(ips[7:9]) do ip
-    (; ip..., stop_time=5e5, βα=0.2)
+ips_03 = map(ips[7:9]) do ip
+    (; ip..., stop_time=7e5, βα=0.3)
 end
 
-ips_005 = map(ips[7:9]) do ip
-    (; ip..., stop_time=20e5, βα=0.05)
+ips_05 = map(ips[7:9]) do ip
+    (; ip..., stop_time=7e5, βα=0.5)
+end
+
+ips_07 = map(ips[7:9]) do ip
+    (; ip..., stop_time=7e5, βα=0.7)
 end
 
 cooling_depth_01 = (;
@@ -145,29 +150,32 @@ cooling_depth_01 = (;
     filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_01)
 )
 
-cooling_depth_02 = (;
-    ips = ips_02,
-    filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_02)
+cooling_depth_03 = (;
+    ips = ips_03,
+    filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_03)
 )
 
-cooling_depth_005 = (;
-    ips = ips_005,
-    filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_005)
+cooling_depth_05 = (;
+    ips = ips_05,
+    filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_05)
+)
+
+cooling_depth_07 = (;
+    ips = ips_07,
+    filenames = map(ip -> make_filename(ip; θτ=θτ_from_str(ip)), ips_07)
 )
 
 # With wind
 ips_wind_init = [
+    (; ips[5]..., βτ = 0.001, θτ = 0)
+    (; ips[5]..., βτ = 0.005, θτ = 0)
+    (; ips[5]..., βτ = 0.01, θτ = 0)
+    
     (; ips[7]..., βτ = 0.01, θτ = 0)
     (; ips[7]..., βτ = 0.01, θτ = π)
     
-    (; ips[9]..., βτ = 0.01, θτ = 0)
-    (; ips[9]..., βτ = 0.01, θτ = π)
-    
     (; ips[7]..., βτ = 0.01, θτ = π/2)
     (; ips[7]..., βτ = 0.01, θτ = 3π/2)
-    
-    (; ips[9]..., βτ = 0.01, θτ = π/2)
-    (; ips[9]..., βτ = 0.01, θτ = 3π/2)
 ]
 ips_wind = map(ip -> (; ip..., stop_time=10e5, βα=0.1), ips_wind_init)
 
@@ -182,33 +190,6 @@ wind_init = (;
 wind = (;
     ips = ips_wind,
     filenames = filenames_wind
-)
-
-ips_hd_init = [
-    (; ips[7]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Low cooling
-    (; ips[9]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # High cooling
-    (; ips[9]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Along-front wind
-    (; ips[9]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Across-front wind
-]
-
-ips_hd = map(ip -> (ip..., stop_time=10e5, βα=0.1), ips_hd_init)
-
-filenames_hd = [
-    "low-cooling",
-    "high-cooling",
-    "along-front-wind",
-    "across-front-wind",
-]
-
-highresolution_init = (;
-    ips = ips_hd_init,
-    filenames = map(x->x * "-init", filenames_hd),
-    destfilenamess = map(x->[x], filenames_hd)
-)
-
-highresolution = (;
-    ips = ips_hd,
-    filenames = filenames_hd
 )
 
 test_inds = [7, 8, 9]
@@ -269,4 +250,31 @@ end
 cooling_only = (;
     ips,
     filenames,
+)
+
+ips_hd_init = [
+    (; ips[3]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Low cooling
+    (; ips[10]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # High cooling
+    (; ips[5]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Along-front wind
+    (; ips[5]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Across-front wind
+]
+
+ips_hd = map(ip -> (ip..., stop_time=10e5, βα=0.1), ips_hd_init)
+
+filenames_hd = [
+    "low-cooling",
+    "high-cooling",
+    "along-front-wind",
+    "across-front-wind",
+]
+
+highresolution_init = (;
+    ips = ips_hd_init,
+    filenames = map(x->x * "-init", filenames_hd),
+    destfilenamess = map(x->[x], filenames_hd)
+)
+
+highresolution = (;
+    ips = ips_hd,
+    filenames = filenames_hd
 )

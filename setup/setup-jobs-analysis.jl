@@ -69,8 +69,9 @@ save_script("outer-test-DFM", outer_test.filenames, "DFM", "0:30:00"; loc="jobs-
 
 setnames = [
     "cooling-depth-0_1",
-    "cooling-depth-0_2",
-    "cooling-depth-0_05",
+    "cooling-depth-0_3",
+    "cooling-depth-0_5",
+    "cooling-depth-0_7",
     "cooling-only",
     "wind",
     "high-resolution"
@@ -78,8 +79,9 @@ setnames = [
 
 sets = [
     cooling_depth_01,
-    cooling_depth_02,
-    cooling_depth_005,
+    cooling_depth_03,
+    cooling_depth_05,
+    cooling_depth_07,
     cooling_only,
     wind,
     highresolution,
