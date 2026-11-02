@@ -6,6 +6,7 @@ using Printf
 include("base_state.jl")
 include("grid_faces.jl")
 include("parameters.jl")
+include("from_lower_res.jl")
 
 const sp = create_simulation_parameters(simulation_parameters)
 
@@ -59,6 +60,11 @@ model = NonhydrostaticModel(grid;
 @info model
 set!(model; init_state...)
 
+if need_to_interpolate(output_folder, initialised_folder)
+    @info "Interpolating an initial state from $initialised_folder"
+    set_interpolated_init!(model, initialised_folder, sp)
+end
+
 # Some initial timestep...
 Δt = 1e-3 / sp.f
 
@@ -86,7 +92,7 @@ simulation = Simulation(model; Δt, sp.stop_time, sp.wall_time_limit)
 include("time_average_output.jl")
 
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=5e-2/sp.f)
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=5e-1/sp.f)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 # Compute the advection

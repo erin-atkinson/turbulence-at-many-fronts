@@ -73,8 +73,12 @@ setnames = [
     "cooling-depth-0_5",
     "cooling-depth-0_7",
     "cooling-only",
+    "cooling-only-init",
+    "cooling-depth-init",
     "wind",
-    "high-resolution"
+    "wind-init",
+    "high-resolution",
+    "high-resolution-init"
 ]
 
 sets = [
@@ -83,8 +87,12 @@ sets = [
     cooling_depth_05,
     cooling_depth_07,
     cooling_only,
+    cooling_only_init,
+    cooling_depth_init,
     wind,
+    wind_init,
     highresolution,
+    highresolution_init,
 ]
 
 let set = test_set,
@@ -108,20 +116,20 @@ let set = test_set,
 end
 
 for (set, setname) in zip(sets, setnames)
-    #save_script("$setname-MEAN", set.filenames, "MEAN", "1:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
+    save_script("$setname-MEAN", set.filenames, "MEAN", "1:00:00"; loc="jobs-analysis", filename="TIMEAVERAGE.jld2", job=false)
     save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "1:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
-    save_script("$setname-PV", set.filenames, "PV", "2:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
-    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
-    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
-    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
+    #save_script("$setname-PV", set.filenames, "PV", "2:00:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
+    #save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
+    #save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
+    #save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN.jld2", job=false)
     save_script("$setname-SLICES", set.filenames, "SLICES", "2:30:00"; loc="jobs-analysis", filename="OUTPUT.jld2", job=false)
     
     save_script("$setname-MEAN-20", set.filenames, "MEAN", "1:00:00"; loc="jobs-analysis", filename="MEAN.jld2", outputfilename="MEAN-20.jld2", job=false)
     save_script("$setname-GRADIENTS-20", set.filenames, "GRADIENTS", "1:00:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="GRADIENTS-20.jld2", job=false)
     save_script("$setname-ENERGY-20", set.filenames, "ENERGY", "1:00:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="ENERGY-20.jld2", job=false)
-    save_script("$setname-PV-20", set.filenames, "PV", "1:00:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="PV-20.jld2", job=false)
-    save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="UBALANCE-20.jld2", job=false)
-    save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="VBALANCE-20.jld2", job=false)
-    save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="BBALANCE-20.jld2", job=false)
+    #save_script("$setname-PV-20", set.filenames, "PV", "1:00:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="PV-20.jld2", job=false)
+    #save_script("$setname-UBALANCE-20", set.filenames, "UBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="UBALANCE-20.jld2", job=false)
+    #save_script("$setname-VBALANCE-20", set.filenames, "VBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="VBALANCE-20.jld2", job=false)
+    #save_script("$setname-BBALANCE-20", set.filenames, "BBALANCE", "2:30:00"; loc="jobs-analysis", filename="MEAN-20.jld2", outputfilename="BBALANCE-20.jld2", job=false)
 end

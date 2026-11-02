@@ -4,7 +4,8 @@
 # Cooling turns on slowly
 @inline function b_flux_func(x, y, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 10)
-    return sp.B * turnon
+    turnoff = max(1-exp(-sp.f * (t - sp.release_time) / 10), 0.01)
+    return sp.B * (turnon - turnoff)
 end
 
 # θ: angle relative to a down-front wind
@@ -24,7 +25,7 @@ end
 # Boundary conditions have no flow outside of the domain
 b_bcs = FieldBoundaryConditions(;
     bottom=GradientBoundaryCondition(sp.N₀²),
-    top=FluxBoundaryCondition(b_flux_func; parameters=(; sp.B, sp.f, sp.start_time))
+    top=FluxBoundaryCondition(b_flux_func; parameters=(; sp.B, sp.f, sp.start_time, sp.release_time))
 )
 u_bcs=FieldBoundaryConditions(;
     top=FluxBoundaryCondition(u_flux_func; parameters=(; sp.θτ, sp.f, sp.τ, sp.start_time, sp.L))

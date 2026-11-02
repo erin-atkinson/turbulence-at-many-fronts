@@ -44,16 +44,16 @@ function make_preamble(jobname, T)
     
     # Launch from scratch
     export JULIA_DEPOT_PATH=\$SCRATCH/julia-trig
-    # export JULIA_CUDA_SOFT_MEMORY_LIMIT=10%
     cd ~/turbulence-at-many-fronts
     """
 end
 
-function make_body(ip, filename)
+function make_body(ip, filename, init_folder="")
     """
     
     output_folder=\$SCRATCH/turbulence-at-many-fronts/$filename
-
+    init_folder=\$SCRATCH/turbulence-at-many-fronts/$init_folder
+    
     stop_time=$(ip.stop_time)
     start_time=$(ip.start_time)
     release_time=$(ip.release_time)
@@ -84,7 +84,7 @@ function make_body(ip, filename)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$start_time \$release_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$betath \$wall_time_limit \$comment
+    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$init_folder \$stop_time \$start_time \$release_time \$save_time \$f \$L \$betax \$betah \$Nx \$Nh \$Ny \$Nz \$betal \$betaH \$betaalpha \$betaB \$betatau \$thetatau \$beta0 \$betath \$wall_time_limit \$comment
     """
 end
 
@@ -101,16 +101,59 @@ function make_copy(filenames)
 end
 
 
-function make_script(jobname, T, ip, filename, destfilenames=[])
+function make_script(jobname, T, ip, filename; copy_to=[], init_folder="")
     preamble = make_preamble(jobname, T)
-    body = make_body(ip, filename)
-    return preamble * body * make_copy(destfilenames)
+    body = make_body(ip, filename, init_folder)
+    return preamble * body * make_copy(copy_to)
 end
 
-function save_script(jobname, T, ip, filename; loc="", copy_to=[])
+function save_script(jobname, T, ip, filename; loc="", copy_to=[], init_folder="")
     scriptpath = joinpath(loc, jobname * ".sh")
     println(check_completion(filename))
-    write(scriptpath, make_script(jobname, T, ip, filename, copy_to))
+    write(scriptpath, make_script(jobname, T, ip, filename; copy_to, init_folder))
+    return nothing
+end
+
+function make_mps_script(mpsjobname, jobnames, T; loc)
+    jobs = ["\nbash " * joinpath(loc, jobname * ".sh") * " &\nsleep 10\n" for jobname in jobnames]
+    
+    """
+    #!/bin/bash
+    #SBATCH --nodes=1
+    #SBATCH --gpus-per-node=1
+    #SBATCH --time=$T
+    #SBATCH --job-name=$mpsjobname
+    #SBATCH --output=../scratch/logs/$mpsjobname.txt
+    
+    export JULIA_CUDA_MEMORY_POOL=split
+    export JULIA_CUDA_SOFT_MEMORY_LIMIT=10%
+    rm -rf /dev/shm/$mpsjobname
+    
+    mkdir /dev/shm/$mpsjobname
+    mkdir /dev/shm/$mpsjobname/nvidia-mps
+    mkdir /dev/shm/$mpsjobname/nvidia-log
+    
+    export CUDA_MPS_PIPE_DIRECTORY=/dev/shm/$mpsjobname/nvidia-mps
+    export CUDA_MPS_LOG_DIRECTORY=/dev/shm/$mpsjobname/nvidia-log
+    export CUDA_VISIBLE_DEVICES=0
+    
+    nvidia-cuda-mps-control -d
+    
+    cd ~/turbulence-at-many-fronts
+    
+    module load julia/1.12.5
+    export JULIA_DEPOT_PATH=\$SCRATCH/julia-trig
+    $(join(jobs))
+    pkill -c -f nvidia-cuda-mps-server
+    wait
+    
+    echo quit | nvidia-cuda-mps-control
+    """
+end
+
+function save_mps_script(mpsjobname, jobnames, T; loc="")
+    scriptpath = joinpath(loc, mpsjobname * ".sh")
+    write(scriptpath, make_mps_script(mpsjobname, jobnames, T; loc))
     return nothing
 end
 
@@ -205,6 +248,7 @@ mkpath(path)
 for (ip, filename, copy_to) in zip(wind_init.ips, wind_init.filenames, wind_init.destfilenamess)
     save_script(filename, T, ip, filename; loc=path, copy_to)
 end
+save_mps_script("all-wind", wind_init.filenames[1:3], T; loc=path)
 
 println()
 println("VARYING WIND")
@@ -222,8 +266,8 @@ mkpath(path)
 
 T = "12:00:00"
 
-for (ip, filename, copy_to) in zip(highresolution_init.ips, highresolution_init.filenames, highresolution_init.destfilenamess)
-    save_script(filename, T, ip, filename; loc=path, copy_to)
+for (ip, filename, copy_to, init_folder) in zip(highresolution_init.ips, highresolution_init.filenames, highresolution_init.destfilenamess, hd_init_folders)
+    save_script(filename, T, ip, filename; loc=path, copy_to, init_folder)
 end
 
 println()

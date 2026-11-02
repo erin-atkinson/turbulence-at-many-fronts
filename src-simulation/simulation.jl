@@ -6,80 +6,82 @@
 
     ARGS is a set of input arguments:
         [01]: Path to output folder
+        [02]: Path to output folder to initialise from
 
-        [02]: Simulation stop time in seconds
-        [03]: Start time of simulation (negative for a cooling pre-initialisation)
-        [04]: Strain release time
-        [05]: Save interval
+        [03]: Simulation stop time in seconds
+        [04]: Start time of simulation (negative for a cooling pre-initialisation)
+        [05]: Strain release time
+        [06]: Save interval
 
-        [06]: Coriolis parameter in 1/seconds
-        [07]: Deformation radius in metres
+        [07]: Coriolis parameter in 1/seconds
+        [08]: Deformation radius in metres
 
-        [08]: Across-front domain size (relative to front)
-        [09]: Central region domain size (relative to front)
+        [09]: Across-front domain size (relative to front)
+        [10]: Central region domain size (relative to front)
 
-        [10]: Number of across-front (x) grid points
-        [11]: Number of central region (x) grid points
-        [12]: Number of along-front (y) grid points
-        [13]: Number of vertical (z) grid points
+        [11]: Number of across-front (x) grid points
+        [12]: Number of central region (x) grid points
+        [13]: Number of along-front (y) grid points
+        [14]: Number of vertical (z) grid points
 
-        [14]: Initial width of front relative to deformation radius
-        [15]: Height of front relative to deformation radius
+        [15]: Initial width of front relative to deformation radius
+        [16]: Height of front relative to deformation radius
 
-        [16]: Strain Rossby number
-        [17]: Surface buoyancy flux 
-        [18]: Surface wind stress
-        [19]: Surface wind stress angle (0: along front pi/2: across front)
-        [20]: Deep deformation radius
-        [21]: Thermocline buoyancy step
+        [17]: Strain Rossby number
+        [18]: Surface buoyancy flux 
+        [19]: Surface wind stress
+        [20]: Surface wind stress angle (0: along front pi/2: across front)
+        [21]: Deep deformation radius
+        [22]: Thermocline buoyancy step
 
-        [22]: Maximum wall time
+        [23]: Maximum wall time
         
-        [23]: Comment
+        [24]: Comment
 =#
 println("simulation.jl")
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
 
 output_folder = ARGS[1]
+initialised_folder = ARGS[2]
 
 simulation_parameters = let
 
     # Simulation times
-    stop_time = parse(Float64, ARGS[2])
-    start_time = parse(Float64, ARGS[3])
-    release_time = parse(Float64, ARGS[4])
-    save_time = parse(Float64, ARGS[5])
+    stop_time = parse(Float64, ARGS[3])
+    start_time = parse(Float64, ARGS[4])
+    release_time = parse(Float64, ARGS[5])
+    save_time = parse(Float64, ARGS[6])
 
     # Coriolis frequency
-    f = parse(Float64, ARGS[6])
+    f = parse(Float64, ARGS[7])
 
     # Deformation radius
-    L = parse(Float64, ARGS[7])
+    L = parse(Float64, ARGS[8])
 
     # Grid extent
-    βx = parse(Float64, ARGS[8])
-    βh = parse(Float64, ARGS[9])
+    βx = parse(Float64, ARGS[9])
+    βh = parse(Float64, ARGS[10])
 
     # Grid sizes
-    Nx = parse(Int64, ARGS[10])
-    Nh = parse(Int64, ARGS[11])
-    Ny = parse(Int64, ARGS[12])
-    Nz = parse(Int64, ARGS[13])
+    Nx = parse(Int64, ARGS[11])
+    Nh = parse(Int64, ARGS[12])
+    Ny = parse(Int64, ARGS[13])
+    Nz = parse(Int64, ARGS[14])
 
     # Front
-    βℓ = parse(Float64, ARGS[14])
-    βH = parse(Float64, ARGS[15])
+    βℓ = parse(Float64, ARGS[15])
+    βH = parse(Float64, ARGS[16])
 
     # Background
-    βα = parse(Float64, ARGS[16])
-    βB = parse(Float64, ARGS[17])
-    βτ = parse(Float64, ARGS[18])
-    θτ = parse(Float64, ARGS[19])
-    β₀ = parse(Float64, ARGS[20])
-    βth = parse(Float64, ARGS[21])
+    βα = parse(Float64, ARGS[17])
+    βB = parse(Float64, ARGS[18])
+    βτ = parse(Float64, ARGS[19])
+    θτ = parse(Float64, ARGS[20])
+    β₀ = parse(Float64, ARGS[21])
+    βth = parse(Float64, ARGS[22])
 
-    wall_time_limit = parse(Float64, ARGS[22])
+    wall_time_limit = parse(Float64, ARGS[23])
     
     (;
         stop_time, start_time, save_time, release_time,
@@ -92,7 +94,7 @@ simulation_parameters = let
     )
 end
 
-const comment = join(ARGS[23:end], " ")
+const comment = join(ARGS[24:end], " ")
 
 for (k, v) in pairs(simulation_parameters)
     k_str = string(k)

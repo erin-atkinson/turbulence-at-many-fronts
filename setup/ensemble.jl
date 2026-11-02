@@ -19,7 +19,7 @@ end
 
 # Default
 default_ip = (;
-    stop_time = 10e5, start_time = -2e5, save_time = 1e4, release_time = -1.0,
+    stop_time = 13e5, start_time = -2e5, save_time = 1e4, release_time = 10e5,
     f = 1e-4, L = 1e3,
     βx = 20, βh = 3,
     Nx = 1024, Nh = 768, Ny = 128, Nz = 64,
@@ -82,7 +82,7 @@ outer_test = (;
 )
 
 default_ip = (;
-    stop_time = 10e5, start_time = -2e5, save_time = 1e4, release_time = -1.0,
+    stop_time = 13e5, start_time = -2e5, save_time = 1e4, release_time = 10e5,
     f = 1e-4, L = 1e3,
     βx = 20, βh = 3,
     Nx = 1400, Nh = 1024, Ny = 128, Nz = 64,
@@ -130,19 +130,19 @@ cooling_depth_init = (;
 )
 
 ips_01 = map(ips) do ip
-    (; ip..., stop_time=10e5, βα=0.1)
+    (; ip..., stop_time=13e5, βα=0.1, release_time=7e5)
 end
 
 ips_03 = map(ips[7:9]) do ip
-    (; ip..., stop_time=7e5, βα=0.3)
+    (; ip..., stop_time=10e5, βα=0.3, release_time=7e5)
 end
 
 ips_05 = map(ips[7:9]) do ip
-    (; ip..., stop_time=7e5, βα=0.5)
+    (; ip..., stop_time=10e5, βα=0.5, release_time=7e5)
 end
 
 ips_07 = map(ips[7:9]) do ip
-    (; ip..., stop_time=7e5, βα=0.7)
+    (; ip..., stop_time=10e5, βα=0.7, release_time=7e5)
 end
 
 cooling_depth_01 = (;
@@ -167,9 +167,9 @@ cooling_depth_07 = (;
 
 # With wind
 ips_wind_init = [
-    (; ips[5]..., βτ = 0.001, θτ = 0)
-    (; ips[5]..., βτ = 0.005, θτ = 0)
-    (; ips[5]..., βτ = 0.01, θτ = 0)
+    (; ips[6]..., βτ = 0.001, θτ = 0)
+    (; ips[6]..., βτ = 0.005, θτ = 0)
+    (; ips[6]..., βτ = 0.01, θτ = 0)
     
     (; ips[7]..., βτ = 0.01, θτ = 0)
     (; ips[7]..., βτ = 0.01, θτ = π)
@@ -177,7 +177,7 @@ ips_wind_init = [
     (; ips[7]..., βτ = 0.01, θτ = π/2)
     (; ips[7]..., βτ = 0.01, θτ = 3π/2)
 ]
-ips_wind = map(ip -> (; ip..., stop_time=10e5, βα=0.1), ips_wind_init)
+ips_wind = map(ip -> (; ip..., stop_time=13e5, βα=0.1, release_time=10e5), ips_wind_init)
 
 filenames_wind_init = map(ip->make_filename(ip; θτ=θτ_from_str(ip), βα="init"), ips_wind_init)
 filenames_wind = map(ip->make_filename(ip; θτ=θτ_from_str(ip)), ips_wind)
@@ -240,7 +240,7 @@ cooling_only_init = (;
 )
 
 ips = map(ips) do ip
-    (; ip..., stop_time=10e5, βα=0.1)
+    (; ip..., stop_time=13e5, βα=0.1)
 end
 
 filenames = map(ips) do ip
@@ -253,13 +253,17 @@ cooling_only = (;
 )
 
 ips_hd_init = [
-    (; ips[3]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Low cooling
-    (; ips[10]..., βτ = 0, θτ = 0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # High cooling
-    (; ips[5]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Along-front wind
-    (; ips[5]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600) # Across-front wind
+    (; ips[3]..., βτ = 0.0, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600, start_time=-5e4, stop_time=0.0, release_time=-1.0) # Low cooling
+    (; ips[10]..., βτ = 0.0, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600, start_time=-5e4, stop_time=0.0, release_time=-1.0) # High cooling
+    (; ips[3]..., βτ = 0.01, θτ = 0.0, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600, start_time=-5e4, stop_time=0.0, release_time=-1.0) # Along-front wind
+    (; ips[3]..., βτ = 0.01, θτ = π/2, Nx=5600, Nh=4096, Ny=128, Nz=256, wall_time_limit = 11 * 3600, start_time=-5e4, stop_time=0.0, release_time=-1.0) # Across-front wind
 ]
 
-ips_hd = map(ip -> (ip..., stop_time=10e5, βα=0.1), ips_hd_init)
+hd_init_folders = map(ips_hd_init) do ip
+    make_filename(ip; θτ=θτ_from_str(ip), βα="init")
+end
+
+ips_hd = map(ip -> (ip..., stop_time=13e5, βα=0.1, release_time=10e5), ips_hd_init)
 
 filenames_hd = [
     "low-cooling",
