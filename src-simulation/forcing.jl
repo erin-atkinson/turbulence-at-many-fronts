@@ -17,7 +17,7 @@ end
     turnon = max(1-exp(-f * t / 10), 0)
     release_time <= 0 && return α * turnon
     turnoff = 1-exp(-2f * (t - release_time) / 10)
-    turnoff = min(turnoff, 0.99)
+    turnoff = min(turnoff, 0.66)
     turnoff = max(turnoff, 0.0)
     return α * (turnon - turnoff)
 end
