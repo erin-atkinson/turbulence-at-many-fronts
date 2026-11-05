@@ -100,7 +100,7 @@ function carpenter2020buoyancy(nav_file, ctd_file)
     return carpenter_buoyancy, H
 end
 
-@inline function carpenter2020preprocessfunc(i, j, k, grid, carpenter_buoyancy, maximum_depth, x_carpenter_center, b_min)
+@inline function carpenter_2020_preprocess_func(i, j, k, grid, carpenter_buoyancy, maximum_depth, x_carpenter_center, b_min)
     from_loc = (Center(), nothing, Center())
     from_grid = carpenter_buoyancy.grid
     
@@ -118,7 +118,7 @@ end
     carpenter2020preprocess(carpenter_buoyancy, maximum_depth)
 Process field `carpenter_buoyancy` to match our simulation output.
 """
-function carpenter2020preprocess(carpenter_buoyancy, maximum_depth)
+function carpenter_2020_preprocess(carpenter_buoyancy, maximum_depth)
     carpenter_grid = carpenter_buoyancy.grid
     carpenter_x = xnodes(carpenter_buoyancy)
     
@@ -147,7 +147,7 @@ function carpenter2020preprocess(carpenter_buoyancy, maximum_depth)
         topology = (Bounded, Periodic, Bounded)
     )
     b_min = minimum(carpenter_buoyancy)
-    b = Field(KernelFunctionOperation{Center, Nothing, Center}(carpenter2020preprocessfunc, grid, carpenter_buoyancy, maximum_depth, x_center, b_min))
+    b = Field(KernelFunctionOperation{Center, Nothing, Center}(carpenter_2020_preprocess_func, grid, carpenter_buoyancy, maximum_depth, x_center, b_min))
     compute!(b)
     fill_halo_regions!(b)
 

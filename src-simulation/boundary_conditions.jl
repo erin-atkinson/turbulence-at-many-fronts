@@ -4,7 +4,9 @@
 # Cooling turns on slowly
 @inline function b_flux_func(x, y, t, sp) 
     turnon = 1 - exp(-sp.f*(t - sp.start_time) / 10)
-    turnoff = max(1-exp(-sp.f * (t - sp.release_time) / 10), 0.01)
+    turnoff = 1-exp(-2sp.f * (t - sp.release_time) / 10)
+    turnoff = min(turnoff, 0.99)
+    turnoff = max(turnoff, 0.0)
     return sp.B * (turnon - turnoff)
 end
 

@@ -16,8 +16,9 @@ end
 @inline function variable_strain_rate(t, α, f, release_time)
     turnon = max(1-exp(-f * t / 10), 0)
     release_time <= 0 && return α * turnon
-    
-    turnoff = max(1-exp(-f * (t - release_time) / 10), 0.01)
+    turnoff = 1-exp(-2f * (t - release_time) / 10)
+    turnoff = min(turnoff, 0.99)
+    turnoff = max(turnoff, 0.0)
     return α * (turnon - turnoff)
 end
 
